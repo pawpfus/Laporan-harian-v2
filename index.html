@@ -1,0 +1,667 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pelaporan Pertanian</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --green-50: #EAF3DE;
+      --green-100: #C0DD97;
+      --green-600: #3B6D11;
+      --green-700: #27500A;
+      --green-800: #173404;
+      --amber-50: #FAEEDA;
+      --amber-600: #854F0B;
+      --amber-700: #633806;
+      --blue-50: #E6F1FB;
+      --blue-600: #185FA5;
+      --blue-800: #0C447C;
+      --red-50: #FCEBEB;
+      --red-600: #A32D2D;
+      --gray-50: #F1EFE8;
+      --gray-200: #B4B2A9;
+      --gray-500: #5F5E5A;
+      --gray-700: #444441;
+      --bg: #F7F6F2;
+      --surface: #FFFFFF;
+      --text: #1a1a18;
+      --text-muted: #5F5E5A;
+      --border: rgba(0,0,0,0.1);
+      --border-strong: rgba(0,0,0,0.18);
+      --radius-md: 8px;
+      --radius-lg: 12px;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #1a1a18;
+        --surface: #252522;
+        --text: #F1EFE8;
+        --text-muted: #B4B2A9;
+        --border: rgba(255,255,255,0.1);
+        --border-strong: rgba(255,255,255,0.2);
+        --green-50: #173404;
+        --green-600: #97C459;
+        --green-700: #C0DD97;
+        --green-800: #EAF3DE;
+        --amber-50: #412402;
+        --amber-600: #EF9F27;
+        --amber-700: #FAC775;
+        --blue-50: #042C53;
+        --blue-600: #85B7EB;
+        --blue-800: #B5D4F4;
+        --red-50: #501313;
+        --red-600: #F09595;
+        --gray-50: #2C2C2A;
+      }
+    }
+
+    body {
+      font-family: 'DM Sans', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 0;
+    }
+
+    @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500&display=swap');
+
+    .topbar {
+      background: var(--surface);
+      border-bottom: 0.5px solid var(--border);
+      padding: 0 1.5rem;
+      height: 56px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    .topbar-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: var(--radius-md);
+      background: var(--green-50);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .topbar-icon i { font-size: 18px; color: var(--green-600); }
+
+    .topbar-title { font-size: 16px; font-weight: 500; }
+    .topbar-sub { font-size: 12px; color: var(--text-muted); margin-top: 1px; }
+
+    .container {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 1.5rem 1rem 4rem;
+    }
+
+    .tabs {
+      display: flex;
+      gap: 4px;
+      background: var(--surface);
+      border: 0.5px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 4px;
+      margin-bottom: 1.5rem;
+    }
+
+    .tab {
+      flex: 1;
+      padding: 9px 8px;
+      font-size: 13px;
+      font-weight: 500;
+      border: none;
+      background: none;
+      cursor: pointer;
+      border-radius: var(--radius-md);
+      font-family: inherit;
+      color: var(--text-muted);
+      transition: all 0.15s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    .tab.active {
+      background: var(--bg);
+      color: var(--text);
+      border: 0.5px solid var(--border);
+    }
+
+    .tab i { font-size: 15px; }
+
+    .panel { display: none; }
+    .panel.active { display: block; }
+
+    .card {
+      background: var(--surface);
+      border: 0.5px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 1.25rem;
+      margin-bottom: 1rem;
+    }
+
+    .section-label {
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      margin-bottom: 1rem;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    @media (max-width: 500px) {
+      .form-grid { grid-template-columns: 1fr; }
+    }
+
+    .field { display: flex; flex-direction: column; gap: 5px; }
+
+    .field label {
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+
+    .field input,
+    .field select {
+      font-family: inherit;
+      font-size: 14px;
+      padding: 8px 10px;
+      border: 0.5px solid var(--border-strong);
+      border-radius: var(--radius-md);
+      background: var(--bg);
+      color: var(--text);
+      outline: none;
+      transition: border-color 0.15s;
+    }
+
+    .field input:focus,
+    .field select:focus {
+      border-color: var(--green-600);
+      box-shadow: 0 0 0 3px rgba(59,109,17,0.1);
+    }
+
+    .divider {
+      height: 0.5px;
+      background: var(--border);
+      margin: 1.25rem 0;
+    }
+
+    .btn-submit {
+      width: 100%;
+      padding: 11px;
+      background: var(--green-600);
+      color: var(--green-50);
+      border: none;
+      border-radius: var(--radius-md);
+      font-size: 14px;
+      font-weight: 500;
+      font-family: inherit;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: background 0.15s, transform 0.1s;
+    }
+
+    .btn-submit:hover { background: var(--green-700); }
+    .btn-submit:active { transform: scale(0.99); }
+    .btn-submit i { font-size: 17px; }
+
+    .alert {
+      padding: 10px 14px;
+      border-radius: var(--radius-md);
+      font-size: 13px;
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      animation: fadeIn 0.2s ease;
+    }
+
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: none; } }
+
+    .alert.success { background: var(--green-50); color: var(--green-700); border: 0.5px solid var(--green-600); }
+    .alert.warning { background: var(--amber-50); color: var(--amber-700); border: 0.5px solid var(--amber-600); }
+    .alert.hidden { display: none; }
+    .alert i { font-size: 16px; }
+
+    .data-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1rem;
+    }
+
+    .data-count {
+      font-size: 12px;
+      background: var(--green-50);
+      color: var(--green-600);
+      padding: 3px 10px;
+      border-radius: 99px;
+      font-weight: 500;
+    }
+
+    .table-wrap {
+      overflow-x: auto;
+      border-radius: var(--radius-md);
+      border: 0.5px solid var(--border);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+      min-width: 620px;
+    }
+
+    thead tr { background: var(--bg); }
+
+    th {
+      text-align: left;
+      padding: 9px 12px;
+      font-weight: 500;
+      font-size: 11px;
+      color: var(--text-muted);
+      border-bottom: 0.5px solid var(--border);
+      white-space: nowrap;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    td {
+      padding: 9px 12px;
+      border-bottom: 0.5px solid var(--border);
+      color: var(--text);
+      white-space: nowrap;
+    }
+
+    tr:last-child td { border-bottom: none; }
+    tbody tr:hover td { background: var(--bg); }
+
+    .badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 99px;
+      font-size: 11px;
+      font-weight: 500;
+    }
+
+    .badge-padi { background: var(--green-50); color: var(--green-600); }
+    .badge-jagung { background: var(--amber-50); color: var(--amber-600); }
+    .badge-kedelai { background: var(--blue-50); color: var(--blue-600); }
+
+    .btn-hapus {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      padding: 4px 6px;
+      border-radius: var(--radius-md);
+      font-size: 13px;
+      transition: color 0.15s, background 0.15s;
+      line-height: 1;
+    }
+
+    .btn-hapus:hover { background: var(--red-50); color: var(--red-600); }
+    .btn-hapus i { font-size: 15px; vertical-align: middle; }
+
+    .empty-state {
+      text-align: center;
+      padding: 3rem;
+      color: var(--text-muted);
+      font-size: 14px;
+    }
+
+    .empty-state i { font-size: 36px; display: block; margin-bottom: 10px; opacity: 0.35; }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-bottom: 1rem;
+    }
+
+    .stat-card {
+      background: var(--bg);
+      border-radius: var(--radius-md);
+      padding: 14px 12px;
+      text-align: center;
+    }
+
+    .stat-val { font-size: 24px; font-weight: 500; color: var(--text); }
+    .stat-label { font-size: 11px; color: var(--text-muted); margin-top: 3px; }
+
+    .bar-row { margin-bottom: 12px; }
+
+    .bar-meta {
+      display: flex;
+      justify-content: space-between;
+      font-size: 13px;
+      margin-bottom: 5px;
+    }
+
+    .bar-track {
+      height: 6px;
+      background: var(--bg);
+      border-radius: 99px;
+      overflow: hidden;
+      border: 0.5px solid var(--border);
+    }
+
+    .bar-fill {
+      height: 100%;
+      border-radius: 99px;
+      transition: width 0.4s ease;
+    }
+  </style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-icon">
+    <i class="ti ti-plant"></i>
+  </div>
+  <div>
+    <div class="topbar-title">Pelaporan Pertanian</div>
+    <div class="topbar-sub">Sistem pelaporan luas tambah tanam harian</div>
+  </div>
+</div>
+
+<div class="container">
+
+  <div id="alert-box" class="alert hidden">
+    <i id="alert-icon" class="ti ti-circle-check"></i>
+    <span id="alert-msg"></span>
+  </div>
+
+  <div class="tabs" role="tablist">
+    <button class="tab active" onclick="switchTab('input')" id="tab-input" role="tab">
+      <i class="ti ti-edit"></i> Input Laporan
+    </button>
+    <button class="tab" onclick="switchTab('data')" id="tab-data" role="tab">
+      <i class="ti ti-table"></i> Lihat Data
+    </button>
+    <button class="tab" onclick="switchTab('rekap')" id="tab-rekap" role="tab">
+      <i class="ti ti-chart-bar"></i> Rekap
+    </button>
+  </div>
+
+  <!-- PANEL INPUT -->
+  <div class="panel active" id="panel-input">
+    <div class="card">
+      <div class="section-label">Informasi Umum</div>
+      <div class="form-grid">
+        <div class="field">
+          <label for="f-tanggal">Tanggal</label>
+          <input type="date" id="f-tanggal" />
+        </div>
+        <div class="field">
+          <label for="f-user">Nama User</label>
+          <input type="text" id="f-user" placeholder="Nama petugas" />
+        </div>
+        <div class="field">
+          <label for="f-desa">Desa</label>
+          <input type="text" id="f-desa" placeholder="Nama desa" />
+        </div>
+        <div class="field">
+          <label for="f-kelompok">Kelompok Tani</label>
+          <input type="text" id="f-kelompok" placeholder="Nama kelompok" />
+        </div>
+      </div>
+      <div class="divider"></div>
+      <div class="section-label">Detail Kegiatan</div>
+      <div class="form-grid">
+        <div class="field">
+          <label for="f-jenis">Jenis LTT</label>
+          <select id="f-jenis">
+            <option>Reguler</option>
+            <option>Oplah Rawa</option>
+            <option>Oplah Non Rawa</option>
+            <option>CSR</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="f-kegiatan">Kegiatan</label>
+          <select id="f-kegiatan">
+            <option>Bera</option>
+            <option>Olah Lahan</option>
+            <option>Tanam</option>
+            <option>Panen</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="f-komoditas">Komoditas</label>
+          <select id="f-komoditas">
+            <option>Padi</option>
+            <option>Jagung</option>
+            <option>Kedelai</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="f-luas">Luas (Ha)</label>
+          <input type="number" id="f-luas" min="0" step="0.1" placeholder="0.0" />
+        </div>
+      </div>
+      <div class="divider"></div>
+      <button class="btn-submit" onclick="simpanData()">
+        <i class="ti ti-device-floppy"></i> Simpan Laporan
+      </button>
+    </div>
+  </div>
+
+  <!-- PANEL DATA -->
+  <div class="panel" id="panel-data">
+    <div class="card">
+      <div class="data-header">
+        <span class="section-label" style="margin:0">Data Laporan</span>
+        <span class="data-count" id="data-count">0 laporan</span>
+      </div>
+      <div id="table-container"></div>
+    </div>
+  </div>
+
+  <!-- PANEL REKAP -->
+  <div class="panel" id="panel-rekap">
+    <div class="card">
+      <div class="section-label">Ringkasan Keseluruhan</div>
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-val" id="stat-total">0</div>
+          <div class="stat-label">Total laporan</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-val" id="stat-luas">0</div>
+          <div class="stat-label">Total luas (Ha)</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-val" id="stat-desa">0</div>
+          <div class="stat-label">Jumlah desa</div>
+        </div>
+      </div>
+      <div class="divider"></div>
+      <div class="section-label">Luas per Komoditas</div>
+      <div id="rekap-komoditas"></div>
+      <div class="divider"></div>
+      <div class="section-label">Luas per Kegiatan</div>
+      <div id="rekap-kegiatan"></div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  const STORAGE_KEY = 'laporan_pertanian_v1';
+
+  function loadData() {
+    try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'); }
+    catch { return []; }
+  }
+
+  function saveData(data) {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+  }
+
+  function showAlert(msg, type) {
+    const box = document.getElementById('alert-box');
+    const msgEl = document.getElementById('alert-msg');
+    const icon = document.getElementById('alert-icon');
+    box.className = 'alert ' + type;
+    msgEl.textContent = msg;
+    icon.className = type === 'success' ? 'ti ti-circle-check' : 'ti ti-alert-triangle';
+    clearTimeout(box._timer);
+    box._timer = setTimeout(() => box.className = 'alert hidden', 3000);
+  }
+
+  function simpanData() {
+    const tanggal = document.getElementById('f-tanggal').value;
+    const desa = document.getElementById('f-desa').value.trim();
+    const kelompok = document.getElementById('f-kelompok').value.trim();
+    const user = document.getElementById('f-user').value.trim();
+    const luas = parseFloat(document.getElementById('f-luas').value) || 0;
+
+    if (!desa || !kelompok || !user || !tanggal) {
+      showAlert('Semua data wajib diisi', 'warning');
+      return;
+    }
+
+    const data = loadData();
+    data.push({
+      id: Date.now(),
+      tanggal,
+      desa,
+      kelompok_tani: kelompok,
+      jenis_LTT: document.getElementById('f-jenis').value,
+      kegiatan: document.getElementById('f-kegiatan').value,
+      komoditas: document.getElementById('f-komoditas').value,
+      luas: parseFloat(luas.toFixed(2)),
+      user
+    });
+    saveData(data);
+
+    document.getElementById('f-desa').value = '';
+    document.getElementById('f-kelompok').value = '';
+    document.getElementById('f-luas').value = '';
+
+    showAlert('Laporan berhasil disimpan', 'success');
+    renderTable();
+    updateRekap();
+  }
+
+  function hapusData(id) {
+    if (!confirm('Hapus laporan ini?')) return;
+    const data = loadData().filter(d => d.id !== id);
+    saveData(data);
+    renderTable();
+    updateRekap();
+  }
+
+  function getBadge(k) {
+    const map = { Padi: 'padi', Jagung: 'jagung', Kedelai: 'kedelai' };
+    return `<span class="badge badge-${map[k] || 'padi'}">${k}</span>`;
+  }
+
+  function renderTable() {
+    const data = loadData();
+    document.getElementById('data-count').textContent = data.length + ' laporan';
+    const container = document.getElementById('table-container');
+    if (!data.length) {
+      container.innerHTML = `<div class="empty-state"><i class="ti ti-inbox"></i>Belum ada data laporan</div>`;
+      return;
+    }
+    const rows = [...data].reverse().map(d => `
+      <tr>
+        <td>${d.tanggal}</td>
+        <td>${d.desa}</td>
+        <td>${d.kelompok_tani}</td>
+        <td>${d.jenis_LTT}</td>
+        <td>${d.kegiatan}</td>
+        <td>${getBadge(d.komoditas)}</td>
+        <td style="text-align:right">${d.luas.toFixed(1)}</td>
+        <td>${d.user}</td>
+        <td><button class="btn-hapus" onclick="hapusData(${d.id})" title="Hapus"><i class="ti ti-trash"></i></button></td>
+      </tr>`).join('');
+    container.innerHTML = `
+      <div class="table-wrap">
+        <table>
+          <thead><tr>
+            <th>Tanggal</th><th>Desa</th><th>Kelompok Tani</th>
+            <th>Jenis LTT</th><th>Kegiatan</th><th>Komoditas</th>
+            <th>Luas (Ha)</th><th>User</th><th></th>
+          </tr></thead>
+          <tbody>${rows}</tbody>
+        </table>
+      </div>`;
+  }
+
+  function updateRekap() {
+    const data = loadData();
+    const totalLuas = data.reduce((s, d) => s + d.luas, 0);
+
+    document.getElementById('stat-total').textContent = data.length;
+    document.getElementById('stat-luas').textContent = totalLuas.toFixed(1);
+    document.getElementById('stat-desa').textContent = new Set(data.map(d => d.desa)).size;
+
+    const colors = {
+      Padi: '#3B6D11', Jagung: '#854F0B', Kedelai: '#185FA5',
+      Bera: '#888780', 'Olah Lahan': '#993C1D', Tanam: '#3B6D11', Panen: '#639922'
+    };
+
+    function barRows(grouped) {
+      if (!Object.keys(grouped).length) return '<div style="font-size:13px;color:var(--text-muted)">Belum ada data</div>';
+      return Object.entries(grouped).map(([k, v]) => {
+        const pct = totalLuas ? Math.round((v / totalLuas) * 100) : 0;
+        return `<div class="bar-row">
+          <div class="bar-meta">
+            <span>${k}</span>
+            <span style="color:var(--text-muted)">${v.toFixed(1)} Ha (${pct}%)</span>
+          </div>
+          <div class="bar-track">
+            <div class="bar-fill" style="width:${pct}%;background:${colors[k] || '#3B6D11'}"></div>
+          </div>
+        </div>`;
+      }).join('');
+    }
+
+    const komoditas = {};
+    const kegiatan = {};
+    data.forEach(d => {
+      komoditas[d.komoditas] = (komoditas[d.komoditas] || 0) + d.luas;
+      kegiatan[d.kegiatan] = (kegiatan[d.kegiatan] || 0) + d.luas;
+    });
+
+    document.getElementById('rekap-komoditas').innerHTML = barRows(komoditas);
+    document.getElementById('rekap-kegiatan').innerHTML = barRows(kegiatan);
+  }
+
+  function switchTab(name) {
+    ['input', 'data', 'rekap'].forEach(t => {
+      document.getElementById('panel-' + t).className = 'panel' + (t === name ? ' active' : '');
+      document.getElementById('tab-' + t).className = 'tab' + (t === name ? ' active' : '');
+    });
+    if (name === 'data') renderTable();
+    if (name === 'rekap') updateRekap();
+  }
+
+  document.getElementById('f-tanggal').value = new Date().toISOString().split('T')[0];
+  updateRekap();
+</script>
+
+</body>
+</html>
