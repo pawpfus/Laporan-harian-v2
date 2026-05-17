@@ -522,7 +522,7 @@
   const LS_URL_KEY = 'sb_url';
   const LS_KEY_KEY = 'sb_key';
 
-  let supabase = null;
+  let sbClient = null;
   let cachedData = []; // cache lokal untuk export & rekap
 
   // ─── INIT ───────────────────────────────────────────────────────────
@@ -536,9 +536,9 @@
     }
 
     try {
-      const { createClient } = window.supabase; supabase = createClient(url, key);
+      const { createClient } = window.supabase; sbClient = createClient(url, key);
       // Test koneksi
-      const { error } = await supabase.from('laporan').select('id', { count: 'exact', head: true });
+      const { error } = await sbClient.from('laporan').select('id', { count: 'exact', head: true });
       if (error) throw error;
       setDbStatus(true);
     } catch (e) {
@@ -558,8 +558,8 @@
     if (!url || !key) { showAlert('URL dan Key wajib diisi', 'warning'); return; }
 
     try {
-      const { createClient } = window.supabase; supabase = createClient(url, key);
-      const { error } = await supabase.from('laporan').select('id', { count: 'exact', head: true });
+      const { createClient } = window.supabase; sbClient = createClient(url, key);
+      const { error } = await sbClient.from('laporan').select('id', { count: 'exact', head: true });
       if (error) throw error;
 
       localStorage.setItem(LS_URL_KEY, url);
@@ -597,8 +597,8 @@
 
   // ─── DATA OPS ───────────────────────────────────────────────────────
   async function fetchData() {
-    if (!supabase) return [];
-    const { data, error } = await supabase
+    if (!sbClient) return [];
+    const { data, error } = await sbClient
       .from('laporan')
       .select('*')
       .order('created_at', { ascending: false });
@@ -608,7 +608,7 @@
   }
 
   async function simpanData() {
-    if (!supabase) { showAlert('Belum terhubung ke database', 'warning'); return; }
+    if (!sbClient) { showAlert('Belum terhubung ke database', 'warning'); return; }
 
     const tanggal  = document.getElementById('f-tanggal').value;
     const desa     = document.getElementById('f-desa').value.trim();
@@ -635,7 +635,7 @@
       user_name:     user
     };
 
-    const { error } = await supabase.from('laporan').insert([row]);
+    const { error } = await sbClient.from('laporan').insert([row]);
 
     btn.disabled = false;
     btn.innerHTML = '<i class="ti ti-device-floppy"></i> Simpan Laporan';
@@ -652,7 +652,7 @@
 
   async function hapusData(id) {
     if (!confirm('Hapus laporan ini?')) return;
-    const { error } = await supabase.from('laporan').delete().eq('id', id);
+    const { error } = await sbClient.from('laporan').delete().eq('id', id);
     if (error) { showAlert('Gagal menghapus: ' + error.message, 'error'); return; }
     showAlert('Laporan dihapus', 'warning');
     await fetchData();
