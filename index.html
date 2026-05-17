@@ -7,11 +7,6 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500&display=swap" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css" />
-  <!-- SheetJS untuk export Excel -->
-  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
-  <!-- Supabase JS -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -515,6 +510,8 @@
 
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
   // ─── SUPABASE CONFIG ────────────────────────────────────────────────
   // Ganti dengan URL dan Key dari project Supabase kamu
@@ -539,7 +536,7 @@
     }
 
     try {
-      supabase = window.supabase.createClient(url, key);
+      const { createClient } = window.supabase; supabase = createClient(url, key);
       // Test koneksi
       const { error } = await supabase.from('laporan').select('id', { count: 'exact', head: true });
       if (error) throw error;
@@ -561,7 +558,7 @@
     if (!url || !key) { showAlert('URL dan Key wajib diisi', 'warning'); return; }
 
     try {
-      supabase = window.supabase.createClient(url, key);
+      const { createClient } = window.supabase; supabase = createClient(url, key);
       const { error } = await supabase.from('laporan').select('id', { count: 'exact', head: true });
       if (error) throw error;
 
