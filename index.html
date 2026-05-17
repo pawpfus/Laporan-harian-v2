@@ -4,7 +4,14 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Pelaporan Pertanian</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500&display=swap" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css" />
+  <!-- SheetJS untuk export Excel -->
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <!-- Supabase JS -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -65,11 +72,9 @@
       background: var(--bg);
       color: var(--text);
       min-height: 100vh;
-      padding: 0;
     }
 
-    @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500&display=swap');
-
+    /* ── TOPBAR ── */
     .topbar {
       background: var(--surface);
       border-bottom: 0.5px solid var(--border);
@@ -84,146 +89,42 @@
     }
 
     .topbar-icon {
-      width: 32px;
-      height: 32px;
+      width: 32px; height: 32px;
       border-radius: var(--radius-md);
       background: var(--green-50);
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
     }
-
     .topbar-icon i { font-size: 18px; color: var(--green-600); }
-
     .topbar-title { font-size: 16px; font-weight: 500; }
     .topbar-sub { font-size: 12px; color: var(--text-muted); margin-top: 1px; }
 
+    /* Supabase status indicator */
+    .db-status {
+      margin-left: auto;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+    .db-dot {
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      background: var(--gray-200);
+      transition: background 0.3s;
+    }
+    .db-dot.ok { background: #4ade80; }
+    .db-dot.err { background: var(--red-600); }
+
+    /* ── CONTAINER ── */
     .container {
       max-width: 720px;
       margin: 0 auto;
       padding: 1.5rem 1rem 4rem;
     }
 
-    .tabs {
-      display: flex;
-      gap: 4px;
-      background: var(--surface);
-      border: 0.5px solid var(--border);
-      border-radius: var(--radius-lg);
-      padding: 4px;
-      margin-bottom: 1.5rem;
-    }
-
-    .tab {
-      flex: 1;
-      padding: 9px 8px;
-      font-size: 13px;
-      font-weight: 500;
-      border: none;
-      background: none;
-      cursor: pointer;
-      border-radius: var(--radius-md);
-      font-family: inherit;
-      color: var(--text-muted);
-      transition: all 0.15s;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 6px;
-    }
-
-    .tab.active {
-      background: var(--bg);
-      color: var(--text);
-      border: 0.5px solid var(--border);
-    }
-
-    .tab i { font-size: 15px; }
-
-    .panel { display: none; }
-    .panel.active { display: block; }
-
-    .card {
-      background: var(--surface);
-      border: 0.5px solid var(--border);
-      border-radius: var(--radius-lg);
-      padding: 1.25rem;
-      margin-bottom: 1rem;
-    }
-
-    .section-label {
-      font-size: 11px;
-      font-weight: 500;
-      color: var(--text-muted);
-      text-transform: uppercase;
-      letter-spacing: 0.07em;
-      margin-bottom: 1rem;
-    }
-
-    .form-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px;
-    }
-
-    @media (max-width: 500px) {
-      .form-grid { grid-template-columns: 1fr; }
-    }
-
-    .field { display: flex; flex-direction: column; gap: 5px; }
-
-    .field label {
-      font-size: 13px;
-      color: var(--text-muted);
-    }
-
-    .field input,
-    .field select {
-      font-family: inherit;
-      font-size: 14px;
-      padding: 8px 10px;
-      border: 0.5px solid var(--border-strong);
-      border-radius: var(--radius-md);
-      background: var(--bg);
-      color: var(--text);
-      outline: none;
-      transition: border-color 0.15s;
-    }
-
-    .field input:focus,
-    .field select:focus {
-      border-color: var(--green-600);
-      box-shadow: 0 0 0 3px rgba(59,109,17,0.1);
-    }
-
-    .divider {
-      height: 0.5px;
-      background: var(--border);
-      margin: 1.25rem 0;
-    }
-
-    .btn-submit {
-      width: 100%;
-      padding: 11px;
-      background: var(--green-600);
-      color: var(--green-50);
-      border: none;
-      border-radius: var(--radius-md);
-      font-size: 14px;
-      font-weight: 500;
-      font-family: inherit;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      transition: background 0.15s, transform 0.1s;
-    }
-
-    .btn-submit:hover { background: var(--green-700); }
-    .btn-submit:active { transform: scale(0.99); }
-    .btn-submit i { font-size: 17px; }
-
+    /* ── ALERT ── */
     .alert {
       padding: 10px 14px;
       border-radius: var(--radius-md);
@@ -234,142 +135,218 @@
       gap: 8px;
       animation: fadeIn 0.2s ease;
     }
-
     @keyframes fadeIn { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: none; } }
-
     .alert.success { background: var(--green-50); color: var(--green-700); border: 0.5px solid var(--green-600); }
     .alert.warning { background: var(--amber-50); color: var(--amber-700); border: 0.5px solid var(--amber-600); }
-    .alert.hidden { display: none; }
-    .alert i { font-size: 16px; }
+    .alert.error   { background: var(--red-50);   color: var(--red-600);   border: 0.5px solid var(--red-600); }
+    .alert.hidden  { display: none; }
+    .alert i { font-size: 16px; flex-shrink: 0; }
 
-    .data-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
+    /* ── TABS ── */
+    .tabs {
+      display: flex; gap: 4px;
+      background: var(--surface);
+      border: 0.5px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 4px;
+      margin-bottom: 1.5rem;
+    }
+    .tab {
+      flex: 1; padding: 9px 8px;
+      font-size: 13px; font-weight: 500;
+      border: none; background: none;
+      cursor: pointer; border-radius: var(--radius-md);
+      font-family: inherit; color: var(--text-muted);
+      transition: all 0.15s;
+      display: flex; align-items: center; justify-content: center; gap: 6px;
+    }
+    .tab.active { background: var(--bg); color: var(--text); border: 0.5px solid var(--border); }
+    .tab i { font-size: 15px; }
+
+    .panel { display: none; }
+    .panel.active { display: block; }
+
+    /* ── CARD ── */
+    .card {
+      background: var(--surface);
+      border: 0.5px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 1.25rem;
       margin-bottom: 1rem;
     }
 
-    .data-count {
-      font-size: 12px;
-      background: var(--green-50);
-      color: var(--green-600);
-      padding: 3px 10px;
-      border-radius: 99px;
-      font-weight: 500;
+    .section-label {
+      font-size: 11px; font-weight: 500;
+      color: var(--text-muted);
+      text-transform: uppercase; letter-spacing: 0.07em;
+      margin-bottom: 1rem;
     }
 
-    .table-wrap {
-      overflow-x: auto;
+    /* ── FORM ── */
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    @media (max-width: 500px) { .form-grid { grid-template-columns: 1fr; } }
+
+    .field { display: flex; flex-direction: column; gap: 5px; }
+    .field label { font-size: 13px; color: var(--text-muted); }
+
+    .field input, .field select {
+      font-family: inherit; font-size: 14px;
+      padding: 8px 10px;
+      border: 0.5px solid var(--border-strong);
       border-radius: var(--radius-md);
+      background: var(--bg); color: var(--text);
+      outline: none; transition: border-color 0.15s;
+    }
+    .field input:focus, .field select:focus {
+      border-color: var(--green-600);
+      box-shadow: 0 0 0 3px rgba(59,109,17,0.1);
+    }
+
+    .divider { height: 0.5px; background: var(--border); margin: 1.25rem 0; }
+
+    /* ── BUTTONS ── */
+    .btn-submit {
+      width: 100%; padding: 11px;
+      background: var(--green-600); color: var(--green-50);
+      border: none; border-radius: var(--radius-md);
+      font-size: 14px; font-weight: 500; font-family: inherit;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      transition: background 0.15s, transform 0.1s;
+    }
+    .btn-submit:hover { background: var(--green-700); }
+    .btn-submit:active { transform: scale(0.99); }
+    .btn-submit:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+    .btn-submit i { font-size: 17px; }
+
+    .btn-export {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 7px 14px;
+      font-size: 12px; font-weight: 500; font-family: inherit;
+      border-radius: var(--radius-md); cursor: pointer;
+      transition: background 0.15s;
+    }
+    .btn-export-csv {
+      background: var(--gray-50); color: var(--gray-700);
+      border: 0.5px solid var(--border-strong);
+    }
+    .btn-export-csv:hover { background: var(--gray-200); }
+    .btn-export-excel {
+      background: var(--green-50); color: var(--green-700);
+      border: 0.5px solid var(--green-600);
+    }
+    .btn-export-excel:hover { background: var(--green-100); }
+
+    /* ── DATA HEADER ── */
+    .data-header {
+      display: flex; align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1rem;
+      flex-wrap: wrap; gap: 8px;
+    }
+    .data-header-right { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+    .data-count {
+      font-size: 12px; background: var(--green-50);
+      color: var(--green-600); padding: 3px 10px;
+      border-radius: 99px; font-weight: 500;
+    }
+
+    /* ── TABLE ── */
+    .table-wrap {
+      overflow-x: auto; border-radius: var(--radius-md);
       border: 0.5px solid var(--border);
     }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 13px;
-      min-width: 620px;
-    }
-
+    table { width: 100%; border-collapse: collapse; font-size: 13px; min-width: 620px; }
     thead tr { background: var(--bg); }
-
     th {
-      text-align: left;
-      padding: 9px 12px;
-      font-weight: 500;
-      font-size: 11px;
-      color: var(--text-muted);
+      text-align: left; padding: 9px 12px;
+      font-weight: 500; font-size: 11px; color: var(--text-muted);
       border-bottom: 0.5px solid var(--border);
-      white-space: nowrap;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
+      white-space: nowrap; text-transform: uppercase; letter-spacing: 0.05em;
     }
-
     td {
       padding: 9px 12px;
       border-bottom: 0.5px solid var(--border);
-      color: var(--text);
-      white-space: nowrap;
+      color: var(--text); white-space: nowrap;
     }
-
     tr:last-child td { border-bottom: none; }
     tbody tr:hover td { background: var(--bg); }
 
+    /* ── BADGES ── */
     .badge {
-      display: inline-block;
-      padding: 2px 8px;
-      border-radius: 99px;
-      font-size: 11px;
-      font-weight: 500;
+      display: inline-block; padding: 2px 8px;
+      border-radius: 99px; font-size: 11px; font-weight: 500;
     }
-
-    .badge-padi { background: var(--green-50); color: var(--green-600); }
-    .badge-jagung { background: var(--amber-50); color: var(--amber-600); }
-    .badge-kedelai { background: var(--blue-50); color: var(--blue-600); }
+    .badge-padi    { background: var(--green-50); color: var(--green-600); }
+    .badge-jagung  { background: var(--amber-50); color: var(--amber-600); }
+    .badge-kedelai { background: var(--blue-50);  color: var(--blue-600); }
 
     .btn-hapus {
-      background: none;
-      border: none;
-      color: var(--text-muted);
-      cursor: pointer;
-      padding: 4px 6px;
-      border-radius: var(--radius-md);
-      font-size: 13px;
-      transition: color 0.15s, background 0.15s;
-      line-height: 1;
+      background: none; border: none; color: var(--text-muted);
+      cursor: pointer; padding: 4px 6px;
+      border-radius: var(--radius-md); font-size: 13px;
+      transition: color 0.15s, background 0.15s; line-height: 1;
     }
-
     .btn-hapus:hover { background: var(--red-50); color: var(--red-600); }
     .btn-hapus i { font-size: 15px; vertical-align: middle; }
 
+    /* ── EMPTY / LOADING ── */
     .empty-state {
-      text-align: center;
-      padding: 3rem;
-      color: var(--text-muted);
-      font-size: 14px;
+      text-align: center; padding: 3rem;
+      color: var(--text-muted); font-size: 14px;
     }
-
     .empty-state i { font-size: 36px; display: block; margin-bottom: 10px; opacity: 0.35; }
 
-    .stats-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 10px;
-      margin-bottom: 1rem;
+    .loading-state {
+      text-align: center; padding: 2rem;
+      color: var(--text-muted); font-size: 13px;
+      display: flex; align-items: center; justify-content: center; gap: 8px;
     }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .spin { display: inline-block; animation: spin 1s linear infinite; }
 
-    .stat-card {
-      background: var(--bg);
-      border-radius: var(--radius-md);
-      padding: 14px 12px;
-      text-align: center;
-    }
-
+    /* ── STATS / REKAP ── */
+    .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 1rem; }
+    .stat-card { background: var(--bg); border-radius: var(--radius-md); padding: 14px 12px; text-align: center; }
     .stat-val { font-size: 24px; font-weight: 500; color: var(--text); }
     .stat-label { font-size: 11px; color: var(--text-muted); margin-top: 3px; }
 
     .bar-row { margin-bottom: 12px; }
-
-    .bar-meta {
-      display: flex;
-      justify-content: space-between;
-      font-size: 13px;
-      margin-bottom: 5px;
-    }
-
+    .bar-meta { display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 5px; }
     .bar-track {
-      height: 6px;
-      background: var(--bg);
-      border-radius: 99px;
-      overflow: hidden;
+      height: 6px; background: var(--bg);
+      border-radius: 99px; overflow: hidden;
       border: 0.5px solid var(--border);
     }
+    .bar-fill { height: 100%; border-radius: 99px; transition: width 0.4s ease; }
 
-    .bar-fill {
-      height: 100%;
-      border-radius: 99px;
-      transition: width 0.4s ease;
+    /* ── SETUP CARD ── */
+    .setup-card {
+      background: var(--amber-50);
+      border: 0.5px solid var(--amber-600);
+      border-radius: var(--radius-lg);
+      padding: 1.25rem;
+      margin-bottom: 1rem;
     }
+    .setup-card .setup-title {
+      font-size: 13px; font-weight: 500;
+      color: var(--amber-700); margin-bottom: 10px;
+      display: flex; align-items: center; gap: 6px;
+    }
+    .setup-card .field input {
+      font-size: 13px;
+      font-family: 'Courier New', monospace;
+    }
+    .setup-card .btn-connect {
+      margin-top: 10px;
+      padding: 8px 16px;
+      background: var(--amber-600); color: white;
+      border: none; border-radius: var(--radius-md);
+      font-size: 13px; font-weight: 500; font-family: inherit;
+      cursor: pointer; display: flex; align-items: center; gap: 6px;
+      transition: background 0.15s;
+    }
+    .setup-card .btn-connect:hover { background: var(--amber-700); }
   </style>
 </head>
 <body>
@@ -382,13 +359,37 @@
     <div class="topbar-title">Pelaporan Pertanian</div>
     <div class="topbar-sub">Sistem pelaporan luas tambah tanam harian</div>
   </div>
+  <div class="db-status" title="Status koneksi database">
+    <div class="db-dot" id="db-dot"></div>
+    <span id="db-label">Menghubungkan…</span>
+  </div>
 </div>
 
 <div class="container">
 
+  <!-- ALERT BOX (bug fix: sudah ada di HTML) -->
   <div id="alert-box" class="alert hidden">
     <i id="alert-icon" class="ti ti-circle-check"></i>
     <span id="alert-msg"></span>
+  </div>
+
+  <!-- SETUP SUPABASE (muncul jika belum dikonfigurasi) -->
+  <div id="setup-card" class="setup-card" style="display:none">
+    <div class="setup-title"><i class="ti ti-database"></i> Konfigurasi Supabase</div>
+    <p style="font-size:13px;color:var(--amber-700);margin-bottom:12px">
+      Masukkan URL dan Anon Key dari project Supabase kamu. Data akan disimpan ke tabel <code>laporan</code>.
+    </p>
+    <div class="field" style="margin-bottom:8px">
+      <label>Supabase URL</label>
+      <input type="text" id="cfg-url" placeholder="https://xxxx.supabase.co" />
+    </div>
+    <div class="field">
+      <label>Anon Key</label>
+      <input type="text" id="cfg-key" placeholder="eyJhbGci..." />
+    </div>
+    <button class="btn-connect" onclick="connectSupabase()">
+      <i class="ti ti-plug"></i> Hubungkan
+    </button>
   </div>
 
   <div class="tabs" role="tablist">
@@ -460,7 +461,7 @@
         </div>
       </div>
       <div class="divider"></div>
-      <button class="btn-submit" onclick="simpanData()">
+      <button class="btn-submit" id="btn-simpan" onclick="simpanData()">
         <i class="ti ti-device-floppy"></i> Simpan Laporan
       </button>
     </div>
@@ -471,7 +472,15 @@
     <div class="card">
       <div class="data-header">
         <span class="section-label" style="margin:0">Data Laporan</span>
-        <span class="data-count" id="data-count">0 laporan</span>
+        <div class="data-header-right">
+          <button class="btn-export btn-export-csv" onclick="exportCSV()">
+            <i class="ti ti-file-text"></i> Export CSV
+          </button>
+          <button class="btn-export btn-export-excel" onclick="exportExcel()">
+            <i class="ti ti-file-spreadsheet"></i> Export Excel
+          </button>
+          <span class="data-count" id="data-count">0 laporan</span>
+        </div>
       </div>
       <div id="table-container"></div>
     </div>
@@ -507,96 +516,183 @@
 </div>
 
 <script>
-  const STORAGE_KEY = 'laporan_pertanian_v1';
+  // ─── SUPABASE CONFIG ────────────────────────────────────────────────
+  // Ganti dengan URL dan Key dari project Supabase kamu
+  // atau biarkan kosong — form konfigurasi akan muncul otomatis
+  const SUPABASE_URL = 'https://penaujinawijzwcimgde.supabase.co';
+  const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBlbmF1amluYXdpanp3Y2ltZ2RlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg5NzgzNzcsImV4cCI6MjA5NDU1NDM3N30.FNNGqO7X5wpZ9Ng8qehPagS74uP-GMo8Z2AdzSEU6v4';
 
-  function loadData() {
-    try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'); }
-    catch { return []; }
-  }
+  const LS_URL_KEY = 'sb_url';
+  const LS_KEY_KEY = 'sb_key';
 
-  function saveData(data) {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-  }
+  let supabase = null;
+  let cachedData = []; // cache lokal untuk export & rekap
 
-  function showAlert(msg, type) {
-    const box = document.getElementById('alert-box');
-    const msgEl = document.getElementById('alert-msg');
-    const icon = document.getElementById('alert-icon');
-    box.className = 'alert ' + type;
-    msgEl.textContent = msg;
-    icon.className = type === 'success' ? 'ti ti-circle-check' : 'ti ti-alert-triangle';
-    clearTimeout(box._timer);
-    box._timer = setTimeout(() => box.className = 'alert hidden', 3000);
-  }
+  // ─── INIT ───────────────────────────────────────────────────────────
+  async function init() {
+    const url = SUPABASE_URL || localStorage.getItem(LS_URL_KEY) || '';
+    const key = SUPABASE_KEY || localStorage.getItem(LS_KEY_KEY) || '';
 
-  function simpanData() {
-    const tanggal = document.getElementById('f-tanggal').value;
-    const desa = document.getElementById('f-desa').value.trim();
-    const kelompok = document.getElementById('f-kelompok').value.trim();
-    const user = document.getElementById('f-user').value.trim();
-    const luas = parseFloat(document.getElementById('f-luas').value) || 0;
-
-    if (!desa || !kelompok || !user || !tanggal) {
-      showAlert('Semua data wajib diisi', 'warning');
+    if (!url || !key) {
+      showSetup();
       return;
     }
 
-    const data = loadData();
-    data.push({
-      id: Date.now(),
+    try {
+      supabase = window.supabase.createClient(url, key);
+      // Test koneksi
+      const { error } = await supabase.from('laporan').select('id', { count: 'exact', head: true });
+      if (error) throw error;
+      setDbStatus(true);
+    } catch (e) {
+      setDbStatus(false);
+      showAlert('Gagal terhubung ke Supabase: ' + e.message, 'error');
+      showSetup();
+    }
+  }
+
+  function showSetup() {
+    document.getElementById('setup-card').style.display = 'block';
+  }
+
+  async function connectSupabase() {
+    const url = document.getElementById('cfg-url').value.trim();
+    const key = document.getElementById('cfg-key').value.trim();
+    if (!url || !key) { showAlert('URL dan Key wajib diisi', 'warning'); return; }
+
+    try {
+      supabase = window.supabase.createClient(url, key);
+      const { error } = await supabase.from('laporan').select('id', { count: 'exact', head: true });
+      if (error) throw error;
+
+      localStorage.setItem(LS_URL_KEY, url);
+      localStorage.setItem(LS_KEY_KEY, key);
+      setDbStatus(true);
+      document.getElementById('setup-card').style.display = 'none';
+      showAlert('Berhasil terhubung ke Supabase!', 'success');
+    } catch (e) {
+      setDbStatus(false);
+      showAlert('Koneksi gagal: ' + e.message, 'error');
+    }
+  }
+
+  function setDbStatus(ok) {
+    document.getElementById('db-dot').className = 'db-dot ' + (ok ? 'ok' : 'err');
+    document.getElementById('db-label').textContent = ok ? 'Terhubung' : 'Terputus';
+  }
+
+  // ─── ALERT ──────────────────────────────────────────────────────────
+  function showAlert(msg, type = 'success') {
+    const box  = document.getElementById('alert-box');
+    const msgEl = document.getElementById('alert-msg');
+    const icon  = document.getElementById('alert-icon');
+    const iconMap = {
+      success: 'ti ti-circle-check',
+      warning: 'ti ti-alert-triangle',
+      error:   'ti ti-circle-x'
+    };
+    box.className = 'alert ' + type;
+    msgEl.textContent = msg;
+    icon.className = iconMap[type] || iconMap.success;
+    clearTimeout(box._timer);
+    box._timer = setTimeout(() => { box.className = 'alert hidden'; }, 4000);
+  }
+
+  // ─── DATA OPS ───────────────────────────────────────────────────────
+  async function fetchData() {
+    if (!supabase) return [];
+    const { data, error } = await supabase
+      .from('laporan')
+      .select('*')
+      .order('created_at', { ascending: false });
+    if (error) { showAlert('Gagal memuat data: ' + error.message, 'error'); return []; }
+    cachedData = data || [];
+    return cachedData;
+  }
+
+  async function simpanData() {
+    if (!supabase) { showAlert('Belum terhubung ke database', 'warning'); return; }
+
+    const tanggal  = document.getElementById('f-tanggal').value;
+    const desa     = document.getElementById('f-desa').value.trim();
+    const kelompok = document.getElementById('f-kelompok').value.trim();
+    const user     = document.getElementById('f-user').value.trim();
+    const luas     = parseFloat(document.getElementById('f-luas').value) || 0;
+
+    if (!desa || !kelompok || !user || !tanggal) {
+      showAlert('Semua data wajib diisi', 'warning'); return;
+    }
+
+    const btn = document.getElementById('btn-simpan');
+    btn.disabled = true;
+    btn.innerHTML = '<i class="ti ti-loader spin"></i> Menyimpan…';
+
+    const row = {
       tanggal,
       desa,
       kelompok_tani: kelompok,
-      jenis_LTT: document.getElementById('f-jenis').value,
-      kegiatan: document.getElementById('f-kegiatan').value,
-      komoditas: document.getElementById('f-komoditas').value,
-      luas: parseFloat(luas.toFixed(2)),
-      user
-    });
-    saveData(data);
+      jenis_ltt:     document.getElementById('f-jenis').value,
+      kegiatan:      document.getElementById('f-kegiatan').value,
+      komoditas:     document.getElementById('f-komoditas').value,
+      luas:          parseFloat(luas.toFixed(2)),
+      user_name:     user
+    };
 
-    document.getElementById('f-desa').value = '';
+    const { error } = await supabase.from('laporan').insert([row]);
+
+    btn.disabled = false;
+    btn.innerHTML = '<i class="ti ti-device-floppy"></i> Simpan Laporan';
+
+    if (error) { showAlert('Gagal menyimpan: ' + error.message, 'error'); return; }
+
+    document.getElementById('f-desa').value    = '';
     document.getElementById('f-kelompok').value = '';
-    document.getElementById('f-luas').value = '';
+    document.getElementById('f-luas').value    = '';
 
-    showAlert('Laporan berhasil disimpan', 'success');
-    renderTable();
-    updateRekap();
+    showAlert('Laporan berhasil disimpan ke database', 'success');
+    await fetchData();
   }
 
-  function hapusData(id) {
+  async function hapusData(id) {
     if (!confirm('Hapus laporan ini?')) return;
-    const data = loadData().filter(d => d.id !== id);
-    saveData(data);
+    const { error } = await supabase.from('laporan').delete().eq('id', id);
+    if (error) { showAlert('Gagal menghapus: ' + error.message, 'error'); return; }
+    showAlert('Laporan dihapus', 'warning');
+    await fetchData();
     renderTable();
     updateRekap();
   }
 
+  // ─── RENDER TABLE ───────────────────────────────────────────────────
   function getBadge(k) {
     const map = { Padi: 'padi', Jagung: 'jagung', Kedelai: 'kedelai' };
     return `<span class="badge badge-${map[k] || 'padi'}">${k}</span>`;
   }
 
-  function renderTable() {
-    const data = loadData();
-    document.getElementById('data-count').textContent = data.length + ' laporan';
+  async function renderTable() {
     const container = document.getElementById('table-container');
+    container.innerHTML = `<div class="loading-state"><i class="ti ti-loader spin"></i> Memuat data…</div>`;
+    const data = await fetchData();
+    document.getElementById('data-count').textContent = data.length + ' laporan';
+
     if (!data.length) {
       container.innerHTML = `<div class="empty-state"><i class="ti ti-inbox"></i>Belum ada data laporan</div>`;
       return;
     }
-    const rows = [...data].reverse().map(d => `
+
+    const rows = data.map(d => `
       <tr>
         <td>${d.tanggal}</td>
         <td>${d.desa}</td>
         <td>${d.kelompok_tani}</td>
-        <td>${d.jenis_LTT}</td>
+        <td>${d.jenis_ltt}</td>
         <td>${d.kegiatan}</td>
         <td>${getBadge(d.komoditas)}</td>
-        <td style="text-align:right">${d.luas.toFixed(1)}</td>
-        <td>${d.user}</td>
-        <td><button class="btn-hapus" onclick="hapusData(${d.id})" title="Hapus"><i class="ti ti-trash"></i></button></td>
+        <td style="text-align:right">${parseFloat(d.luas).toFixed(1)}</td>
+        <td>${d.user_name}</td>
+        <td><button class="btn-hapus" onclick="hapusData('${d.id}')" title="Hapus"><i class="ti ti-trash"></i></button></td>
       </tr>`).join('');
+
     container.innerHTML = `
       <div class="table-wrap">
         <table>
@@ -610,13 +706,14 @@
       </div>`;
   }
 
-  function updateRekap() {
-    const data = loadData();
-    const totalLuas = data.reduce((s, d) => s + d.luas, 0);
+  // ─── REKAP ──────────────────────────────────────────────────────────
+  async function updateRekap() {
+    const data = cachedData.length ? cachedData : await fetchData();
+    const totalLuas = data.reduce((s, d) => s + parseFloat(d.luas || 0), 0);
 
     document.getElementById('stat-total').textContent = data.length;
-    document.getElementById('stat-luas').textContent = totalLuas.toFixed(1);
-    document.getElementById('stat-desa').textContent = new Set(data.map(d => d.desa)).size;
+    document.getElementById('stat-luas').textContent  = totalLuas.toFixed(1);
+    document.getElementById('stat-desa').textContent  = new Set(data.map(d => d.desa)).size;
 
     const colors = {
       Padi: '#3B6D11', Jagung: '#854F0B', Kedelai: '#185FA5',
@@ -624,7 +721,8 @@
     };
 
     function barRows(grouped) {
-      if (!Object.keys(grouped).length) return '<div style="font-size:13px;color:var(--text-muted)">Belum ada data</div>';
+      if (!Object.keys(grouped).length)
+        return '<div style="font-size:13px;color:var(--text-muted)">Belum ada data</div>';
       return Object.entries(grouped).map(([k, v]) => {
         const pct = totalLuas ? Math.round((v / totalLuas) * 100) : 0;
         return `<div class="bar-row">
@@ -639,28 +737,86 @@
       }).join('');
     }
 
-    const komoditas = {};
-    const kegiatan = {};
+    const komoditas = {}, kegiatan = {};
     data.forEach(d => {
-      komoditas[d.komoditas] = (komoditas[d.komoditas] || 0) + d.luas;
-      kegiatan[d.kegiatan] = (kegiatan[d.kegiatan] || 0) + d.luas;
+      komoditas[d.komoditas] = (komoditas[d.komoditas] || 0) + parseFloat(d.luas || 0);
+      kegiatan[d.kegiatan]   = (kegiatan[d.kegiatan]   || 0) + parseFloat(d.luas || 0);
     });
 
     document.getElementById('rekap-komoditas').innerHTML = barRows(komoditas);
-    document.getElementById('rekap-kegiatan').innerHTML = barRows(kegiatan);
+    document.getElementById('rekap-kegiatan').innerHTML  = barRows(kegiatan);
   }
 
+  // ─── EXPORT ─────────────────────────────────────────────────────────
+  function getExportRows() {
+    return cachedData.map(d => ({
+      Tanggal:       d.tanggal,
+      Desa:          d.desa,
+      'Kelompok Tani': d.kelompok_tani,
+      'Jenis LTT':   d.jenis_ltt,
+      Kegiatan:      d.kegiatan,
+      Komoditas:     d.komoditas,
+      'Luas (Ha)':   parseFloat(d.luas),
+      User:          d.user_name
+    }));
+  }
+
+  function exportCSV() {
+    const rows = getExportRows();
+    if (!rows.length) { showAlert('Tidak ada data untuk diekspor', 'warning'); return; }
+    const header = Object.keys(rows[0]);
+    const csv = [
+      header.join(','),
+      ...rows.map(r => header.map(h => `"${String(r[h]).replace(/"/g,'""')}"`).join(','))
+    ].join('\r\n');
+    const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+    const url  = URL.createObjectURL(blob);
+    const a    = Object.assign(document.createElement('a'), {
+      href: url, download: `laporan_pertanian_${today()}.csv`
+    });
+    a.click(); URL.revokeObjectURL(url);
+    showAlert('File CSV berhasil diunduh', 'success');
+  }
+
+  function exportExcel() {
+    const rows = getExportRows();
+    if (!rows.length) { showAlert('Tidak ada data untuk diekspor', 'warning'); return; }
+    const ws = XLSX.utils.json_to_sheet(rows);
+    // Lebar kolom
+    ws['!cols'] = [
+      {wch:12},{wch:20},{wch:22},{wch:16},{wch:14},{wch:12},{wch:12},{wch:16}
+    ];
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Laporan');
+    XLSX.writeFile(wb, `laporan_pertanian_${today()}.xlsx`);
+    showAlert('File Excel berhasil diunduh', 'success');
+  }
+
+  function today() {
+    return new Date().toISOString().split('T')[0];
+  }
+
+  // ─── TABS ───────────────────────────────────────────────────────────
   function switchTab(name) {
     ['input', 'data', 'rekap'].forEach(t => {
       document.getElementById('panel-' + t).className = 'panel' + (t === name ? ' active' : '');
-      document.getElementById('tab-' + t).className = 'tab' + (t === name ? ' active' : '');
+      document.getElementById('tab-'   + t).className = 'tab'   + (t === name ? ' active' : '');
     });
-    if (name === 'data') renderTable();
+    if (name === 'data')  renderTable();
     if (name === 'rekap') updateRekap();
   }
 
-  document.getElementById('f-tanggal').value = new Date().toISOString().split('T')[0];
-  updateRekap();
+  // ─── EXPOSE TO GLOBAL (fix: onclick di HTML bisa memanggil fungsi ini) ──
+  window.switchTab       = switchTab;
+  window.simpanData      = simpanData;
+  window.hapusData       = hapusData;
+  window.exportCSV       = exportCSV;
+  window.exportExcel     = exportExcel;
+  window.connectSupabase = connectSupabase;
+
+  // ─── BOOT ───────────────────────────────────────────────────────────
+  document.getElementById('f-tanggal').value = today();
+  init();
 </script>
 
 </body>
