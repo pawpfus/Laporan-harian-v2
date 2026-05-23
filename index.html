@@ -13,19 +13,30 @@
     :root {
       --green-50: #EAF3DE;
       --green-100: #C0DD97;
+      --green-400: #639922;
       --green-600: #3B6D11;
       --green-700: #27500A;
       --green-800: #173404;
       --amber-50: #FAEEDA;
+      --amber-400: #EF9F27;
       --amber-600: #854F0B;
       --amber-700: #633806;
       --blue-50: #E6F1FB;
+      --blue-400: #378ADD;
       --blue-600: #185FA5;
       --blue-800: #0C447C;
+      --teal-50: #E1F5EE;
+      --teal-400: #1D9E75;
+      --teal-600: #0F6E56;
+      --coral-50: #FAECE7;
+      --coral-400: #D85A30;
+      --coral-600: #993C1D;
       --red-50: #FCEBEB;
       --red-600: #A32D2D;
       --gray-50: #F1EFE8;
+      --gray-100: #D3D1C7;
       --gray-200: #B4B2A9;
+      --gray-400: #888780;
       --gray-500: #5F5E5A;
       --gray-700: #444441;
       --bg: #F7F6F2;
@@ -47,18 +58,33 @@
         --border: rgba(255,255,255,0.1);
         --border-strong: rgba(255,255,255,0.2);
         --green-50: #173404;
+        --green-100: #27500A;
+        --green-400: #97C459;
         --green-600: #97C459;
         --green-700: #C0DD97;
         --green-800: #EAF3DE;
         --amber-50: #412402;
+        --amber-400: #EF9F27;
         --amber-600: #EF9F27;
         --amber-700: #FAC775;
         --blue-50: #042C53;
+        --blue-400: #378ADD;
         --blue-600: #85B7EB;
         --blue-800: #B5D4F4;
+        --teal-50: #04342C;
+        --teal-400: #5DCAA5;
+        --teal-600: #9FE1CB;
+        --coral-50: #4A1B0C;
+        --coral-400: #F0997B;
+        --coral-600: #F5C4B3;
         --red-50: #501313;
         --red-600: #F09595;
         --gray-50: #2C2C2A;
+        --gray-100: #444441;
+        --gray-200: #5F5E5A;
+        --gray-400: #B4B2A9;
+        --gray-500: #B4B2A9;
+        --gray-700: #D3D1C7;
       }
     }
 
@@ -82,7 +108,6 @@
       top: 0;
       z-index: 10;
     }
-
     .topbar-icon {
       width: 32px; height: 32px;
       border-radius: var(--radius-md);
@@ -93,110 +118,77 @@
     .topbar-icon i { font-size: 18px; color: var(--green-600); }
     .topbar-title { font-size: 16px; font-weight: 500; }
     .topbar-sub { font-size: 12px; color: var(--text-muted); margin-top: 1px; }
-
-    /* Supabase status indicator */
     .db-status {
       margin-left: auto;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      font-size: 12px;
-      color: var(--text-muted);
+      display: flex; align-items: center; gap: 6px;
+      font-size: 12px; color: var(--text-muted);
     }
     .db-dot {
-      width: 7px; height: 7px;
-      border-radius: 50%;
-      background: var(--gray-200);
-      transition: background 0.3s;
+      width: 7px; height: 7px; border-radius: 50%;
+      background: var(--gray-200); transition: background 0.3s;
     }
-    .db-dot.ok { background: #4ade80; }
+    .db-dot.ok  { background: #4ade80; }
     .db-dot.err { background: var(--red-600); }
 
     /* ── CONTAINER ── */
-    .container {
-      max-width: 720px;
-      margin: 0 auto;
-      padding: 1.5rem 1rem 4rem;
-    }
+    .container { max-width: 720px; margin: 0 auto; padding: 1.5rem 1rem 4rem; }
 
     /* ── ALERT ── */
     .alert {
-      padding: 10px 14px;
-      border-radius: var(--radius-md);
-      font-size: 13px;
-      margin-bottom: 1rem;
-      display: flex;
-      align-items: center;
-      gap: 8px;
+      padding: 10px 14px; border-radius: var(--radius-md);
+      font-size: 13px; margin-bottom: 1rem;
+      display: flex; align-items: center; gap: 8px;
       animation: fadeIn 0.2s ease;
     }
-    @keyframes fadeIn { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: none; } }
-    .alert.success { background: var(--green-50); color: var(--green-700); border: 0.5px solid var(--green-600); }
-    .alert.warning { background: var(--amber-50); color: var(--amber-700); border: 0.5px solid var(--amber-600); }
-    .alert.error   { background: var(--red-50);   color: var(--red-600);   border: 0.5px solid var(--red-600); }
+    @keyframes fadeIn { from { opacity:0; transform:translateY(-4px); } to { opacity:1; transform:none; } }
+    .alert.success { background: var(--green-50);  color: var(--green-700);  border: 0.5px solid var(--green-600); }
+    .alert.warning { background: var(--amber-50);  color: var(--amber-700);  border: 0.5px solid var(--amber-600); }
+    .alert.error   { background: var(--red-50);    color: var(--red-600);    border: 0.5px solid var(--red-600); }
     .alert.hidden  { display: none; }
     .alert i { font-size: 16px; flex-shrink: 0; }
 
     /* ── TABS ── */
     .tabs {
       display: flex; gap: 4px;
-      background: var(--surface);
-      border: 0.5px solid var(--border);
-      border-radius: var(--radius-lg);
-      padding: 4px;
-      margin-bottom: 1.5rem;
+      background: var(--surface); border: 0.5px solid var(--border);
+      border-radius: var(--radius-lg); padding: 4px; margin-bottom: 1.5rem;
     }
     .tab {
-      flex: 1; padding: 9px 8px;
-      font-size: 13px; font-weight: 500;
-      border: none; background: none;
-      cursor: pointer; border-radius: var(--radius-md);
-      font-family: inherit; color: var(--text-muted);
-      transition: all 0.15s;
+      flex: 1; padding: 9px 8px; font-size: 13px; font-weight: 500;
+      border: none; background: none; cursor: pointer;
+      border-radius: var(--radius-md); font-family: inherit;
+      color: var(--text-muted); transition: all 0.15s;
       display: flex; align-items: center; justify-content: center; gap: 6px;
     }
     .tab.active { background: var(--bg); color: var(--text); border: 0.5px solid var(--border); }
     .tab i { font-size: 15px; }
-
     .panel { display: none; }
     .panel.active { display: block; }
 
     /* ── CARD ── */
     .card {
-      background: var(--surface);
-      border: 0.5px solid var(--border);
-      border-radius: var(--radius-lg);
-      padding: 1.25rem;
-      margin-bottom: 1rem;
+      background: var(--surface); border: 0.5px solid var(--border);
+      border-radius: var(--radius-lg); padding: 1.25rem; margin-bottom: 1rem;
     }
-
     .section-label {
-      font-size: 11px; font-weight: 500;
-      color: var(--text-muted);
-      text-transform: uppercase; letter-spacing: 0.07em;
-      margin-bottom: 1rem;
+      font-size: 11px; font-weight: 500; color: var(--text-muted);
+      text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 1rem;
     }
 
     /* ── FORM ── */
     .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
     @media (max-width: 500px) { .form-grid { grid-template-columns: 1fr; } }
-
     .field { display: flex; flex-direction: column; gap: 5px; }
     .field label { font-size: 13px; color: var(--text-muted); }
-
     .field input, .field select {
-      font-family: inherit; font-size: 14px;
-      padding: 8px 10px;
-      border: 0.5px solid var(--border-strong);
-      border-radius: var(--radius-md);
-      background: var(--bg); color: var(--text);
-      outline: none; transition: border-color 0.15s;
+      font-family: inherit; font-size: 14px; padding: 8px 10px;
+      border: 0.5px solid var(--border-strong); border-radius: var(--radius-md);
+      background: var(--bg); color: var(--text); outline: none; transition: border-color 0.15s;
     }
     .field input:focus, .field select:focus {
       border-color: var(--green-600);
       box-shadow: 0 0 0 3px rgba(59,109,17,0.1);
     }
-
     .divider { height: 0.5px; background: var(--border); margin: 1.25rem 0; }
 
     /* ── BUTTONS ── */
@@ -205,8 +197,7 @@
       background: var(--green-600); color: var(--green-50);
       border: none; border-radius: var(--radius-md);
       font-size: 14px; font-weight: 500; font-family: inherit;
-      cursor: pointer;
-      display: flex; align-items: center; justify-content: center; gap: 8px;
+      cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;
       transition: background 0.15s, transform 0.1s;
     }
     .btn-submit:hover { background: var(--green-700); }
@@ -216,125 +207,114 @@
 
     .btn-export {
       display: inline-flex; align-items: center; gap: 6px;
-      padding: 7px 14px;
-      font-size: 12px; font-weight: 500; font-family: inherit;
-      border-radius: var(--radius-md); cursor: pointer;
-      transition: background 0.15s;
+      padding: 7px 14px; font-size: 12px; font-weight: 500; font-family: inherit;
+      border-radius: var(--radius-md); cursor: pointer; transition: background 0.15s;
     }
-    .btn-export-csv {
-      background: var(--gray-50); color: var(--gray-700);
-      border: 0.5px solid var(--border-strong);
-    }
-    .btn-export-csv:hover { background: var(--gray-200); }
-    .btn-export-excel {
-      background: var(--green-50); color: var(--green-700);
-      border: 0.5px solid var(--green-600);
-    }
+    .btn-export-csv  { background: var(--gray-50);   color: var(--gray-700);  border: 0.5px solid var(--border-strong); }
+    .btn-export-csv:hover  { background: var(--gray-100); }
+    .btn-export-excel { background: var(--green-50); color: var(--green-700); border: 0.5px solid var(--green-600); }
     .btn-export-excel:hover { background: var(--green-100); }
 
     /* ── DATA HEADER ── */
     .data-header {
-      display: flex; align-items: center;
-      justify-content: space-between;
-      margin-bottom: 1rem;
-      flex-wrap: wrap; gap: 8px;
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 1rem; flex-wrap: wrap; gap: 8px;
     }
     .data-header-right { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
     .data-count {
-      font-size: 12px; background: var(--green-50);
-      color: var(--green-600); padding: 3px 10px;
-      border-radius: 99px; font-weight: 500;
+      font-size: 12px; background: var(--green-50); color: var(--green-600);
+      padding: 3px 10px; border-radius: 99px; font-weight: 500;
     }
 
     /* ── TABLE ── */
-    .table-wrap {
-      overflow-x: auto; border-radius: var(--radius-md);
-      border: 0.5px solid var(--border);
-    }
+    .table-wrap { overflow-x: auto; border-radius: var(--radius-md); border: 0.5px solid var(--border); }
     table { width: 100%; border-collapse: collapse; font-size: 13px; min-width: 620px; }
     thead tr { background: var(--bg); }
     th {
-      text-align: left; padding: 9px 12px;
-      font-weight: 500; font-size: 11px; color: var(--text-muted);
-      border-bottom: 0.5px solid var(--border);
+      text-align: left; padding: 9px 12px; font-weight: 500; font-size: 11px;
+      color: var(--text-muted); border-bottom: 0.5px solid var(--border);
       white-space: nowrap; text-transform: uppercase; letter-spacing: 0.05em;
     }
-    td {
-      padding: 9px 12px;
-      border-bottom: 0.5px solid var(--border);
-      color: var(--text); white-space: nowrap;
-    }
+    td { padding: 9px 12px; border-bottom: 0.5px solid var(--border); color: var(--text); white-space: nowrap; }
     tr:last-child td { border-bottom: none; }
     tbody tr:hover td { background: var(--bg); }
 
     /* ── BADGES ── */
-    .badge {
-      display: inline-block; padding: 2px 8px;
-      border-radius: 99px; font-size: 11px; font-weight: 500;
-    }
+    .badge { display: inline-block; padding: 2px 8px; border-radius: 99px; font-size: 11px; font-weight: 500; }
     .badge-padi    { background: var(--green-50); color: var(--green-600); }
     .badge-jagung  { background: var(--amber-50); color: var(--amber-600); }
     .badge-kedelai { background: var(--blue-50);  color: var(--blue-600); }
 
     .btn-hapus {
       background: none; border: none; color: var(--text-muted);
-      cursor: pointer; padding: 4px 6px;
-      border-radius: var(--radius-md); font-size: 13px;
-      transition: color 0.15s, background 0.15s; line-height: 1;
+      cursor: pointer; padding: 4px 6px; border-radius: var(--radius-md);
+      font-size: 13px; transition: color 0.15s, background 0.15s; line-height: 1;
     }
     .btn-hapus:hover { background: var(--red-50); color: var(--red-600); }
     .btn-hapus i { font-size: 15px; vertical-align: middle; }
 
     /* ── EMPTY / LOADING ── */
-    .empty-state {
-      text-align: center; padding: 3rem;
-      color: var(--text-muted); font-size: 14px;
-    }
+    .empty-state { text-align: center; padding: 3rem; color: var(--text-muted); font-size: 14px; }
     .empty-state i { font-size: 36px; display: block; margin-bottom: 10px; opacity: 0.35; }
-
     .loading-state {
-      text-align: center; padding: 2rem;
-      color: var(--text-muted); font-size: 13px;
+      text-align: center; padding: 2rem; color: var(--text-muted); font-size: 13px;
       display: flex; align-items: center; justify-content: center; gap: 8px;
     }
     @keyframes spin { to { transform: rotate(360deg); } }
     .spin { display: inline-block; animation: spin 1s linear infinite; }
 
-    /* ── STATS / REKAP ── */
-    .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 1rem; }
-    .stat-card { background: var(--bg); border-radius: var(--radius-md); padding: 14px 12px; text-align: center; }
-    .stat-val { font-size: 24px; font-weight: 500; color: var(--text); }
-    .stat-label { font-size: 11px; color: var(--text-muted); margin-top: 3px; }
-
-    .bar-row { margin-bottom: 12px; }
-    .bar-meta { display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 5px; }
-    .bar-track {
-      height: 6px; background: var(--bg);
-      border-radius: 99px; overflow: hidden;
-      border: 0.5px solid var(--border);
+    /* ── REKAP: STAT CARDS ── */
+    .stats-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+      gap: 10px; margin-bottom: 1.25rem;
     }
-    .bar-fill { height: 100%; border-radius: 99px; transition: width 0.4s ease; }
+    .stat-card {
+      background: var(--bg); border-radius: var(--radius-md);
+      padding: 14px 12px;
+    }
+    .stat-icon { font-size: 18px; margin-bottom: 6px; }
+    .stat-val  { font-size: 24px; font-weight: 500; color: var(--text); line-height: 1; }
+    .stat-label { font-size: 11px; color: var(--text-muted); margin-top: 3px; }
+    .stat-sub  { font-size: 11px; margin-top: 4px; }
+
+    /* ── REKAP: FILTER CHIPS ── */
+    .filter-row { display: flex; gap: 6px; margin-bottom: 1.25rem; flex-wrap: wrap; }
+    .chip {
+      font-size: 12px; padding: 5px 12px; border-radius: 99px;
+      border: 0.5px solid var(--border-strong); background: transparent;
+      color: var(--text-muted); cursor: pointer; font-family: inherit;
+      transition: all 0.15s;
+    }
+    .chip:hover { background: var(--bg); }
+    .chip.active { background: var(--green-50); color: var(--green-600); border-color: var(--green-400); font-weight: 500; }
+
+    /* ── REKAP: CHART CARD ── */
+    .chart-card {
+      background: var(--surface); border: 0.5px solid var(--border);
+      border-radius: var(--radius-lg); padding: 1rem 1.25rem; margin-bottom: 12px;
+    }
+    .chart-title {
+      font-size: 12px; font-weight: 500; color: var(--text-muted);
+      text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 10px;
+      display: flex; align-items: center; gap: 6px;
+    }
+    .chart-title i { font-size: 14px; }
+    .legend-row { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 10px; }
+    .legend-item { display: flex; align-items: center; gap: 5px; font-size: 12px; color: var(--text-muted); }
+    .legend-dot  { width: 10px; height: 10px; border-radius: 2px; flex-shrink: 0; }
 
     /* ── SETUP CARD ── */
     .setup-card {
-      background: var(--amber-50);
-      border: 0.5px solid var(--amber-600);
-      border-radius: var(--radius-lg);
-      padding: 1.25rem;
-      margin-bottom: 1rem;
+      background: var(--amber-50); border: 0.5px solid var(--amber-600);
+      border-radius: var(--radius-lg); padding: 1.25rem; margin-bottom: 1rem;
     }
     .setup-card .setup-title {
-      font-size: 13px; font-weight: 500;
-      color: var(--amber-700); margin-bottom: 10px;
+      font-size: 13px; font-weight: 500; color: var(--amber-700); margin-bottom: 10px;
       display: flex; align-items: center; gap: 6px;
     }
-    .setup-card .field input {
-      font-size: 13px;
-      font-family: 'Courier New', monospace;
-    }
+    .setup-card .field input { font-size: 13px; font-family: 'Courier New', monospace; }
     .setup-card .btn-connect {
-      margin-top: 10px;
-      padding: 8px 16px;
+      margin-top: 10px; padding: 8px 16px;
       background: var(--amber-600); color: white;
       border: none; border-radius: var(--radius-md);
       font-size: 13px; font-weight: 500; font-family: inherit;
@@ -347,9 +327,7 @@
 <body>
 
 <div class="topbar">
-  <div class="topbar-icon">
-    <i class="ti ti-plant"></i>
-  </div>
+  <div class="topbar-icon"><i class="ti ti-plant"></i></div>
   <div>
     <div class="topbar-title">Pelaporan Pertanian</div>
     <div class="topbar-sub">Sistem pelaporan luas tambah tanam harian</div>
@@ -362,13 +340,12 @@
 
 <div class="container">
 
-  <!-- ALERT BOX (bug fix: sudah ada di HTML) -->
   <div id="alert-box" class="alert hidden">
     <i id="alert-icon" class="ti ti-circle-check"></i>
     <span id="alert-msg"></span>
   </div>
 
-  <!-- SETUP SUPABASE (muncul jika belum dikonfigurasi) -->
+  <!-- SETUP SUPABASE -->
   <div id="setup-card" class="setup-card" style="display:none">
     <div class="setup-title"><i class="ti ti-database"></i> Konfigurasi Supabase</div>
     <p style="font-size:13px;color:var(--amber-700);margin-bottom:12px">
@@ -483,61 +460,224 @@
 
   <!-- PANEL REKAP -->
   <div class="panel" id="panel-rekap">
-    <div class="card">
-      <div class="section-label">Ringkasan Keseluruhan</div>
-      <div class="stats-grid">
-        <div class="stat-card">
-          <div class="stat-val" id="stat-total">0</div>
-          <div class="stat-label">Total laporan</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-val" id="stat-luas">0</div>
-          <div class="stat-label">Total luas (Ha)</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-val" id="stat-desa">0</div>
-          <div class="stat-label">Jumlah desa</div>
-        </div>
-      </div>
-      <div class="divider"></div>
-      <div class="section-label">Luas per Komoditas</div>
-      <div id="rekap-komoditas"></div>
-      <div class="divider"></div>
-      <div class="section-label">Luas per Kegiatan</div>
-      <div id="rekap-kegiatan"></div>
-    </div>
-  </div>
 
-</div>
+    <!-- Filter Jenis LTT -->
+    <div class="filter-row" id="rekap-filter">
+      <button class="chip active" data-filter="semua" onclick="setRekapFilter('semua', this)">Semua</button>
+      <button class="chip" data-filter="Reguler" onclick="setRekapFilter('Reguler', this)">Reguler</button>
+      <button class="chip" data-filter="Oplah Rawa" onclick="setRekapFilter('Oplah Rawa', this)">Oplah Rawa</button>
+      <button class="chip" data-filter="Oplah Non Rawa" onclick="setRekapFilter('Oplah Non Rawa', this)">Oplah Non Rawa</button>
+      <button class="chip" data-filter="CSR" onclick="setRekapFilter('CSR', this)">CSR</button>
+    </div>
+
+    <!-- Stat Cards -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-icon" style="color:var(--green-600)"><i class="ti ti-file-description" aria-hidden="true"></i></div>
+        <div class="stat-label">Total laporan</div>
+        <div class="stat-val" id="stat-total">0</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon" style="color:var(--blue-600)"><i class="ti ti-map-2" aria-hidden="true"></i></div>
+        <div class="stat-label">Total luas (Ha)</div>
+        <div class="stat-val" id="stat-luas">0</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon" style="color:var(--amber-600)"><i class="ti ti-home-2" aria-hidden="true"></i></div>
+        <div class="stat-label">Jumlah desa</div>
+        <div class="stat-val" id="stat-desa">0</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon" style="color:var(--teal-600)"><i class="ti ti-users" aria-hidden="true"></i></div>
+        <div class="stat-label">Kelompok tani</div>
+        <div class="stat-val" id="stat-kelompok">0</div>
+      </div>
+    </div>
+
+    <!-- Chart: Luas per Komoditas -->
+    <div class="chart-card">
+      <div class="chart-title">
+        <i class="ti ti-plant-2" aria-hidden="true"></i> Luas per komoditas (Ha)
+      </div>
+      <div class="legend-row" id="legend-komoditas"></div>
+      <div style="position:relative;width:100%;height:130px;">
+        <canvas id="chartKomoditas" role="img" aria-label="Bar chart horizontal luas per komoditas"></canvas>
+      </div>
+    </div>
+
+    <!-- Chart: Luas per Kegiatan -->
+    <div class="chart-card">
+      <div class="chart-title">
+        <i class="ti ti-trowel" aria-hidden="true"></i> Luas per kegiatan (Ha)
+      </div>
+      <div class="legend-row" id="legend-kegiatan"></div>
+      <div style="position:relative;width:100%;height:170px;">
+        <canvas id="chartKegiatan" role="img" aria-label="Bar chart horizontal luas per kegiatan"></canvas>
+      </div>
+    </div>
+
+  </div><!-- /panel-rekap -->
+
+</div><!-- /container -->
 
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <script>
   // ─── SUPABASE CONFIG ────────────────────────────────────────────────
-  // Ganti dengan URL dan Key dari project Supabase kamu
-  // atau biarkan kosong — form konfigurasi akan muncul otomatis
   const SUPABASE_URL = 'https://penaujinawijzwcimgde.supabase.co';
   const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBlbmF1amluYXdpanp3Y2ltZ2RlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg5NzgzNzcsImV4cCI6MjA5NDU1NDM3N30.FNNGqO7X5wpZ9Ng8qehPagS74uP-GMo8Z2AdzSEU6v4';
-
   const LS_URL_KEY = 'sb_url';
   const LS_KEY_KEY = 'sb_key';
 
   let sbClient = null;
-  let cachedData = []; // cache lokal untuk export & rekap
+  let cachedData = [];
+  let activeFilter = 'semua';
+
+  // ─── CHART INSTANCES ────────────────────────────────────────────────
+  let chartK = null;
+  let chartG = null;
+
+  const KOMODITAS_COLORS = {
+    'Padi':    '#639922',
+    'Jagung':  '#EF9F27',
+    'Kedelai': '#378ADD',
+  };
+  const KEGIATAN_COLORS = {
+    'Tanam':      '#1D9E75',
+    'Panen':      '#D85A30',
+    'Olah Lahan': '#888780',
+    'Bera':       '#B4B2A9',
+  };
+
+  const isDark = () => window.matchMedia('(prefers-color-scheme: dark)').matches;
+
+  function chartAxisColor() { return isDark() ? '#B4B2A9' : '#5F5E5A'; }
+  function chartGridColor()  { return isDark() ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.06)'; }
+
+  function baseChartOptions(numBars) {
+    return {
+      indexAxis: 'y',
+      responsive: true,
+      maintainAspectRatio: false,
+      animation: { duration: 400 },
+      plugins: {
+        legend: { display: false },
+        tooltip: { callbacks: { label: ctx => '  ' + parseFloat(ctx.parsed.x).toFixed(1) + ' Ha' } }
+      },
+      scales: {
+        x: {
+          grid: { color: chartGridColor() },
+          ticks: { font: { size: 11 }, color: chartAxisColor(), callback: v => v + ' Ha' }
+        },
+        y: {
+          grid: { display: false },
+          ticks: { font: { size: 12 }, color: chartAxisColor() }
+        }
+      }
+    };
+  }
+
+  function initCharts() {
+    chartK = new Chart(document.getElementById('chartKomoditas'), {
+      type: 'bar',
+      data: { labels: [], datasets: [{ data: [], backgroundColor: [], borderRadius: 4, barThickness: 22 }] },
+      options: baseChartOptions(3)
+    });
+    chartG = new Chart(document.getElementById('chartKegiatan'), {
+      type: 'bar',
+      data: { labels: [], datasets: [{ data: [], backgroundColor: [], borderRadius: 4, barThickness: 22 }] },
+      options: baseChartOptions(4)
+    });
+  }
+
+  function updateCharts(data) {
+    // Hitung luas per komoditas & kegiatan
+    const kom = {}, keg = {};
+    data.forEach(d => {
+      const luas = parseFloat(d.luas || 0);
+      kom[d.komoditas] = (kom[d.komoditas] || 0) + luas;
+      keg[d.kegiatan]  = (keg[d.kegiatan]  || 0) + luas;
+    });
+
+    // Urutkan dari terbesar
+    const komEntries = Object.entries(kom).sort((a,b) => b[1]-a[1]);
+    const kegEntries = Object.entries(keg).sort((a,b) => b[1]-a[1]);
+
+    // Update chart komoditas
+    chartK.data.labels = komEntries.map(e => e[0]);
+    chartK.data.datasets[0].data  = komEntries.map(e => parseFloat(e[1].toFixed(1)));
+    chartK.data.datasets[0].backgroundColor = komEntries.map(e => KOMODITAS_COLORS[e[0]] || '#639922');
+    chartK.update();
+
+    // Update chart kegiatan
+    chartG.data.labels = kegEntries.map(e => e[0]);
+    chartG.data.datasets[0].data  = kegEntries.map(e => parseFloat(e[1].toFixed(1)));
+    chartG.data.datasets[0].backgroundColor = kegEntries.map(e => KEGIATAN_COLORS[e[0]] || '#888780');
+    chartG.update();
+
+    // Legend komoditas
+    const totalLuas = data.reduce((s,d) => s + parseFloat(d.luas||0), 0);
+    document.getElementById('legend-komoditas').innerHTML = komEntries.length
+      ? komEntries.map(([k,v]) => `
+          <span class="legend-item">
+            <span class="legend-dot" style="background:${KOMODITAS_COLORS[k]||'#639922'}"></span>
+            ${k} <strong style="color:var(--text);margin-left:3px">${v.toFixed(1)} Ha</strong>
+          </span>`).join('')
+      : '<span style="font-size:13px;color:var(--text-muted)">Belum ada data</span>';
+
+    // Legend kegiatan
+    document.getElementById('legend-kegiatan').innerHTML = kegEntries.length
+      ? kegEntries.map(([k,v]) => `
+          <span class="legend-item">
+            <span class="legend-dot" style="background:${KEGIATAN_COLORS[k]||'#888780'}"></span>
+            ${k} <strong style="color:var(--text);margin-left:3px">${v.toFixed(1)} Ha</strong>
+          </span>`).join('')
+      : '<span style="font-size:13px;color:var(--text-muted)">Belum ada data</span>';
+  }
+
+  // ─── REKAP ──────────────────────────────────────────────────────────
+  function setRekapFilter(filter, el) {
+    activeFilter = filter;
+    document.querySelectorAll('#rekap-filter .chip').forEach(c => c.classList.remove('active'));
+    el.classList.add('active');
+    renderRekap();
+  }
+
+  async function updateRekap() {
+    if (!cachedData.length) await fetchData();
+    renderRekap();
+  }
+
+  function renderRekap() {
+    const data = activeFilter === 'semua'
+      ? cachedData
+      : cachedData.filter(d => d.jenis_ltt === activeFilter);
+
+    const totalLuas   = data.reduce((s,d) => s + parseFloat(d.luas||0), 0);
+    const totalDesa   = new Set(data.map(d => d.desa)).size;
+    const totalKelompok = new Set(data.map(d => d.kelompok_tani)).size;
+
+    document.getElementById('stat-total').textContent    = data.length;
+    document.getElementById('stat-luas').textContent     = totalLuas.toFixed(1);
+    document.getElementById('stat-desa').textContent     = totalDesa;
+    document.getElementById('stat-kelompok').textContent = totalKelompok;
+
+    updateCharts(data);
+  }
 
   // ─── INIT ───────────────────────────────────────────────────────────
   async function init() {
+    initCharts();
+
     const url = SUPABASE_URL || localStorage.getItem(LS_URL_KEY) || '';
     const key = SUPABASE_KEY || localStorage.getItem(LS_KEY_KEY) || '';
 
-    if (!url || !key) {
-      showSetup();
-      return;
-    }
+    if (!url || !key) { showSetup(); return; }
 
     try {
-      const { createClient } = window.supabase; sbClient = createClient(url, key);
-      // Test koneksi
+      const { createClient } = window.supabase;
+      sbClient = createClient(url, key);
       const { error } = await sbClient.from('laporan').select('id', { count: 'exact', head: true });
       if (error) throw error;
       setDbStatus(true);
@@ -556,12 +696,11 @@
     const url = document.getElementById('cfg-url').value.trim();
     const key = document.getElementById('cfg-key').value.trim();
     if (!url || !key) { showAlert('URL dan Key wajib diisi', 'warning'); return; }
-
     try {
-      const { createClient } = window.supabase; sbClient = createClient(url, key);
+      const { createClient } = window.supabase;
+      sbClient = createClient(url, key);
       const { error } = await sbClient.from('laporan').select('id', { count: 'exact', head: true });
       if (error) throw error;
-
       localStorage.setItem(LS_URL_KEY, url);
       localStorage.setItem(LS_KEY_KEY, key);
       setDbStatus(true);
@@ -580,7 +719,7 @@
 
   // ─── ALERT ──────────────────────────────────────────────────────────
   function showAlert(msg, type = 'success') {
-    const box  = document.getElementById('alert-box');
+    const box   = document.getElementById('alert-box');
     const msgEl = document.getElementById('alert-msg');
     const icon  = document.getElementById('alert-icon');
     const iconMap = {
@@ -609,43 +748,33 @@
 
   async function simpanData() {
     if (!sbClient) { showAlert('Belum terhubung ke database', 'warning'); return; }
-
     const tanggal  = document.getElementById('f-tanggal').value;
     const desa     = document.getElementById('f-desa').value.trim();
     const kelompok = document.getElementById('f-kelompok').value.trim();
     const user     = document.getElementById('f-user').value.trim();
     const luas     = parseFloat(document.getElementById('f-luas').value) || 0;
-
     if (!desa || !kelompok || !user || !tanggal) {
       showAlert('Semua data wajib diisi', 'warning'); return;
     }
-
     const btn = document.getElementById('btn-simpan');
     btn.disabled = true;
     btn.innerHTML = '<i class="ti ti-loader spin"></i> Menyimpan…';
-
     const row = {
-      tanggal,
-      desa,
+      tanggal, desa,
       kelompok_tani: kelompok,
-      jenis_ltt:     document.getElementById('f-jenis').value,
-      kegiatan:      document.getElementById('f-kegiatan').value,
-      komoditas:     document.getElementById('f-komoditas').value,
-      luas:          parseFloat(luas.toFixed(2)),
-      user_name:     user
+      jenis_ltt:    document.getElementById('f-jenis').value,
+      kegiatan:     document.getElementById('f-kegiatan').value,
+      komoditas:    document.getElementById('f-komoditas').value,
+      luas:         parseFloat(luas.toFixed(2)),
+      user_name:    user
     };
-
     const { error } = await sbClient.from('laporan').insert([row]);
-
     btn.disabled = false;
     btn.innerHTML = '<i class="ti ti-device-floppy"></i> Simpan Laporan';
-
     if (error) { showAlert('Gagal menyimpan: ' + error.message, 'error'); return; }
-
-    document.getElementById('f-desa').value    = '';
+    document.getElementById('f-desa').value     = '';
     document.getElementById('f-kelompok').value = '';
-    document.getElementById('f-luas').value    = '';
-
+    document.getElementById('f-luas').value     = '';
     showAlert('Laporan berhasil disimpan ke database', 'success');
     await fetchData();
   }
@@ -657,7 +786,7 @@
     showAlert('Laporan dihapus', 'warning');
     await fetchData();
     renderTable();
-    updateRekap();
+    renderRekap();
   }
 
   // ─── RENDER TABLE ───────────────────────────────────────────────────
@@ -671,12 +800,10 @@
     container.innerHTML = `<div class="loading-state"><i class="ti ti-loader spin"></i> Memuat data…</div>`;
     const data = await fetchData();
     document.getElementById('data-count').textContent = data.length + ' laporan';
-
     if (!data.length) {
       container.innerHTML = `<div class="empty-state"><i class="ti ti-inbox"></i>Belum ada data laporan</div>`;
       return;
     }
-
     const rows = data.map(d => `
       <tr>
         <td>${d.tanggal}</td>
@@ -689,7 +816,6 @@
         <td>${d.user_name}</td>
         <td><button class="btn-hapus" onclick="hapusData('${d.id}')" title="Hapus"><i class="ti ti-trash"></i></button></td>
       </tr>`).join('');
-
     container.innerHTML = `
       <div class="table-wrap">
         <table>
@@ -703,58 +829,17 @@
       </div>`;
   }
 
-  // ─── REKAP ──────────────────────────────────────────────────────────
-  async function updateRekap() {
-    const data = cachedData.length ? cachedData : await fetchData();
-    const totalLuas = data.reduce((s, d) => s + parseFloat(d.luas || 0), 0);
-
-    document.getElementById('stat-total').textContent = data.length;
-    document.getElementById('stat-luas').textContent  = totalLuas.toFixed(1);
-    document.getElementById('stat-desa').textContent  = new Set(data.map(d => d.desa)).size;
-
-    const colors = {
-      Padi: '#3B6D11', Jagung: '#854F0B', Kedelai: '#185FA5',
-      Bera: '#888780', 'Olah Lahan': '#993C1D', Tanam: '#3B6D11', Panen: '#639922'
-    };
-
-    function barRows(grouped) {
-      if (!Object.keys(grouped).length)
-        return '<div style="font-size:13px;color:var(--text-muted)">Belum ada data</div>';
-      return Object.entries(grouped).map(([k, v]) => {
-        const pct = totalLuas ? Math.round((v / totalLuas) * 100) : 0;
-        return `<div class="bar-row">
-          <div class="bar-meta">
-            <span>${k}</span>
-            <span style="color:var(--text-muted)">${v.toFixed(1)} Ha (${pct}%)</span>
-          </div>
-          <div class="bar-track">
-            <div class="bar-fill" style="width:${pct}%;background:${colors[k] || '#3B6D11'}"></div>
-          </div>
-        </div>`;
-      }).join('');
-    }
-
-    const komoditas = {}, kegiatan = {};
-    data.forEach(d => {
-      komoditas[d.komoditas] = (komoditas[d.komoditas] || 0) + parseFloat(d.luas || 0);
-      kegiatan[d.kegiatan]   = (kegiatan[d.kegiatan]   || 0) + parseFloat(d.luas || 0);
-    });
-
-    document.getElementById('rekap-komoditas').innerHTML = barRows(komoditas);
-    document.getElementById('rekap-kegiatan').innerHTML  = barRows(kegiatan);
-  }
-
   // ─── EXPORT ─────────────────────────────────────────────────────────
   function getExportRows() {
     return cachedData.map(d => ({
-      Tanggal:       d.tanggal,
-      Desa:          d.desa,
-      'Kelompok Tani': d.kelompok_tani,
-      'Jenis LTT':   d.jenis_ltt,
-      Kegiatan:      d.kegiatan,
-      Komoditas:     d.komoditas,
-      'Luas (Ha)':   parseFloat(d.luas),
-      User:          d.user_name
+      Tanggal:           d.tanggal,
+      Desa:              d.desa,
+      'Kelompok Tani':   d.kelompok_tani,
+      'Jenis LTT':       d.jenis_ltt,
+      Kegiatan:          d.kegiatan,
+      Komoditas:         d.komoditas,
+      'Luas (Ha)':       parseFloat(d.luas),
+      User:              d.user_name
     }));
   }
 
@@ -768,9 +853,7 @@
     ].join('\r\n');
     const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
     const url  = URL.createObjectURL(blob);
-    const a    = Object.assign(document.createElement('a'), {
-      href: url, download: `laporan_pertanian_${today()}.csv`
-    });
+    const a    = Object.assign(document.createElement('a'), { href: url, download: `laporan_pertanian_${today()}.csv` });
     a.click(); URL.revokeObjectURL(url);
     showAlert('File CSV berhasil diunduh', 'success');
   }
@@ -779,23 +862,18 @@
     const rows = getExportRows();
     if (!rows.length) { showAlert('Tidak ada data untuk diekspor', 'warning'); return; }
     const ws = XLSX.utils.json_to_sheet(rows);
-    // Lebar kolom
-    ws['!cols'] = [
-      {wch:12},{wch:20},{wch:22},{wch:16},{wch:14},{wch:12},{wch:12},{wch:16}
-    ];
+    ws['!cols'] = [{wch:12},{wch:20},{wch:22},{wch:16},{wch:14},{wch:12},{wch:12},{wch:16}];
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, 'Laporan');
     XLSX.writeFile(wb, `laporan_pertanian_${today()}.xlsx`);
     showAlert('File Excel berhasil diunduh', 'success');
   }
 
-  function today() {
-    return new Date().toISOString().split('T')[0];
-  }
+  function today() { return new Date().toISOString().split('T')[0]; }
 
   // ─── TABS ───────────────────────────────────────────────────────────
   function switchTab(name) {
-    ['input', 'data', 'rekap'].forEach(t => {
+    ['input','data','rekap'].forEach(t => {
       document.getElementById('panel-' + t).className = 'panel' + (t === name ? ' active' : '');
       document.getElementById('tab-'   + t).className = 'tab'   + (t === name ? ' active' : '');
     });
@@ -803,13 +881,14 @@
     if (name === 'rekap') updateRekap();
   }
 
-  // ─── EXPOSE TO GLOBAL (fix: onclick di HTML bisa memanggil fungsi ini) ──
+  // ─── EXPOSE GLOBALS ─────────────────────────────────────────────────
   window.switchTab       = switchTab;
   window.simpanData      = simpanData;
   window.hapusData       = hapusData;
   window.exportCSV       = exportCSV;
   window.exportExcel     = exportExcel;
   window.connectSupabase = connectSupabase;
+  window.setRekapFilter  = setRekapFilter;
 
   // ─── BOOT ───────────────────────────────────────────────────────────
   document.getElementById('f-tanggal').value = today();
