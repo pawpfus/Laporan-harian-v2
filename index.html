@@ -451,6 +451,140 @@
     }
     .setup-card .btn-connect:hover { background: var(--amber-700); transform: translateY(-1px); }
 
+    /* ── TABLE FILTER BAR ── */
+    .table-filter-bar {
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 1.25rem;
+    }
+    @media (max-width: 600px) {
+      .table-filter-bar {
+        grid-template-columns: 1fr;
+      }
+    }
+    .table-filter-bar input, .table-filter-bar select {
+      font-family: inherit; font-size: 13px; padding: 10px 12px;
+      border: 1px solid var(--border-strong); border-radius: var(--radius-md);
+      background: var(--bg); color: var(--text); outline: none; transition: all 0.2s;
+    }
+    .table-filter-bar input:focus, .table-filter-bar select:focus {
+      border-color: var(--green-600);
+      box-shadow: 0 0 0 3px rgba(46,125,50,0.1);
+      background: var(--surface);
+    }
+
+    /* ── PAGINATION ── */
+    .pagination-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 1.25rem;
+      padding-top: 0.5rem;
+      border-top: 1px solid var(--border);
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .pagination-info {
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+    .pagination-buttons {
+      display: flex;
+      gap: 6px;
+    }
+    .btn-page {
+      padding: 6px 12px;
+      font-size: 12px;
+      font-weight: 600;
+      font-family: inherit;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--text);
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .btn-page:hover:not(:disabled) {
+      background: var(--green-50);
+      color: var(--green-600);
+      border-color: rgba(46,125,50,0.2);
+    }
+    .btn-page:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+
+    /* ── EDIT ACTION BUTTON ── */
+    .btn-edit {
+      background: transparent; border: none; color: var(--text-muted);
+      cursor: pointer; padding: 6px 8px; border-radius: 8px;
+      font-size: 14px; transition: all 0.2s ease;
+      display: inline-flex; align-items: center; justify-content: center;
+    }
+    .btn-edit:hover { background: var(--green-50); color: var(--green-600); transform: scale(1.05); }
+
+    /* ── MODAL DIALOG ── */
+    .modal-overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0, 0, 0, 0.4);
+      backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
+      display: flex; align-items: center; justify-content: center;
+      z-index: 1000;
+      opacity: 0; pointer-events: none;
+      transition: opacity 0.3s ease;
+      padding: 1rem;
+    }
+    .modal-overlay.active {
+      opacity: 1; pointer-events: auto;
+    }
+    .modal-content {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      width: 100%; max-width: 540px;
+      padding: 1.75rem 2rem;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.12);
+      transform: translateY(20px);
+      transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    .modal-overlay.active .modal-content {
+      transform: translateY(0);
+    }
+    .modal-header {
+      display: flex; justify-content: space-between; align-items: center;
+      margin-bottom: 1.25rem;
+    }
+    .modal-title { font-size: 16px; font-weight: 600; color: var(--text); }
+    .btn-close-modal {
+      background: none; border: none; font-size: 20px; cursor: pointer; color: var(--text-muted);
+      display: flex; align-items: center; justify-content: center;
+    }
+    .btn-close-modal:hover { color: var(--text); }
+    .modal-footer {
+      display: flex; gap: 8px; justify-content: flex-end; margin-top: 1.75rem;
+    }
+    .btn-cancel {
+      padding: 10px 18px; border: 1px solid var(--border); border-radius: 8px;
+      background: var(--bg); color: var(--text); cursor: pointer; font-weight: 600;
+      font-size: 13px; font-family: inherit; transition: all 0.2s;
+    }
+    .btn-cancel:hover { background: var(--border); }
+    .btn-save-edit {
+      padding: 10px 18px; border: none; border-radius: 8px;
+      background: var(--green-600); color: #ffffff; cursor: pointer; font-weight: 600;
+      font-size: 13px; font-family: inherit; transition: all 0.2s;
+      box-shadow: 0 4px 10px rgba(46,125,50,0.15);
+    }
+    @media (prefers-color-scheme: dark) {
+      .btn-save-edit {
+        color: #0d130e;
+      }
+    }
+    .btn-save-edit:hover { background: var(--green-700); transform: translateY(-1px); }
+
     /* ── MOBILE RESPONSIVE ── */
     @media (max-width: 480px) {
       .topbar {
@@ -624,6 +758,23 @@
           <span class="data-count" id="data-count">0 laporan</span>
         </div>
       </div>
+      <!-- Bar Filter & Pencarian -->
+      <div class="table-filter-bar">
+        <input type="text" id="t-search" placeholder="Cari desa, kelompok, atau user..." oninput="handleTableSearchFilter()" />
+        <select id="t-filter-komoditas" onchange="handleTableSearchFilter()">
+          <option value="semua">Semua Komoditas</option>
+          <option>Padi</option>
+          <option>Jagung</option>
+          <option>Kedelai</option>
+        </select>
+        <select id="t-filter-kegiatan" onchange="handleTableSearchFilter()">
+          <option value="semua">Semua Kegiatan</option>
+          <option>Bera</option>
+          <option>Olah Lahan</option>
+          <option>Tanam</option>
+          <option>Panen</option>
+        </select>
+      </div>
       <div id="table-container"></div>
     </div>
   </div>
@@ -702,7 +853,10 @@
 
   let sbClient = null;
   let cachedData = [];
+  let filteredData = [];
   let activeFilter = 'semua';
+  let currentPage = 1;
+  const rowsPerPage = 10;
 
   // ─── CHART INSTANCES ────────────────────────────────────────────────
   let chartK = null;
@@ -984,16 +1138,46 @@
     return `<span class="badge badge-${map[k] || 'padi'}">${k}</span>`;
   }
 
-  async function renderTable() {
+  async function renderTable(forceFetch = true) {
     const container = document.getElementById('table-container');
-    container.innerHTML = `<div class="loading-state"><i class="ti ti-loader spin"></i> Memuat data…</div>`;
-    const data = await fetchData();
-    document.getElementById('data-count').textContent = data.length + ' laporan';
-    if (!data.length) {
-      container.innerHTML = `<div class="empty-state"><i class="ti ti-inbox"></i>Belum ada data laporan</div>`;
+    
+    if (forceFetch || !cachedData.length) {
+      container.innerHTML = `<div class="loading-state"><i class="ti ti-loader spin"></i> Memuat data…</div>`;
+      await fetchData();
+    }
+
+    // Ambil nilai filter & pencarian
+    const searchTerm = (document.getElementById('t-search')?.value || '').toLowerCase().trim();
+    const filterKomoditas = document.getElementById('t-filter-komoditas')?.value || 'semua';
+    const filterKegiatan = document.getElementById('t-filter-kegiatan')?.value || 'semua';
+
+    // Lakukan pemfilteran data
+    filteredData = cachedData.filter(d => {
+      const matchSearch = !searchTerm || 
+        (d.desa || '').toLowerCase().includes(searchTerm) || 
+        (d.kelompok_tani || '').toLowerCase().includes(searchTerm) || 
+        (d.user_name || '').toLowerCase().includes(searchTerm);
+      
+      const matchKomoditas = filterKomoditas === 'semua' || d.komoditas === filterKomoditas;
+      const matchKegiatan = filterKegiatan === 'semua' || d.kegiatan === filterKegiatan;
+      
+      return matchSearch && matchKomoditas && matchKegiatan;
+    });
+
+    document.getElementById('data-count').textContent = filteredData.length + ' laporan';
+
+    if (!filteredData.length) {
+      container.innerHTML = `<div class="empty-state"><i class="ti ti-inbox"></i>Tidak ada data laporan yang cocok</div>`;
       return;
     }
-    const rows = data.map(d => `
+
+    // Paginasi
+    const totalPages = Math.ceil(filteredData.length / rowsPerPage);
+    if (currentPage > totalPages) currentPage = Math.max(1, totalPages);
+    const startIndex = (currentPage - 1) * rowsPerPage;
+    const paginatedData = filteredData.slice(startIndex, startIndex + rowsPerPage);
+
+    const rows = paginatedData.map(d => `
       <tr>
         <td>${d.tanggal}</td>
         <td>${d.desa}</td>
@@ -1003,8 +1187,24 @@
         <td>${getBadge(d.komoditas)}</td>
         <td style="text-align:right">${parseFloat(d.luas).toFixed(1)}</td>
         <td>${d.user_name}</td>
-        <td><button class="btn-hapus" onclick="hapusData('${d.id}')" title="Hapus"><i class="ti ti-trash"></i></button></td>
+        <td style="text-align:right">
+          <button class="btn-edit" onclick="bukaEditModal('${d.id}')" title="Edit"><i class="ti ti-edit"></i></button>
+          <button class="btn-hapus" onclick="hapusData('${d.id}')" title="Hapus"><i class="ti ti-trash"></i></button>
+        </td>
       </tr>`).join('');
+
+    let paginationHtml = '';
+    if (totalPages > 1) {
+      paginationHtml = `
+        <div class="pagination-bar">
+          <span class="pagination-info">Halaman <strong>${currentPage}</strong> dari <strong>${totalPages}</strong> (Total ${filteredData.length} data)</span>
+          <div class="pagination-buttons">
+            <button class="btn-page" onclick="changePage(-1)" ${currentPage === 1 ? 'disabled' : ''}>Sebelumnya</button>
+            <button class="btn-page" onclick="changePage(1)" ${currentPage === totalPages ? 'disabled' : ''}>Berikutnya</button>
+          </div>
+        </div>`;
+    }
+
     container.innerHTML = `
       <div class="table-wrap">
         <table>
@@ -1015,7 +1215,82 @@
           </tr></thead>
           <tbody>${rows}</tbody>
         </table>
-      </div>`;
+      </div>
+      ${paginationHtml}`;
+  }
+
+  function handleTableSearchFilter() {
+    currentPage = 1;
+    renderTable(false);
+  }
+
+  function changePage(offset) {
+    currentPage += offset;
+    renderTable(false);
+  }
+
+  // ─── EDIT MODAL OPS ─────────────────────────────────────────────────
+  function bukaEditModal(id) {
+    const item = cachedData.find(d => d.id === id);
+    if (!item) return;
+    document.getElementById('edit-id').value = item.id;
+    document.getElementById('edit-tanggal').value = item.tanggal;
+    document.getElementById('edit-user').value = item.user_name || '';
+    document.getElementById('edit-desa').value = item.desa || '';
+    document.getElementById('edit-kelompok').value = item.kelompok_tani || '';
+    document.getElementById('edit-jenis').value = item.jenis_ltt || 'Reguler';
+    document.getElementById('edit-kegiatan').value = item.kegiatan || 'Bera';
+    document.getElementById('edit-komoditas').value = item.komoditas || 'Padi';
+    document.getElementById('edit-luas').value = item.luas || 0.0;
+    
+    document.getElementById('edit-modal').classList.add('active');
+  }
+
+  function tutupEditModal() {
+    document.getElementById('edit-modal').classList.remove('active');
+  }
+
+  async function updateData() {
+    if (!sbClient) { showAlert('Belum terhubung ke database', 'warning'); return; }
+    const id = document.getElementById('edit-id').value;
+    const tanggal  = document.getElementById('edit-tanggal').value;
+    const desa     = document.getElementById('edit-desa').value.trim();
+    const kelompok = document.getElementById('edit-kelompok').value.trim();
+    const user     = document.getElementById('edit-user').value.trim();
+    const luas     = parseFloat(document.getElementById('edit-luas').value) || 0;
+    
+    if (!desa || !kelompok || !user || !tanggal) {
+      showAlert('Semua data wajib diisi', 'warning'); return;
+    }
+    
+    const btn = document.getElementById('btn-update');
+    btn.disabled = true;
+    btn.innerHTML = '<i class="ti ti-loader spin"></i> Menyimpan…';
+    
+    const row = {
+      tanggal, desa,
+      kelompok_tani: kelompok,
+      jenis_ltt:    document.getElementById('edit-jenis').value,
+      kegiatan:     document.getElementById('edit-kegiatan').value,
+      komoditas:    document.getElementById('edit-komoditas').value,
+      luas:         parseFloat(luas.toFixed(2)),
+      user_name:    user
+    };
+    
+    const { error } = await sbClient.from('laporan').update(row).eq('id', id);
+    btn.disabled = false;
+    btn.innerHTML = 'Simpan Perubahan';
+    
+    if (error) {
+      showAlert('Gagal memperbarui: ' + error.message, 'error');
+      return;
+    }
+    
+    tutupEditModal();
+    showAlert('Laporan berhasil diperbarui!', 'success');
+    await fetchData();
+    renderTable(false);
+    renderRekap();
   }
 
   // ─── EXPORT ─────────────────────────────────────────────────────────
@@ -1078,11 +1353,79 @@
   window.exportExcel     = exportExcel;
   window.connectSupabase = connectSupabase;
   window.setRekapFilter  = setRekapFilter;
+  window.handleTableSearchFilter = handleTableSearchFilter;
+  window.changePage      = changePage;
+  window.bukaEditModal   = bukaEditModal;
+  window.tutupEditModal  = tutupEditModal;
+  window.updateData      = updateData;
 
   // ─── BOOT ───────────────────────────────────────────────────────────
   document.getElementById('f-tanggal').value = today();
   init();
 </script>
+
+  <!-- MODAL EDIT LAPORAN -->
+  <div id="edit-modal" class="modal-overlay" onclick="if(event.target===this) tutupEditModal()">
+    <div class="modal-content">
+      <div class="modal-header">
+        <div class="modal-title"><i class="ti ti-edit"></i> Edit Laporan Pertanian</div>
+        <button class="btn-close-modal" onclick="tutupEditModal()"><i class="ti ti-x"></i></button>
+      </div>
+      <input type="hidden" id="edit-id" />
+      <div class="form-grid">
+        <div class="field">
+          <label for="edit-tanggal">Tanggal</label>
+          <input type="date" id="edit-tanggal" />
+        </div>
+        <div class="field">
+          <label for="edit-user">Nama User</label>
+          <input type="text" id="edit-user" placeholder="Nama petugas" />
+        </div>
+        <div class="field">
+          <label for="edit-desa">Desa</label>
+          <input type="text" id="edit-desa" placeholder="Nama desa" />
+        </div>
+        <div class="field">
+          <label for="edit-kelompok">Kelompok Tani</label>
+          <input type="text" id="edit-kelompok" placeholder="Nama kelompok" />
+        </div>
+        <div class="field">
+          <label for="edit-jenis">Jenis LTT</label>
+          <select id="edit-jenis">
+            <option>Reguler</option>
+            <option>Oplah Rawa</option>
+            <option>Oplah Non Rawa</option>
+            <option>CSR</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="edit-kegiatan">Kegiatan</label>
+          <select id="edit-kegiatan">
+            <option>Bera</option>
+            <option>Olah Lahan</option>
+            <option>Tanam</option>
+            <option>Panen</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="edit-komoditas">Komoditas</label>
+          <select id="edit-komoditas">
+            <option>Padi</option>
+            <option>Jagung</option>
+            <option>Kedelai</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="edit-luas">Luas (Ha)</label>
+          <input type="number" id="edit-luas" min="0" step="0.1" placeholder="0.0" />
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-cancel" onclick="tutupEditModal()">Batal</button>
+        <button class="btn-save-edit" id="btn-update" onclick="updateData()">Simpan Perubahan</button>
+      </div>
+    </div>
+  </div>
 
 </body>
 </html>
