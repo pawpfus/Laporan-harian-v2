@@ -262,8 +262,8 @@
       padding: 9px 16px; font-size: 13px; font-weight: 600; font-family: inherit;
       border-radius: var(--radius-md); cursor: pointer; transition: all 0.2s ease;
     }
-    .btn-export-csv  { background: var(--bg); color: var(--text); border: 1px solid var(--border); }
-    .btn-export-csv:hover  { background: var(--border); transform: translateY(-1px); }
+    .btn-export-pdf  { background: var(--red-50); color: var(--red-600); border: 1px solid rgba(225, 29, 72, 0.15); }
+    .btn-export-pdf:hover  { background: var(--red-50); filter: brightness(0.95); transform: translateY(-1px); }
     .btn-export-excel { background: var(--green-50); color: var(--green-600); border: 1px solid rgba(46, 125, 50, 0.15); }
     .btn-export-excel:hover { background: var(--green-100); transform: translateY(-1px); box-shadow: 0 4px 10px rgba(46, 125, 50, 0.06); }
 
@@ -749,8 +749,8 @@
       <div class="data-header">
         <span class="section-label" style="margin:0">Data Laporan</span>
         <div class="data-header-right">
-          <button class="btn-export btn-export-csv" onclick="exportCSV()">
-            <i class="ti ti-file-text"></i> Export CSV
+          <button class="btn-export btn-export-pdf" onclick="exportPDF()">
+            <i class="ti ti-file-type-pdf"></i> Export PDF
           </button>
           <button class="btn-export btn-export-excel" onclick="exportExcel()">
             <i class="ti ti-file-spreadsheet"></i> Export Excel
@@ -842,6 +842,8 @@
 </div><!-- /container -->
 
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <script>
@@ -1307,19 +1309,54 @@
     }));
   }
 
-  function exportCSV() {
+  function exportPDF() {
     const rows = getExportRows();
     if (!rows.length) { showAlert('Tidak ada data untuk diekspor', 'warning'); return; }
-    const header = Object.keys(rows[0]);
-    const csv = [
-      header.join(','),
-      ...rows.map(r => header.map(h => `"${String(r[h]).replace(/"/g,'""')}"`).join(','))
-    ].join('\r\n');
-    const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
-    const url  = URL.createObjectURL(blob);
-    const a    = Object.assign(document.createElement('a'), { href: url, download: `laporan_pertanian_${today()}.csv` });
-    a.click(); URL.revokeObjectURL(url);
-    showAlert('File CSV berhasil diunduh', 'success');
+    
+    try {
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF('l', 'mm', 'a4');
+      
+      // Title
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(16);
+      doc.text('LAPORAN PERTANIAN', 14, 15);
+      
+      doc.setFontSize(10);
+      doc.setFont('helvetica', 'normal');
+      doc.text(`Dicetak pada: ${new Date().toLocaleString('id-ID')}`, 14, 21);
+      
+      // AutoTable
+      const headers = [['Tanggal', 'Desa', 'Kelompok Tani', 'Jenis LTT', 'Kegiatan', 'Komoditas', 'Luas (Ha)', 'User']];
+      const body = rows.map(r => [
+        r.Tanggal,
+        r.Desa,
+        r['Kelompok Tani'],
+        r['Jenis LTT'],
+        r.Kegiatan,
+        r.Komoditas,
+        r['Luas (Ha)'].toFixed(1),
+        r.User
+      ]);
+      
+      doc.autoTable({
+        head: headers,
+        body: body,
+        startY: 26,
+        theme: 'striped',
+        headStyles: { fillColor: [46, 125, 50], textColor: [255, 255, 255], fontStyle: 'bold' },
+        styles: { font: 'helvetica', fontSize: 9 },
+        columnStyles: {
+          6: { halign: 'right' }
+        }
+      });
+      
+      doc.save(`laporan_pertanian_${today()}.pdf`);
+      showAlert('File PDF berhasil diunduh', 'success');
+    } catch (error) {
+      console.error(error);
+      showAlert('Gagal mengekspor PDF: ' + error.message, 'error');
+    }
   }
 
   function exportExcel() {
@@ -1349,7 +1386,7 @@
   window.switchTab       = switchTab;
   window.simpanData      = simpanData;
   window.hapusData       = hapusData;
-  window.exportCSV       = exportCSV;
+  window.exportPDF       = exportPDF;
   window.exportExcel     = exportExcel;
   window.connectSupabase = connectSupabase;
   window.setRekapFilter  = setRekapFilter;
