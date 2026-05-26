@@ -502,6 +502,41 @@
     .setup-card .btn-connect:hover { background: var(--amber-700); transform: translateY(-1px); }
 
     /* ── TABLE FILTER BAR ── */
+    /* ── DATE FILTER ── */
+    .date-filter-bar {
+      display: flex; flex-wrap: wrap; gap: 8px;
+      margin-bottom: 12px; align-items: center;
+    }
+    .date-preset-group { display: flex; gap: 6px; flex-wrap: wrap; }
+    .btn-preset {
+      padding: 7px 14px; font-size: 12px; font-weight: 600;
+      border: 1px solid var(--border-strong); border-radius: 99px;
+      background: var(--surface); color: var(--text-muted);
+      cursor: pointer; font-family: inherit; transition: all 0.2s;
+      white-space: nowrap;
+    }
+    .btn-preset:hover { background: var(--bg); color: var(--text); }
+    .btn-preset.active {
+      background: var(--green-600); color: #fff;
+      border-color: var(--green-600);
+      box-shadow: 0 3px 8px rgba(46,125,50,0.18);
+    }
+    @media (prefers-color-scheme: dark) { .btn-preset.active { color: #0d130e; } }
+    .date-custom-range {
+      display: flex; gap: 6px; align-items: center; flex-wrap: wrap;
+    }
+    .date-custom-range input[type=date] {
+      font-family: inherit; font-size: 12px; padding: 7px 10px;
+      border: 1px solid var(--border-strong); border-radius: var(--radius-md);
+      background: var(--bg); color: var(--text); outline: none; transition: all 0.2s;
+    }
+    .date-custom-range input[type=date]:focus {
+      border-color: var(--green-600);
+      box-shadow: 0 0 0 3px rgba(46,125,50,0.1);
+      background: var(--surface);
+    }
+    .date-sep { font-size: 12px; color: var(--text-muted); }
+
     .table-filter-bar {
       display: grid;
       grid-template-columns: 2fr 1fr 1fr;
@@ -564,6 +599,12 @@
       opacity: 0.4;
       cursor: not-allowed;
     }
+    .btn-page-active {
+      background: var(--green-600) !important;
+      color: #fff !important;
+      border-color: var(--green-600) !important;
+    }
+    @media (prefers-color-scheme: dark) { .btn-page-active { color: #0d130e !important; } }
 
     /* ── EDIT ACTION BUTTON ── */
     .btn-edit {
@@ -801,6 +842,20 @@
           <span class="data-count" id="data-count">0 laporan</span>
         </div>
       </div>
+      <!-- Date Filter -->
+      <div class="date-filter-bar" id="table-date-filter">
+        <div class="date-preset-group">
+          <button class="btn-preset" onclick="setTableDatePreset('hari_ini', this)">Hari Ini</button>
+          <button class="btn-preset" onclick="setTableDatePreset('minggu_ini', this)">Minggu Ini</button>
+          <button class="btn-preset active" onclick="setTableDatePreset('bulan_ini', this)">Bulan Ini</button>
+          <button class="btn-preset" onclick="setTableDatePreset('semua', this)">Semua</button>
+        </div>
+        <div class="date-custom-range">
+          <input type="date" id="t-date-from" onchange="setTableDatePreset('custom', null)" title="Dari tanggal" />
+          <span class="date-sep">—</span>
+          <input type="date" id="t-date-to" onchange="setTableDatePreset('custom', null)" title="Sampai tanggal" />
+        </div>
+      </div>
       <!-- Bar Filter & Pencarian -->
       <div class="table-filter-bar">
         <input type="text" id="t-search" placeholder="Cari desa, kelompok, atau user..." oninput="handleTableSearchFilter()" aria-label="Cari data laporan" />
@@ -824,6 +879,21 @@
 
   <!-- PANEL REKAP -->
   <div class="panel" id="panel-rekap">
+
+    <!-- Date Filter Rekap -->
+    <div class="date-filter-bar" style="margin-bottom:14px">
+      <div class="date-preset-group">
+        <button class="btn-preset" onclick="setRekapDatePreset('hari_ini', this)">Hari Ini</button>
+        <button class="btn-preset" onclick="setRekapDatePreset('minggu_ini', this)">Minggu Ini</button>
+        <button class="btn-preset active" onclick="setRekapDatePreset('bulan_ini', this)">Bulan Ini</button>
+        <button class="btn-preset" onclick="setRekapDatePreset('semua', this)">Semua</button>
+      </div>
+      <div class="date-custom-range">
+        <input type="date" id="r-date-from" onchange="setRekapDatePreset('custom', null)" title="Dari tanggal" />
+        <span class="date-sep">—</span>
+        <input type="date" id="r-date-to" onchange="setRekapDatePreset('custom', null)" title="Sampai tanggal" />
+      </div>
+    </div>
 
     <!-- Filter Jenis LTT -->
     <div class="filter-row" id="rekap-filter">
@@ -903,6 +973,92 @@
   let activeFilter = 'semua';
   let currentPage = 1;
   const rowsPerPage = 10;
+
+  // ─── DATE FILTER STATE ───────────────────────────────────────────────
+  // Shared date range for table
+  let tableDateFrom = null;
+  let tableDateTo   = null;
+  // Shared date range for rekap
+  let rekapDateFrom = null;
+  let rekapDateTo   = null;
+
+  function getDateRange(preset) {
+    const now = new Date();
+    const pad = n => String(n).padStart(2, '0');
+    const fmt = d => `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+    const todayStr = fmt(now);
+
+    if (preset === 'hari_ini') return { from: todayStr, to: todayStr };
+    if (preset === 'minggu_ini') {
+      const day = now.getDay(); // 0=Sun
+      const mon = new Date(now); mon.setDate(now.getDate() - (day === 0 ? 6 : day - 1));
+      const sun = new Date(mon); sun.setDate(mon.getDate() + 6);
+      return { from: fmt(mon), to: fmt(sun) };
+    }
+    if (preset === 'bulan_ini') {
+      const from = `${now.getFullYear()}-${pad(now.getMonth()+1)}-01`;
+      const last = new Date(now.getFullYear(), now.getMonth()+1, 0);
+      return { from, to: fmt(last) };
+    }
+    return { from: null, to: null }; // 'semua'
+  }
+
+  function applyTableDatePreset(preset) {
+    if (preset === 'custom') return; // handled by input change
+    const r = getDateRange(preset);
+    tableDateFrom = r.from;
+    tableDateTo   = r.to;
+    const fi = document.getElementById('t-date-from');
+    const ti = document.getElementById('t-date-to');
+    if (fi) fi.value = r.from || '';
+    if (ti) ti.value = r.to   || '';
+  }
+
+  function applyRekapDatePreset(preset) {
+    if (preset === 'custom') return;
+    const r = getDateRange(preset);
+    rekapDateFrom = r.from;
+    rekapDateTo   = r.to;
+    const fi = document.getElementById('r-date-from');
+    const ti = document.getElementById('r-date-to');
+    if (fi) fi.value = r.from || '';
+    if (ti) ti.value = r.to   || '';
+  }
+
+  function setTableDatePreset(preset, btn) {
+    if (btn) {
+      document.querySelectorAll('#table-date-filter .btn-preset').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+    }
+    if (preset === 'custom') {
+      tableDateFrom = document.getElementById('t-date-from')?.value || null;
+      tableDateTo   = document.getElementById('t-date-to')?.value   || null;
+      document.querySelectorAll('#table-date-filter .btn-preset').forEach(b => b.classList.remove('active'));
+    } else {
+      applyTableDatePreset(preset);
+    }
+    currentPage = 1;
+    renderTable(true);
+  }
+
+  function setRekapDatePreset(preset, btn) {
+    if (btn) {
+      document.querySelectorAll('.date-filter-bar:first-of-type .btn-preset, #panel-rekap .btn-preset[onclick*=Rekap]').forEach(b => b.classList.remove('active'));
+      // just target rekap date buttons
+      const rekapBar = document.getElementById('panel-rekap').querySelector('.date-filter-bar');
+      if (rekapBar) rekapBar.querySelectorAll('.btn-preset').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+    }
+    if (preset === 'custom') {
+      rekapDateFrom = document.getElementById('r-date-from')?.value || null;
+      rekapDateTo   = document.getElementById('r-date-to')?.value   || null;
+      const rekapBar = document.getElementById('panel-rekap').querySelector('.date-filter-bar');
+      if (rekapBar) rekapBar.querySelectorAll('.btn-preset').forEach(b => b.classList.remove('active'));
+    } else {
+      applyRekapDatePreset(preset);
+    }
+    renderRekap();
+  }
 
   // ─── CHART INSTANCES ────────────────────────────────────────────────
   let chartK = null;
@@ -1033,17 +1189,24 @@
   }
 
   async function updateRekap() {
-    if (!cachedData.length) await fetchData();
-    renderRekap();
+    await renderRekap();
   }
 
-  function renderRekap() {
-    const data = activeFilter === 'semua'
-      ? cachedData
-      : cachedData.filter(d => d.jenis_ltt === activeFilter);
+  async function renderRekap() {
+    // Show loading on stat cards
+    ['stat-total','stat-luas','stat-desa','stat-kelompok'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.innerHTML = '<i class="ti ti-loader spin" style="font-size:18px"></i>';
+    });
 
-    const totalLuas   = data.reduce((s,d) => s + parseFloat(d.luas||0), 0);
-    const totalDesa   = new Set(data.map(d => d.desa)).size;
+    const data = await fetchAllForRekap({
+      dateFrom: rekapDateFrom,
+      dateTo:   rekapDateTo,
+      jenis:    activeFilter,
+    });
+
+    const totalLuas     = data.reduce((s,d) => s + parseFloat(d.luas||0), 0);
+    const totalDesa     = new Set(data.map(d => d.desa)).size;
     const totalKelompok = new Set(data.map(d => d.kelompok_tani)).size;
 
     document.getElementById('stat-total').textContent    = data.length;
@@ -1070,6 +1233,9 @@
       if (error) throw error;
       setDbStatus(true);
       hideOfflinePopup();
+      // Apply default date presets
+      applyTableDatePreset('bulan_ini');
+      applyRekapDatePreset('bulan_ini');
     } catch (e) {
       setDbStatus(false);
       showOfflinePopup();
@@ -1100,9 +1266,10 @@
       setDbStatus(true);
       hideOfflinePopup();
       showAlert('Berhasil terhubung ke database!', 'success');
-      await fetchData();
-      renderTable(false);
-      renderRekap();
+      applyTableDatePreset('bulan_ini');
+      applyRekapDatePreset('bulan_ini');
+      await renderTable(true);
+      await renderRekap();
     } catch (e) {
       setDbStatus(false);
     } finally {
@@ -1138,15 +1305,73 @@
   }
 
   // ─── DATA OPS ───────────────────────────────────────────────────────
-  async function fetchData() {
+  // totalCount from backend (for pagination info)
+  let totalCount = 0;
+
+  async function fetchData({ page = 1, dateFrom = null, dateTo = null, search = '', komoditas = 'semua', kegiatan = 'semua' } = {}) {
     if (!sbClient) return [];
-    const { data, error } = await sbClient
+
+    const from = (page - 1) * rowsPerPage;
+    const to   = from + rowsPerPage - 1;
+
+    let q = sbClient
       .from('laporan')
-      .select('*')
-      .order('created_at', { ascending: false });
+      .select('*', { count: 'exact' })
+      .order('tanggal', { ascending: false })
+      .order('created_at', { ascending: false })
+      .range(from, to);
+
+    if (dateFrom) q = q.gte('tanggal', dateFrom);
+    if (dateTo)   q = q.lte('tanggal', dateTo);
+    if (komoditas !== 'semua') q = q.eq('komoditas', komoditas);
+    if (kegiatan  !== 'semua') q = q.eq('kegiatan', kegiatan);
+    if (search) {
+      // Supabase ilike OR — filter client-side after for search (simpler)
+    }
+
+    const { data, error, count } = await q;
     if (error) { showAlert('Gagal memuat data: ' + error.message, 'error'); return []; }
-    cachedData = data || [];
-    return cachedData;
+
+    let rows = data || [];
+
+    // Client-side search (desa, kelompok_tani, user_name) — only on current page
+    if (search) {
+      const s = search.toLowerCase();
+      rows = rows.filter(d =>
+        (d.desa || '').toLowerCase().includes(s) ||
+        (d.kelompok_tani || '').toLowerCase().includes(s) ||
+        (d.user_name || '').toLowerCase().includes(s)
+      );
+    }
+
+    cachedData  = rows;
+    totalCount  = count || 0;
+    return rows;
+  }
+
+  // Fetch ALL filtered rows for export (no pagination)
+  async function fetchAllForExport({ dateFrom = null, dateTo = null, komoditas = 'semua', kegiatan = 'semua' } = {}) {
+    if (!sbClient) return [];
+    let q = sbClient.from('laporan').select('*').order('tanggal', { ascending: false });
+    if (dateFrom)             q = q.gte('tanggal', dateFrom);
+    if (dateTo)               q = q.lte('tanggal', dateTo);
+    if (komoditas !== 'semua') q = q.eq('komoditas', komoditas);
+    if (kegiatan  !== 'semua') q = q.eq('kegiatan', kegiatan);
+    const { data, error } = await q;
+    if (error) { showAlert('Gagal memuat data ekspor: ' + error.message, 'error'); return []; }
+    return data || [];
+  }
+
+  // Fetch ALL filtered rows for rekap stats (no pagination)
+  async function fetchAllForRekap({ dateFrom = null, dateTo = null, jenis = 'semua' } = {}) {
+    if (!sbClient) return [];
+    let q = sbClient.from('laporan').select('*').order('tanggal', { ascending: false });
+    if (dateFrom)          q = q.gte('tanggal', dateFrom);
+    if (dateTo)            q = q.lte('tanggal', dateTo);
+    if (jenis !== 'semua') q = q.eq('jenis_ltt', jenis);
+    const { data, error } = await q;
+    if (error) { showAlert('Gagal memuat rekap: ' + error.message, 'error'); return []; }
+    return data || [];
   }
 
   async function simpanData() {
@@ -1179,7 +1404,7 @@
     document.getElementById('f-kelompok').value = '';
     document.getElementById('f-luas').value     = '';
     showAlert('Laporan berhasil disimpan ke database', 'success');
-    await fetchData();
+    await renderTable(true);
   }
 
   async function hapusData(id) {
@@ -1187,9 +1412,8 @@
     const { error } = await sbClient.from('laporan').delete().eq('id', id);
     if (error) { showAlert('Gagal menghapus: ' + error.message, 'error'); return; }
     showAlert('Laporan dihapus', 'warning');
-    await fetchData();
-    renderTable();
-    renderRekap();
+    await renderTable(true);
+    await renderRekap();
   }
 
   // ─── RENDER TABLE ───────────────────────────────────────────────────
@@ -1198,46 +1422,36 @@
     return `<span class="badge badge-${map[k] || 'padi'}">${k}</span>`;
   }
 
-  async function renderTable(forceFetch = true) {
+  async function renderTable(fetchFromServer = true) {
     const container = document.getElementById('table-container');
-    
-    if (forceFetch || !cachedData.length) {
+
+    const searchTerm      = (document.getElementById('t-search')?.value || '').toLowerCase().trim();
+    const filterKomoditas = document.getElementById('t-filter-komoditas')?.value || 'semua';
+    const filterKegiatan  = document.getElementById('t-filter-kegiatan')?.value  || 'semua';
+
+    if (fetchFromServer) {
       container.innerHTML = `<div class="loading-state"><i class="ti ti-loader spin"></i> Memuat data…</div>`;
-      await fetchData();
+      await fetchData({
+        page: currentPage,
+        dateFrom:  tableDateFrom,
+        dateTo:    tableDateTo,
+        search:    searchTerm,
+        komoditas: filterKomoditas,
+        kegiatan:  filterKegiatan,
+      });
     }
 
-    // Ambil nilai filter & pencarian
-    const searchTerm = (document.getElementById('t-search')?.value || '').toLowerCase().trim();
-    const filterKomoditas = document.getElementById('t-filter-komoditas')?.value || 'semua';
-    const filterKegiatan = document.getElementById('t-filter-kegiatan')?.value || 'semua';
+    document.getElementById('data-count').textContent = totalCount + ' laporan';
 
-    // Lakukan pemfilteran data
-    filteredData = cachedData.filter(d => {
-      const matchSearch = !searchTerm || 
-        (d.desa || '').toLowerCase().includes(searchTerm) || 
-        (d.kelompok_tani || '').toLowerCase().includes(searchTerm) || 
-        (d.user_name || '').toLowerCase().includes(searchTerm);
-      
-      const matchKomoditas = filterKomoditas === 'semua' || d.komoditas === filterKomoditas;
-      const matchKegiatan = filterKegiatan === 'semua' || d.kegiatan === filterKegiatan;
-      
-      return matchSearch && matchKomoditas && matchKegiatan;
-    });
-
-    document.getElementById('data-count').textContent = filteredData.length + ' laporan';
-
-    if (!filteredData.length) {
+    if (!cachedData.length) {
       container.innerHTML = `<div class="empty-state"><i class="ti ti-inbox"></i>Tidak ada data laporan yang cocok</div>`;
       return;
     }
 
-    // Paginasi
-    const totalPages = Math.ceil(filteredData.length / rowsPerPage);
-    if (currentPage > totalPages) currentPage = Math.max(1, totalPages);
-    const startIndex = (currentPage - 1) * rowsPerPage;
-    const paginatedData = filteredData.slice(startIndex, startIndex + rowsPerPage);
+    const totalPages = Math.max(1, Math.ceil(totalCount / rowsPerPage));
+    if (currentPage > totalPages) currentPage = totalPages;
 
-    const rows = paginatedData.map(d => `
+    const rows = cachedData.map(d => `
       <tr>
         <td>${d.tanggal}</td>
         <td>${d.desa}</td>
@@ -1255,12 +1469,27 @@
 
     let paginationHtml = '';
     if (totalPages > 1) {
+      // Build page number buttons (show up to 5 around current)
+      const maxBtns = 5;
+      let startP = Math.max(1, currentPage - Math.floor(maxBtns/2));
+      let endP   = Math.min(totalPages, startP + maxBtns - 1);
+      if (endP - startP < maxBtns - 1) startP = Math.max(1, endP - maxBtns + 1);
+      let pageBtns = '';
+      for (let p = startP; p <= endP; p++) {
+        pageBtns += `<button class="btn-page${p === currentPage ? ' btn-page-active' : ''}" onclick="goToPage(${p})" ${p === currentPage ? 'disabled' : ''}>${p}</button>`;
+      }
       paginationHtml = `
         <div class="pagination-bar">
-          <span class="pagination-info">Halaman <strong>${currentPage}</strong> dari <strong>${totalPages}</strong> (Total ${filteredData.length} data)</span>
+          <span class="pagination-info">
+            Halaman <strong>${currentPage}</strong> dari <strong>${totalPages}</strong>
+            &nbsp;·&nbsp; Total <strong>${totalCount}</strong> data
+          </span>
           <div class="pagination-buttons">
-            <button class="btn-page" onclick="changePage(-1)" ${currentPage === 1 ? 'disabled' : ''}>Sebelumnya</button>
-            <button class="btn-page" onclick="changePage(1)" ${currentPage === totalPages ? 'disabled' : ''}>Berikutnya</button>
+            <button class="btn-page" onclick="goToPage(1)" ${currentPage===1?'disabled':''} title="Halaman pertama">«</button>
+            <button class="btn-page" onclick="changePage(-1)" ${currentPage===1?'disabled':''}>‹</button>
+            ${pageBtns}
+            <button class="btn-page" onclick="changePage(1)" ${currentPage===totalPages?'disabled':''}>›</button>
+            <button class="btn-page" onclick="goToPage(${totalPages})" ${currentPage===totalPages?'disabled':''} title="Halaman terakhir">»</button>
           </div>
         </div>`;
     }
@@ -1281,12 +1510,17 @@
 
   function handleTableSearchFilter() {
     currentPage = 1;
-    renderTable(false);
+    renderTable(true);
   }
 
   function changePage(offset) {
     currentPage += offset;
-    renderTable(false);
+    renderTable(true);
+  }
+
+  function goToPage(p) {
+    currentPage = p;
+    renderTable(true);
   }
 
   // ─── EDIT MODAL OPS ─────────────────────────────────────────────────
@@ -1348,14 +1582,21 @@
     
     tutupEditModal();
     showAlert('Laporan berhasil diperbarui!', 'success');
-    await fetchData();
-    renderTable(false);
-    renderRekap();
+    await renderTable(true);
+    await renderRekap();
   }
 
   // ─── EXPORT ─────────────────────────────────────────────────────────
-  function getExportRows() {
-    return cachedData.map(d => ({
+  async function getExportRows() {
+    const filterKomoditas = document.getElementById('t-filter-komoditas')?.value || 'semua';
+    const filterKegiatan  = document.getElementById('t-filter-kegiatan')?.value  || 'semua';
+    const all = await fetchAllForExport({
+      dateFrom:  tableDateFrom,
+      dateTo:    tableDateTo,
+      komoditas: filterKomoditas,
+      kegiatan:  filterKegiatan,
+    });
+    return all.map(d => ({
       Tanggal:           d.tanggal,
       Desa:              d.desa,
       'Kelompok Tani':   d.kelompok_tani,
@@ -1367,8 +1608,9 @@
     }));
   }
 
-  function exportPDF() {
-    const rows = getExportRows();
+  async function exportPDF() {
+    showAlert('Menyiapkan data ekspor…', 'success');
+    const rows = await getExportRows();
     if (!rows.length) { showAlert('Tidak ada data untuk diekspor', 'warning'); return; }
     
     try {
@@ -1423,8 +1665,9 @@
     }
   }
 
-  function exportExcel() {
-    const rows = getExportRows();
+  async function exportExcel() {
+    showAlert('Menyiapkan data ekspor…', 'success');
+    const rows = await getExportRows();
     if (!rows.length) { showAlert('Tidak ada data untuk diekspor', 'warning'); return; }
     const ws = XLSX.utils.json_to_sheet(rows);
     ws['!cols'] = [{wch:12},{wch:20},{wch:22},{wch:16},{wch:14},{wch:12},{wch:12},{wch:16}];
@@ -1442,7 +1685,7 @@
       document.getElementById('panel-' + t).className = 'panel' + (t === name ? ' active' : '');
       document.getElementById('tab-'   + t).className = 'tab'   + (t === name ? ' active' : '');
     });
-    if (name === 'data')  renderTable();
+    if (name === 'data')  renderTable(true);
     if (name === 'rekap') updateRekap();
   }
 
@@ -1453,13 +1696,16 @@
   window.exportPDF       = exportPDF;
   window.exportExcel     = exportExcel;
   window.connectSupabase = connectSupabase;
-  window.retryConnection  = retryConnection;
-  window.setRekapFilter  = setRekapFilter;
+  window.retryConnection        = retryConnection;
+  window.setRekapFilter         = setRekapFilter;
   window.handleTableSearchFilter = handleTableSearchFilter;
-  window.changePage      = changePage;
-  window.bukaEditModal   = bukaEditModal;
-  window.tutupEditModal  = tutupEditModal;
-  window.updateData      = updateData;
+  window.changePage             = changePage;
+  window.goToPage               = goToPage;
+  window.bukaEditModal          = bukaEditModal;
+  window.tutupEditModal         = tutupEditModal;
+  window.updateData             = updateData;
+  window.setTableDatePreset     = setTableDatePreset;
+  window.setRekapDatePreset     = setRekapDatePreset;
 
   // ─── BOOT ───────────────────────────────────────────────────────────
   document.getElementById('f-tanggal').value = today();
