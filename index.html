@@ -257,15 +257,41 @@
     .btn-submit:disabled { opacity: 0.6; cursor: not-allowed; transform: none; box-shadow: none; }
     .btn-submit i { font-size: 18px; }
 
-    .btn-export {
-      display: inline-flex; align-items: center; gap: 8px;
-      padding: 9px 16px; font-size: 13px; font-weight: 600; font-family: inherit;
+    /* ── DOWNLOAD BUTTON ── */
+    .download-wrap { position: relative; }
+    .btn-download {
+      display: inline-flex; align-items: center; gap: 7px;
+      padding: 9px 14px; font-size: 13px; font-weight: 600; font-family: inherit;
       border-radius: var(--radius-md); cursor: pointer; transition: all 0.2s ease;
+      background: var(--surface); color: var(--text);
+      border: 1px solid var(--border-strong);
     }
-    .btn-export-pdf  { background: var(--red-50); color: var(--red-600); border: 1px solid rgba(225, 29, 72, 0.15); }
-    .btn-export-pdf:hover  { background: var(--red-50); filter: brightness(0.95); transform: translateY(-1px); }
-    .btn-export-excel { background: var(--green-50); color: var(--green-600); border: 1px solid rgba(46, 125, 50, 0.15); }
-    .btn-export-excel:hover { background: var(--green-100); transform: translateY(-1px); box-shadow: 0 4px 10px rgba(46, 125, 50, 0.06); }
+    .btn-download:hover { background: var(--bg); transform: translateY(-1px); box-shadow: 0 4px 10px rgba(0,0,0,0.06); }
+    .btn-download i { font-size: 16px; }
+    .btn-download .chevron { font-size: 12px; opacity: 0.5; transition: transform 0.2s; }
+    .btn-download.open .chevron { transform: rotate(180deg); }
+
+    .download-dropdown {
+      display: none;
+      position: absolute; top: calc(100% + 8px); right: 0;
+      background: var(--surface); border: 1px solid var(--border-strong);
+      border-radius: var(--radius-lg); padding: 6px;
+      box-shadow: 0 12px 28px rgba(0,0,0,0.1);
+      z-index: 200; min-width: 160px;
+      animation: dropIn 0.18s cubic-bezier(0.4,0,0.2,1);
+    }
+    .download-dropdown.open { display: block; }
+    .btn-dl-option {
+      display: flex; align-items: center; gap: 10px;
+      width: 100%; padding: 9px 12px; border: none; background: none;
+      font-family: inherit; font-size: 13px; font-weight: 600;
+      border-radius: 8px; cursor: pointer; transition: background 0.15s;
+      text-align: left;
+    }
+    .btn-dl-option:hover { background: var(--bg); }
+    .btn-dl-option.pdf  { color: var(--red-600); }
+    .btn-dl-option.excel { color: var(--green-600); }
+    .btn-dl-option i { font-size: 17px; }
 
     /* ── DATA HEADER ── */
     .data-header {
@@ -504,10 +530,9 @@
     /* ── TABLE FILTER BAR ── */
     /* ── DATE FILTER ── */
     .date-filter-bar {
-      display: flex; flex-wrap: wrap; gap: 8px;
-      margin-bottom: 12px; align-items: center;
+      display: flex; flex-wrap: wrap; gap: 6px;
+      margin-bottom: 12px; align-items: center; position: relative;
     }
-    .date-preset-group { display: flex; gap: 6px; flex-wrap: wrap; }
     .btn-preset {
       padding: 7px 14px; font-size: 12px; font-weight: 600;
       border: 1px solid var(--border-strong); border-radius: 99px;
@@ -522,20 +547,46 @@
       box-shadow: 0 3px 8px rgba(46,125,50,0.18);
     }
     @media (prefers-color-scheme: dark) { .btn-preset.active { color: #0d130e; } }
-    .date-custom-range {
-      display: flex; gap: 6px; align-items: center; flex-wrap: wrap;
+
+    /* Custom dropdown */
+    .custom-picker-wrap { position: relative; }
+    .custom-picker-dropdown {
+      display: none;
+      position: absolute; top: calc(100% + 8px); left: 0;
+      background: var(--surface); border: 1px solid var(--border-strong);
+      border-radius: var(--radius-lg); padding: 14px 16px;
+      box-shadow: 0 12px 28px rgba(0,0,0,0.1);
+      z-index: 200; min-width: 260px;
+      animation: dropIn 0.18s cubic-bezier(0.4,0,0.2,1);
     }
-    .date-custom-range input[type=date] {
-      font-family: inherit; font-size: 12px; padding: 7px 10px;
+    @keyframes dropIn { from { opacity:0; transform:translateY(-6px); } to { opacity:1; transform:none; } }
+    .custom-picker-dropdown.open { display: block; }
+    .custom-picker-label {
+      font-size: 11px; font-weight: 600; color: var(--text-muted);
+      text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 10px;
+    }
+    .custom-picker-row {
+      display: flex; align-items: center; gap: 8px; margin-bottom: 10px;
+    }
+    .custom-picker-row input[type=date] {
+      flex: 1; font-family: inherit; font-size: 12px; padding: 8px 10px;
       border: 1px solid var(--border-strong); border-radius: var(--radius-md);
       background: var(--bg); color: var(--text); outline: none; transition: all 0.2s;
     }
-    .date-custom-range input[type=date]:focus {
+    .custom-picker-row input[type=date]:focus {
       border-color: var(--green-600);
       box-shadow: 0 0 0 3px rgba(46,125,50,0.1);
       background: var(--surface);
     }
-    .date-sep { font-size: 12px; color: var(--text-muted); }
+    .date-sep { font-size: 12px; color: var(--text-muted); flex-shrink: 0; }
+    .btn-apply-custom {
+      width: 100%; padding: 8px; font-size: 12px; font-weight: 600;
+      background: var(--green-600); color: #fff; border: none;
+      border-radius: var(--radius-md); cursor: pointer; font-family: inherit;
+      transition: all 0.2s;
+    }
+    @media (prefers-color-scheme: dark) { .btn-apply-custom { color: #0d130e; } }
+    .btn-apply-custom:hover { filter: brightness(1.08); }
 
     .table-filter-bar {
       display: grid;
@@ -833,27 +884,40 @@
       <div class="data-header">
         <span class="section-label" style="margin:0">Data Laporan</span>
         <div class="data-header-right">
-          <button class="btn-export btn-export-pdf" onclick="exportPDF()">
-            <i class="ti ti-file-type-pdf"></i> Export PDF
-          </button>
-          <button class="btn-export btn-export-excel" onclick="exportExcel()">
-            <i class="ti ti-file-spreadsheet"></i> Export Excel
-          </button>
+          <div class="download-wrap" id="download-wrap">
+            <button class="btn-download" id="btn-download" onclick="toggleDownloadDropdown()">
+              <i class="ti ti-download"></i> Download
+              <i class="ti ti-chevron-down chevron"></i>
+            </button>
+            <div class="download-dropdown" id="download-dropdown">
+              <button class="btn-dl-option pdf" onclick="exportPDF(); closeDownloadDropdown()">
+                <i class="ti ti-file-type-pdf"></i> Export PDF
+              </button>
+              <button class="btn-dl-option excel" onclick="exportExcel(); closeDownloadDropdown()">
+                <i class="ti ti-file-spreadsheet"></i> Export Excel
+              </button>
+            </div>
+          </div>
           <span class="data-count" id="data-count">0 laporan</span>
         </div>
       </div>
       <!-- Date Filter -->
       <div class="date-filter-bar" id="table-date-filter">
-        <div class="date-preset-group">
-          <button class="btn-preset" onclick="setTableDatePreset('hari_ini', this)">Hari Ini</button>
-          <button class="btn-preset" onclick="setTableDatePreset('minggu_ini', this)">Minggu Ini</button>
-          <button class="btn-preset active" onclick="setTableDatePreset('bulan_ini', this)">Bulan Ini</button>
-          <button class="btn-preset" onclick="setTableDatePreset('semua', this)">Semua</button>
-        </div>
-        <div class="date-custom-range">
-          <input type="date" id="t-date-from" onchange="setTableDatePreset('custom', null)" title="Dari tanggal" />
-          <span class="date-sep">—</span>
-          <input type="date" id="t-date-to" onchange="setTableDatePreset('custom', null)" title="Sampai tanggal" />
+        <button class="btn-preset" onclick="setTableDatePreset('hari_ini', this)">Hari Ini</button>
+        <button class="btn-preset" onclick="setTableDatePreset('minggu_ini', this)">Minggu Ini</button>
+        <button class="btn-preset active" onclick="setTableDatePreset('bulan_ini', this)">Bulan Ini</button>
+        <button class="btn-preset" onclick="setTableDatePreset('semua', this)">Semua</button>
+        <div class="custom-picker-wrap" id="t-custom-wrap">
+          <button class="btn-preset" onclick="toggleCustomPicker('t')"><i class="ti ti-calendar" style="font-size:13px;margin-right:4px"></i>Custom</button>
+          <div class="custom-picker-dropdown" id="t-custom-dropdown">
+            <div class="custom-picker-label">Rentang Tanggal</div>
+            <div class="custom-picker-row">
+              <input type="date" id="t-date-from" placeholder="Dari" />
+              <span class="date-sep">—</span>
+              <input type="date" id="t-date-to" placeholder="Sampai" />
+            </div>
+            <button class="btn-apply-custom" onclick="applyTableCustomRange()">Terapkan</button>
+          </div>
         </div>
       </div>
       <!-- Bar Filter & Pencarian -->
@@ -881,17 +945,22 @@
   <div class="panel" id="panel-rekap">
 
     <!-- Date Filter Rekap -->
-    <div class="date-filter-bar" style="margin-bottom:14px">
-      <div class="date-preset-group">
-        <button class="btn-preset" onclick="setRekapDatePreset('hari_ini', this)">Hari Ini</button>
-        <button class="btn-preset" onclick="setRekapDatePreset('minggu_ini', this)">Minggu Ini</button>
-        <button class="btn-preset active" onclick="setRekapDatePreset('bulan_ini', this)">Bulan Ini</button>
-        <button class="btn-preset" onclick="setRekapDatePreset('semua', this)">Semua</button>
-      </div>
-      <div class="date-custom-range">
-        <input type="date" id="r-date-from" onchange="setRekapDatePreset('custom', null)" title="Dari tanggal" />
-        <span class="date-sep">—</span>
-        <input type="date" id="r-date-to" onchange="setRekapDatePreset('custom', null)" title="Sampai tanggal" />
+    <div class="date-filter-bar" id="rekap-date-filter" style="margin-bottom:14px">
+      <button class="btn-preset" onclick="setRekapDatePreset('hari_ini', this)">Hari Ini</button>
+      <button class="btn-preset" onclick="setRekapDatePreset('minggu_ini', this)">Minggu Ini</button>
+      <button class="btn-preset active" onclick="setRekapDatePreset('bulan_ini', this)">Bulan Ini</button>
+      <button class="btn-preset" onclick="setRekapDatePreset('semua', this)">Semua</button>
+      <div class="custom-picker-wrap" id="r-custom-wrap">
+        <button class="btn-preset" onclick="toggleCustomPicker('r')"><i class="ti ti-calendar" style="font-size:13px;margin-right:4px"></i>Custom</button>
+        <div class="custom-picker-dropdown" id="r-custom-dropdown">
+          <div class="custom-picker-label">Rentang Tanggal</div>
+          <div class="custom-picker-row">
+            <input type="date" id="r-date-from" placeholder="Dari" />
+            <span class="date-sep">—</span>
+            <input type="date" id="r-date-to" placeholder="Sampai" />
+          </div>
+          <button class="btn-apply-custom" onclick="applyRekapCustomRange()">Terapkan</button>
+        </div>
       </div>
     </div>
 
@@ -1004,10 +1073,10 @@
   }
 
   function applyTableDatePreset(preset) {
-    if (preset === 'custom') return; // handled by input change
     const r = getDateRange(preset);
     tableDateFrom = r.from;
     tableDateTo   = r.to;
+    // Sync date inputs inside dropdown
     const fi = document.getElementById('t-date-from');
     const ti = document.getElementById('t-date-to');
     if (fi) fi.value = r.from || '';
@@ -1015,7 +1084,6 @@
   }
 
   function applyRekapDatePreset(preset) {
-    if (preset === 'custom') return;
     const r = getDateRange(preset);
     rekapDateFrom = r.from;
     rekapDateTo   = r.to;
@@ -1025,38 +1093,61 @@
     if (ti) ti.value = r.to   || '';
   }
 
+  function toggleCustomPicker(prefix) {
+    const dropdown = document.getElementById(prefix + '-custom-dropdown');
+    const isOpen = dropdown.classList.contains('open');
+    // Close all dropdowns first
+    document.querySelectorAll('.custom-picker-dropdown').forEach(d => d.classList.remove('open'));
+    if (!isOpen) dropdown.classList.add('open');
+  }
+
+  // Close custom picker when clicking outside
+  document.addEventListener('click', e => {
+    if (!e.target.closest('.custom-picker-wrap')) {
+      document.querySelectorAll('.custom-picker-dropdown').forEach(d => d.classList.remove('open'));
+    }
+  });
+
+  function applyTableCustomRange() {
+    const from = document.getElementById('t-date-from')?.value || null;
+    const to   = document.getElementById('t-date-to')?.value   || null;
+    if (!from && !to) return;
+    tableDateFrom = from;
+    tableDateTo   = to;
+    // Mark Custom button active, deactivate presets
+    document.querySelectorAll('#table-date-filter .btn-preset').forEach(b => b.classList.remove('active'));
+    const customBtn = document.querySelector('#t-custom-wrap .btn-preset');
+    if (customBtn) customBtn.classList.add('active');
+    document.getElementById('t-custom-dropdown').classList.remove('open');
+    currentPage = 1;
+    renderTable(true);
+  }
+
+  function applyRekapCustomRange() {
+    const from = document.getElementById('r-date-from')?.value || null;
+    const to   = document.getElementById('r-date-to')?.value   || null;
+    if (!from && !to) return;
+    rekapDateFrom = from;
+    rekapDateTo   = to;
+    document.querySelectorAll('#rekap-date-filter .btn-preset').forEach(b => b.classList.remove('active'));
+    const customBtn = document.querySelector('#r-custom-wrap .btn-preset');
+    if (customBtn) customBtn.classList.add('active');
+    document.getElementById('r-custom-dropdown').classList.remove('open');
+    renderRekap();
+  }
+
   function setTableDatePreset(preset, btn) {
-    if (btn) {
-      document.querySelectorAll('#table-date-filter .btn-preset').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-    }
-    if (preset === 'custom') {
-      tableDateFrom = document.getElementById('t-date-from')?.value || null;
-      tableDateTo   = document.getElementById('t-date-to')?.value   || null;
-      document.querySelectorAll('#table-date-filter .btn-preset').forEach(b => b.classList.remove('active'));
-    } else {
-      applyTableDatePreset(preset);
-    }
+    document.querySelectorAll('#table-date-filter .btn-preset').forEach(b => b.classList.remove('active'));
+    if (btn) btn.classList.add('active');
+    applyTableDatePreset(preset);
     currentPage = 1;
     renderTable(true);
   }
 
   function setRekapDatePreset(preset, btn) {
-    if (btn) {
-      document.querySelectorAll('.date-filter-bar:first-of-type .btn-preset, #panel-rekap .btn-preset[onclick*=Rekap]').forEach(b => b.classList.remove('active'));
-      // just target rekap date buttons
-      const rekapBar = document.getElementById('panel-rekap').querySelector('.date-filter-bar');
-      if (rekapBar) rekapBar.querySelectorAll('.btn-preset').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-    }
-    if (preset === 'custom') {
-      rekapDateFrom = document.getElementById('r-date-from')?.value || null;
-      rekapDateTo   = document.getElementById('r-date-to')?.value   || null;
-      const rekapBar = document.getElementById('panel-rekap').querySelector('.date-filter-bar');
-      if (rekapBar) rekapBar.querySelectorAll('.btn-preset').forEach(b => b.classList.remove('active'));
-    } else {
-      applyRekapDatePreset(preset);
-    }
+    document.querySelectorAll('#rekap-date-filter .btn-preset').forEach(b => b.classList.remove('active'));
+    if (btn) btn.classList.add('active');
+    applyRekapDatePreset(preset);
     renderRekap();
   }
 
@@ -1689,12 +1780,31 @@
     if (name === 'rekap') updateRekap();
   }
 
+  // ─── DOWNLOAD DROPDOWN ──────────────────────────────────────────────
+  function toggleDownloadDropdown() {
+    const btn = document.getElementById('btn-download');
+    const dd  = document.getElementById('download-dropdown');
+    const open = dd.classList.toggle('open');
+    btn.classList.toggle('open', open);
+  }
+
+  function closeDownloadDropdown() {
+    document.getElementById('download-dropdown')?.classList.remove('open');
+    document.getElementById('btn-download')?.classList.remove('open');
+  }
+
+  document.addEventListener('click', e => {
+    if (!e.target.closest('#download-wrap')) closeDownloadDropdown();
+  });
+
   // ─── EXPOSE GLOBALS ─────────────────────────────────────────────────
   window.switchTab       = switchTab;
   window.simpanData      = simpanData;
   window.hapusData       = hapusData;
-  window.exportPDF       = exportPDF;
-  window.exportExcel     = exportExcel;
+  window.exportPDF              = exportPDF;
+  window.exportExcel            = exportExcel;
+  window.toggleDownloadDropdown = toggleDownloadDropdown;
+  window.closeDownloadDropdown  = closeDownloadDropdown;
   window.connectSupabase = connectSupabase;
   window.retryConnection        = retryConnection;
   window.setRekapFilter         = setRekapFilter;
@@ -1706,6 +1816,9 @@
   window.updateData             = updateData;
   window.setTableDatePreset     = setTableDatePreset;
   window.setRekapDatePreset     = setRekapDatePreset;
+  window.toggleCustomPicker     = toggleCustomPicker;
+  window.applyTableCustomRange  = applyTableCustomRange;
+  window.applyRekapCustomRange  = applyRekapCustomRange;
 
   // ─── BOOT ───────────────────────────────────────────────────────────
   document.getElementById('f-tanggal').value = today();
