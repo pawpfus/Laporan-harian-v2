@@ -428,12 +428,62 @@
     .legend-item { display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--text-muted); }
     .legend-dot  { width: 12px; height: 12px; border-radius: 4px; flex-shrink: 0; }
 
-    /* ── SETUP CARD ── */
+    /* ── OFFLINE POPUP ── */
+    .offline-popup {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.45);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+      display: flex; align-items: center; justify-content: center;
+      z-index: 2000;
+      opacity: 0; pointer-events: none;
+      transition: opacity 0.3s ease;
+      padding: 1rem;
+    }
+    .offline-popup.active { opacity: 1; pointer-events: auto; }
+    .offline-box {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 2.5rem 2rem;
+      max-width: 360px; width: 100%;
+      text-align: center;
+      box-shadow: 0 24px 48px rgba(0,0,0,0.16);
+      transform: translateY(24px) scale(0.97);
+      transition: transform 0.35s cubic-bezier(0.34,1.56,0.64,1);
+    }
+    .offline-popup.active .offline-box { transform: translateY(0) scale(1); }
+    .offline-icon {
+      width: 64px; height: 64px; border-radius: 50%;
+      background: var(--red-50);
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 1.25rem;
+      font-size: 30px; color: var(--red-600);
+    }
+    .offline-title {
+      font-size: 18px; font-weight: 700; color: var(--text); margin-bottom: 8px;
+    }
+    .offline-desc {
+      font-size: 13px; color: var(--text-muted); line-height: 1.6; margin-bottom: 1.5rem;
+    }
+    .btn-retry {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 11px 24px; border: none; border-radius: 10px;
+      background: var(--green-600); color: #fff;
+      font-size: 14px; font-weight: 600; font-family: inherit;
+      cursor: pointer; transition: all 0.2s ease;
+      box-shadow: 0 4px 12px rgba(46,125,50,0.2);
+    }
+    .btn-retry:hover { filter: brightness(1.08); transform: translateY(-1px); }
+    .btn-retry:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+    @media (prefers-color-scheme: dark) {
+      .btn-retry { color: #0d130e; }
+    }
+
+    /* ── SETUP CARD (hidden/unused) ── */
     .setup-card {
-      background: linear-gradient(135deg, var(--amber-50), rgba(255, 248, 235, 0.6));
-      border: 1px solid var(--amber-400);
-      border-radius: var(--radius-lg); padding: 1.75rem; margin-bottom: 1.5rem;
-      box-shadow: 0 8px 24px rgba(217, 119, 6, 0.04);
+      display: none !important;
     }
     .setup-card .setup-title {
       font-size: 14px; font-weight: 600; color: var(--amber-700); margin-bottom: 10px;
@@ -649,23 +699,16 @@
     <span id="alert-msg"></span>
   </div>
 
-  <!-- SETUP SUPABASE -->
-  <div id="setup-card" class="setup-card" style="display:none">
-    <div class="setup-title"><i class="ti ti-database"></i> Konfigurasi Supabase</div>
-    <p style="font-size:13px;color:var(--amber-700);margin-bottom:12px">
-      Masukkan URL dan Anon Key dari project Supabase kamu. Data akan disimpan ke tabel <code>laporan</code>.
-    </p>
-    <div class="field" style="margin-bottom:8px">
-      <label>Supabase URL</label>
-      <input type="text" id="cfg-url" placeholder="https://xxxx.supabase.co" />
+  <!-- OFFLINE POPUP -->
+  <div id="offline-popup" class="offline-popup">
+    <div class="offline-box">
+      <div class="offline-icon"><i class="ti ti-wifi-off"></i></div>
+      <div class="offline-title">Koneksi Terputus</div>
+      <div class="offline-desc">Tidak dapat terhubung ke database.<br>Periksa koneksi internet Anda lalu coba lagi.</div>
+      <button class="btn-retry" id="btn-retry" onclick="retryConnection()">
+        <i class="ti ti-refresh"></i> Coba Lagi
+      </button>
     </div>
-    <div class="field">
-      <label>Anon Key</label>
-      <input type="text" id="cfg-key" placeholder="eyJhbGci..." />
-    </div>
-    <button class="btn-connect" onclick="connectSupabase()">
-      <i class="ti ti-plug"></i> Hubungkan
-    </button>
   </div>
 
   <div class="tabs" role="tablist">
@@ -760,14 +803,14 @@
       </div>
       <!-- Bar Filter & Pencarian -->
       <div class="table-filter-bar">
-        <input type="text" id="t-search" placeholder="Cari desa, kelompok, atau user..." oninput="handleTableSearchFilter()" />
-        <select id="t-filter-komoditas" onchange="handleTableSearchFilter()">
+        <input type="text" id="t-search" placeholder="Cari desa, kelompok, atau user..." oninput="handleTableSearchFilter()" aria-label="Cari data laporan" />
+        <select id="t-filter-komoditas" onchange="handleTableSearchFilter()" aria-label="Filter Komoditas">
           <option value="semua">Semua Komoditas</option>
           <option>Padi</option>
           <option>Jagung</option>
           <option>Kedelai</option>
         </select>
-        <select id="t-filter-kegiatan" onchange="handleTableSearchFilter()">
+        <select id="t-filter-kegiatan" onchange="handleTableSearchFilter()" aria-label="Filter Kegiatan">
           <option value="semua">Semua Kegiatan</option>
           <option>Bera</option>
           <option>Olah Lahan</option>
@@ -848,10 +891,11 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <script>
   // ─── SUPABASE CONFIG ────────────────────────────────────────────────
-  const SUPABASE_URL = 'https://penaujinawijzwcimgde.supabase.co';
-  const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBlbmF1amluYXdpanp3Y2ltZ2RlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg5NzgzNzcsImV4cCI6MjA5NDU1NDM3N30.FNNGqO7X5wpZ9Ng8qehPagS74uP-GMo8Z2AdzSEU6v4';
+  let SUPABASE_URL = 'https://penaujinawijzwcimgde.supabase.co';
+  let SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBlbmF1amluYXdpanp3Y2ltZ2RlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg5NzgzNzcsImV4cCI6MjA5NDU1NDM3N30.FNNGqO7X5wpZ9Ng8qehPagS74uP-GMo8Z2AdzSEU6v4';
   const LS_URL_KEY = 'sb_url';
   const LS_KEY_KEY = 'sb_key';
+
 
   let sbClient = null;
   let cachedData = [];
@@ -962,7 +1006,6 @@
     chartG.update();
 
     // Legend komoditas
-    const totalLuas = data.reduce((s,d) => s + parseFloat(d.luas||0), 0);
     document.getElementById('legend-komoditas').innerHTML = komEntries.length
       ? komEntries.map(([k,v]) => `
           <span class="legend-item">
@@ -1018,7 +1061,7 @@
     const url = SUPABASE_URL || localStorage.getItem(LS_URL_KEY) || '';
     const key = SUPABASE_KEY || localStorage.getItem(LS_KEY_KEY) || '';
 
-    if (!url || !key) { showSetup(); return; }
+    if (!url || !key) { showOfflinePopup(); return; }
 
     try {
       const { createClient } = window.supabase;
@@ -1026,35 +1069,50 @@
       const { error } = await sbClient.from('laporan').select('id', { count: 'exact', head: true });
       if (error) throw error;
       setDbStatus(true);
+      hideOfflinePopup();
     } catch (e) {
       setDbStatus(false);
-      showAlert('Gagal terhubung ke Supabase: ' + e.message, 'error');
-      showSetup();
+      showOfflinePopup();
     }
   }
 
-  function showSetup() {
-    document.getElementById('setup-card').style.display = 'block';
+  function showOfflinePopup() {
+    document.getElementById('offline-popup').classList.add('active');
+  }
+
+  function hideOfflinePopup() {
+    document.getElementById('offline-popup').classList.remove('active');
+  }
+
+  async function retryConnection() {
+    const btn = document.getElementById('btn-retry');
+    btn.disabled = true;
+    btn.innerHTML = '<i class="ti ti-loader spin"></i> Menghubungkan…';
+
+    const url = SUPABASE_URL || localStorage.getItem(LS_URL_KEY) || '';
+    const key = SUPABASE_KEY || localStorage.getItem(LS_KEY_KEY) || '';
+
+    try {
+      const { createClient } = window.supabase;
+      sbClient = createClient(url, key);
+      const { error } = await sbClient.from('laporan').select('id', { count: 'exact', head: true });
+      if (error) throw error;
+      setDbStatus(true);
+      hideOfflinePopup();
+      showAlert('Berhasil terhubung ke database!', 'success');
+      await fetchData();
+      renderTable(false);
+      renderRekap();
+    } catch (e) {
+      setDbStatus(false);
+    } finally {
+      btn.disabled = false;
+      btn.innerHTML = '<i class="ti ti-refresh"></i> Coba Lagi';
+    }
   }
 
   async function connectSupabase() {
-    const url = document.getElementById('cfg-url').value.trim();
-    const key = document.getElementById('cfg-key').value.trim();
-    if (!url || !key) { showAlert('URL dan Key wajib diisi', 'warning'); return; }
-    try {
-      const { createClient } = window.supabase;
-      sbClient = createClient(url, key);
-      const { error } = await sbClient.from('laporan').select('id', { count: 'exact', head: true });
-      if (error) throw error;
-      localStorage.setItem(LS_URL_KEY, url);
-      localStorage.setItem(LS_KEY_KEY, key);
-      setDbStatus(true);
-      document.getElementById('setup-card').style.display = 'none';
-      showAlert('Berhasil terhubung ke Supabase!', 'success');
-    } catch (e) {
-      setDbStatus(false);
-      showAlert('Koneksi gagal: ' + e.message, 'error');
-    }
+    // kept for backward compatibility
   }
 
   function setDbStatus(ok) {
@@ -1339,12 +1397,18 @@
         r.User
       ]);
       
+      // Calculate total area
+      const totalLuas = rows.reduce((s, r) => s + r['Luas (Ha)'], 0);
+      const foot = [['Total', '', '', '', '', '', totalLuas.toFixed(1) + ' Ha', '']];
+      
       doc.autoTable({
         head: headers,
         body: body,
+        foot: foot,
         startY: 26,
         theme: 'striped',
         headStyles: { fillColor: [46, 125, 50], textColor: [255, 255, 255], fontStyle: 'bold' },
+        footStyles: { fillColor: [240, 244, 240], textColor: [46, 125, 50], fontStyle: 'bold' },
         styles: { font: 'helvetica', fontSize: 9 },
         columnStyles: {
           6: { halign: 'right' }
@@ -1389,6 +1453,7 @@
   window.exportPDF       = exportPDF;
   window.exportExcel     = exportExcel;
   window.connectSupabase = connectSupabase;
+  window.retryConnection  = retryConnection;
   window.setRekapFilter  = setRekapFilter;
   window.handleTableSearchFilter = handleTableSearchFilter;
   window.changePage      = changePage;
