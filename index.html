@@ -413,6 +413,29 @@
 
     /* ── REKAP: FILTER CHIPS ── */
     .filter-row { display: flex; gap: 8px; margin-bottom: 1.5rem; flex-wrap: wrap; }
+
+    /* ── REKAP TOOLBAR ── */
+    .rekap-toolbar {
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 12px; margin-bottom: 1.5rem; flex-wrap: wrap;
+    }
+    .rekap-toolbar-left {
+      display: flex; align-items: center; gap: 10px; flex-wrap: wrap; flex: 1;
+    }
+    .rekap-toolbar-label {
+      font-size: 12px; font-weight: 600; color: var(--text-muted);
+      white-space: nowrap; text-transform: uppercase; letter-spacing: 0.06em;
+    }
+    .rekap-chips { display: flex; gap: 6px; flex-wrap: wrap; }
+    /* dropdown opens to left for right-aligned waktu button */
+    .waktu-dropdown-right {
+      left: auto !important; right: 0;
+    }
+    @media (max-width: 600px) {
+      .rekap-toolbar { gap: 8px; }
+      .rekap-toolbar-left { order: 1; }
+      .rekap-toolbar .waktu-wrap { order: 0; margin-left: auto; }
+    }
     .chip {
       font-size: 13px; padding: 7px 16px; border-radius: 99px;
       border: 1px solid var(--border); background: var(--surface);
@@ -528,86 +551,124 @@
     .setup-card .btn-connect:hover { background: var(--amber-700); transform: translateY(-1px); }
 
     /* ── TABLE FILTER BAR ── */
-    /* ── DATE FILTER ── */
-    .date-filter-bar {
-      display: flex; flex-wrap: wrap; gap: 6px;
-      margin-bottom: 12px; align-items: center; position: relative;
-    }
-    .btn-preset {
-      padding: 7px 14px; font-size: 12px; font-weight: 600;
-      border: 1px solid var(--border-strong); border-radius: 99px;
-      background: var(--surface); color: var(--text-muted);
-      cursor: pointer; font-family: inherit; transition: all 0.2s;
-      white-space: nowrap;
-    }
-    .btn-preset:hover { background: var(--bg); color: var(--text); }
-    .btn-preset.active {
-      background: var(--green-600); color: #fff;
-      border-color: var(--green-600);
-      box-shadow: 0 3px 8px rgba(46,125,50,0.18);
-    }
-    @media (prefers-color-scheme: dark) { .btn-preset.active { color: #0d130e; } }
+    /* ── WAKTU LAPORAN DROPDOWN ── */
+    @keyframes dropIn { from { opacity:0; transform:translateY(-6px); } to { opacity:1; transform:none; } }
 
-    /* Custom dropdown */
-    .custom-picker-wrap { position: relative; }
-    .custom-picker-dropdown {
-      display: none;
-      position: absolute; top: calc(100% + 8px); left: 0;
+    .waktu-wrap { position: relative; }
+    .btn-waktu {
+      display: inline-flex; align-items: center; gap: 7px;
+      padding: 9px 14px; font-size: 13px; font-weight: 600; font-family: inherit;
+      border-radius: var(--radius-md); cursor: pointer; transition: all 0.2s;
+      background: var(--surface); color: var(--text);
+      border: 1px solid var(--border-strong); white-space: nowrap;
+    }
+    .btn-waktu:hover { background: var(--bg); transform: translateY(-1px); box-shadow: 0 4px 10px rgba(0,0,0,0.06); }
+    .btn-waktu.has-filter { background: var(--green-50); color: var(--green-600); border-color: rgba(46,125,50,0.3); }
+    @media (prefers-color-scheme: dark) { .btn-waktu.has-filter { background: var(--green-100); } }
+    .btn-waktu i.chevron { font-size: 12px; opacity: 0.5; transition: transform 0.2s; }
+    .btn-waktu.open i.chevron { transform: rotate(180deg); }
+
+    .waktu-dropdown {
+      display: none; position: absolute; top: calc(100% + 8px); left: 0;
       background: var(--surface); border: 1px solid var(--border-strong);
-      border-radius: var(--radius-lg); padding: 14px 16px;
+      border-radius: var(--radius-lg); padding: 10px;
       box-shadow: 0 12px 28px rgba(0,0,0,0.1);
-      z-index: 200; min-width: 260px;
+      z-index: 300; min-width: 220px;
       animation: dropIn 0.18s cubic-bezier(0.4,0,0.2,1);
     }
-    @keyframes dropIn { from { opacity:0; transform:translateY(-6px); } to { opacity:1; transform:none; } }
-    .custom-picker-dropdown.open { display: block; }
-    .custom-picker-label {
+    .waktu-dropdown.open { display: block; }
+
+    .waktu-presets { display: flex; flex-direction: column; gap: 2px; margin-bottom: 8px; }
+    .btn-waktu-opt {
+      display: flex; align-items: center; gap: 10px;
+      width: 100%; padding: 9px 10px; border: none; background: none;
+      font-family: inherit; font-size: 13px; font-weight: 500; color: var(--text);
+      border-radius: 8px; cursor: pointer; transition: background 0.15s; text-align: left;
+    }
+    .btn-waktu-opt:hover { background: var(--bg); }
+    .btn-waktu-opt.active { background: var(--green-50); color: var(--green-600); font-weight: 600; }
+    @media (prefers-color-scheme: dark) { .btn-waktu-opt.active { background: var(--green-100); } }
+    .btn-waktu-opt i { font-size: 16px; opacity: 0.6; flex-shrink: 0; }
+    .btn-waktu-opt.active i { opacity: 1; }
+
+    .waktu-divider { height: 1px; background: var(--border); margin: 6px 0; }
+
+    .waktu-custom-section { padding: 4px 2px 2px; }
+    .waktu-custom-label {
       font-size: 11px; font-weight: 600; color: var(--text-muted);
-      text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 10px;
+      text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 8px;
     }
-    .custom-picker-row {
-      display: flex; align-items: center; gap: 8px; margin-bottom: 10px;
+    .waktu-custom-row {
+      display: flex; align-items: center; gap: 6px; margin-bottom: 8px;
     }
-    .custom-picker-row input[type=date] {
-      flex: 1; font-family: inherit; font-size: 12px; padding: 8px 10px;
+    .waktu-custom-row input[type=date] {
+      flex: 1; font-family: inherit; font-size: 12px; padding: 7px 8px;
       border: 1px solid var(--border-strong); border-radius: var(--radius-md);
       background: var(--bg); color: var(--text); outline: none; transition: all 0.2s;
+      min-width: 0;
     }
-    .custom-picker-row input[type=date]:focus {
+    .waktu-custom-row input[type=date]:focus {
       border-color: var(--green-600);
       box-shadow: 0 0 0 3px rgba(46,125,50,0.1);
       background: var(--surface);
     }
-    .date-sep { font-size: 12px; color: var(--text-muted); flex-shrink: 0; }
+    .date-sep { font-size: 11px; color: var(--text-muted); flex-shrink: 0; }
     .btn-apply-custom {
       width: 100%; padding: 8px; font-size: 12px; font-weight: 600;
       background: var(--green-600); color: #fff; border: none;
-      border-radius: var(--radius-md); cursor: pointer; font-family: inherit;
-      transition: all 0.2s;
+      border-radius: var(--radius-md); cursor: pointer; font-family: inherit; transition: all 0.2s;
     }
     @media (prefers-color-scheme: dark) { .btn-apply-custom { color: #0d130e; } }
     .btn-apply-custom:hover { filter: brightness(1.08); }
 
-    .table-filter-bar {
-      display: grid;
-      grid-template-columns: 2fr 1fr 1fr;
-      gap: 12px;
-      margin-bottom: 1.25rem;
+    /* ── FILTER TOOLBAR ── */
+    .filter-toolbar {
+      display: flex; align-items: center; gap: 8px;
+      margin-bottom: 1.25rem; flex-wrap: wrap;
     }
-    @media (max-width: 600px) {
-      .table-filter-bar {
-        grid-template-columns: 1fr;
-      }
+    .filter-toolbar-search {
+      flex: 1; min-width: 180px; position: relative;
     }
-    .table-filter-bar input, .table-filter-bar select {
-      font-family: inherit; font-size: 13px; padding: 10px 12px;
+    .filter-toolbar-search i {
+      position: absolute; left: 11px; top: 50%; transform: translateY(-50%);
+      color: var(--text-muted); font-size: 16px; pointer-events: none;
+    }
+    .filter-toolbar-search input {
+      width: 100%; padding: 9px 12px 9px 34px;
+      font-family: inherit; font-size: 13px;
       border: 1px solid var(--border-strong); border-radius: var(--radius-md);
       background: var(--bg); color: var(--text); outline: none; transition: all 0.2s;
+      box-sizing: border-box;
     }
-    .table-filter-bar input:focus, .table-filter-bar select:focus {
+    .filter-toolbar-search input:focus {
       border-color: var(--green-600);
       box-shadow: 0 0 0 3px rgba(46,125,50,0.1);
       background: var(--surface);
+    }
+    .filter-toolbar-divider {
+      width: 1px; height: 28px; background: var(--border-strong);
+      flex-shrink: 0; opacity: 0.6;
+    }
+    .filter-select {
+      font-family: inherit; font-size: 13px; font-weight: 500;
+      padding: 9px 32px 9px 12px; border: 1px solid var(--border-strong);
+      border-radius: var(--radius-md); background: var(--bg); color: var(--text);
+      outline: none; transition: all 0.2s; cursor: pointer;
+      appearance: none; -webkit-appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+      background-repeat: no-repeat; background-position: right 10px center;
+      white-space: nowrap;
+    }
+    .filter-select:focus {
+      border-color: var(--green-600);
+      box-shadow: 0 0 0 3px rgba(46,125,50,0.1);
+      background-color: var(--surface);
+    }
+    @media (max-width: 600px) {
+      .filter-toolbar { gap: 6px; }
+      .filter-toolbar-search { min-width: 100%; order: -1; }
+      .filter-toolbar-divider { display: none; }
+      .filter-select { flex: 1; }
     }
 
     /* ── PAGINATION ── */
@@ -882,7 +943,10 @@
   <div class="panel" id="panel-data">
     <div class="card">
       <div class="data-header">
-        <span class="section-label" style="margin:0">Data Laporan</span>
+        <div style="display:flex;align-items:center;gap:10px">
+          <span class="section-label" style="margin:0">Data Laporan</span>
+          <span class="data-count" id="data-count">0 laporan</span>
+        </div>
         <div class="data-header-right">
           <div class="download-wrap" id="download-wrap">
             <button class="btn-download" id="btn-download" onclick="toggleDownloadDropdown()">
@@ -898,38 +962,51 @@
               </button>
             </div>
           </div>
-          <span class="data-count" id="data-count">0 laporan</span>
         </div>
       </div>
-      <!-- Date Filter -->
-      <div class="date-filter-bar" id="table-date-filter">
-        <button class="btn-preset" onclick="setTableDatePreset('hari_ini', this)">Hari Ini</button>
-        <button class="btn-preset" onclick="setTableDatePreset('minggu_ini', this)">Minggu Ini</button>
-        <button class="btn-preset active" onclick="setTableDatePreset('bulan_ini', this)">Bulan Ini</button>
-        <button class="btn-preset" onclick="setTableDatePreset('semua', this)">Semua</button>
-        <div class="custom-picker-wrap" id="t-custom-wrap">
-          <button class="btn-preset" onclick="toggleCustomPicker('t')"><i class="ti ti-calendar" style="font-size:13px;margin-right:4px"></i>Custom</button>
-          <div class="custom-picker-dropdown" id="t-custom-dropdown">
-            <div class="custom-picker-label">Rentang Tanggal</div>
-            <div class="custom-picker-row">
-              <input type="date" id="t-date-from" placeholder="Dari" />
-              <span class="date-sep">—</span>
-              <input type="date" id="t-date-to" placeholder="Sampai" />
+      <!-- Filter Toolbar -->
+      <div class="filter-toolbar">
+        <!-- Search -->
+        <div class="filter-toolbar-search">
+          <i class="ti ti-search"></i>
+          <input type="text" id="t-search" placeholder="Cari desa, kelompok, atau user…" oninput="handleTableSearchFilter()" aria-label="Cari data laporan" />
+        </div>
+        <div class="filter-toolbar-divider"></div>
+        <!-- Waktu Laporan -->
+        <div class="waktu-wrap" id="t-waktu-wrap">
+          <button class="btn-waktu has-filter" id="t-btn-waktu" onclick="toggleWaktuDropdown('t')">
+            <i class="ti ti-calendar-event"></i>
+            <span id="t-waktu-label">Bulan Ini</span>
+            <i class="ti ti-chevron-down chevron"></i>
+          </button>
+          <div class="waktu-dropdown" id="t-waktu-dropdown">
+            <div class="waktu-presets">
+              <button class="btn-waktu-opt" onclick="setTableDatePreset('hari_ini', 't')"><i class="ti ti-sun"></i>Hari Ini</button>
+              <button class="btn-waktu-opt" onclick="setTableDatePreset('minggu_ini', 't')"><i class="ti ti-calendar-week"></i>Minggu Ini</button>
+              <button class="btn-waktu-opt active" onclick="setTableDatePreset('bulan_ini', 't')"><i class="ti ti-calendar-month"></i>Bulan Ini</button>
+              <button class="btn-waktu-opt" onclick="setTableDatePreset('semua', 't')"><i class="ti ti-infinity"></i>Semua</button>
             </div>
-            <button class="btn-apply-custom" onclick="applyTableCustomRange()">Terapkan</button>
+            <div class="waktu-divider"></div>
+            <div class="waktu-custom-section">
+              <div class="waktu-custom-label">Rentang Custom</div>
+              <div class="waktu-custom-row">
+                <input type="date" id="t-date-from" />
+                <span class="date-sep">—</span>
+                <input type="date" id="t-date-to" />
+              </div>
+              <button class="btn-apply-custom" onclick="applyTableCustomRange()">Terapkan</button>
+            </div>
           </div>
         </div>
-      </div>
-      <!-- Bar Filter & Pencarian -->
-      <div class="table-filter-bar">
-        <input type="text" id="t-search" placeholder="Cari desa, kelompok, atau user..." oninput="handleTableSearchFilter()" aria-label="Cari data laporan" />
-        <select id="t-filter-komoditas" onchange="handleTableSearchFilter()" aria-label="Filter Komoditas">
+        <!-- Komoditas -->
+        <select class="filter-select" id="t-filter-komoditas" onchange="handleTableSearchFilter()" aria-label="Filter Komoditas">
           <option value="semua">Semua Komoditas</option>
           <option>Padi</option>
           <option>Jagung</option>
           <option>Kedelai</option>
         </select>
-        <select id="t-filter-kegiatan" onchange="handleTableSearchFilter()" aria-label="Filter Kegiatan">
+        <!-- Kegiatan -->
+        <select class="filter-select" id="t-filter-kegiatan" onchange="handleTableSearchFilter()" aria-label="Filter Kegiatan">
           <option value="semua">Semua Kegiatan</option>
           <option>Bera</option>
           <option>Olah Lahan</option>
@@ -944,33 +1021,44 @@
   <!-- PANEL REKAP -->
   <div class="panel" id="panel-rekap">
 
-    <!-- Date Filter Rekap -->
-    <div class="date-filter-bar" id="rekap-date-filter" style="margin-bottom:14px">
-      <button class="btn-preset" onclick="setRekapDatePreset('hari_ini', this)">Hari Ini</button>
-      <button class="btn-preset" onclick="setRekapDatePreset('minggu_ini', this)">Minggu Ini</button>
-      <button class="btn-preset active" onclick="setRekapDatePreset('bulan_ini', this)">Bulan Ini</button>
-      <button class="btn-preset" onclick="setRekapDatePreset('semua', this)">Semua</button>
-      <div class="custom-picker-wrap" id="r-custom-wrap">
-        <button class="btn-preset" onclick="toggleCustomPicker('r')"><i class="ti ti-calendar" style="font-size:13px;margin-right:4px"></i>Custom</button>
-        <div class="custom-picker-dropdown" id="r-custom-dropdown">
-          <div class="custom-picker-label">Rentang Tanggal</div>
-          <div class="custom-picker-row">
-            <input type="date" id="r-date-from" placeholder="Dari" />
-            <span class="date-sep">—</span>
-            <input type="date" id="r-date-to" placeholder="Sampai" />
-          </div>
-          <button class="btn-apply-custom" onclick="applyRekapCustomRange()">Terapkan</button>
+    <!-- Rekap Toolbar -->
+    <div class="rekap-toolbar">
+      <!-- Jenis LTT chips -->
+      <div class="rekap-toolbar-left">
+        <div class="rekap-chips" id="rekap-filter">
+          <button class="chip active" data-filter="semua" onclick="setRekapFilter('semua', this)">Semua</button>
+          <button class="chip" data-filter="Reguler" onclick="setRekapFilter('Reguler', this)">Reguler</button>
+          <button class="chip" data-filter="Oplah Rawa" onclick="setRekapFilter('Oplah Rawa', this)">Oplah Rawa</button>
+          <button class="chip" data-filter="Oplah Non Rawa" onclick="setRekapFilter('Oplah Non Rawa', this)">Oplah Non Rawa</button>
+          <button class="chip" data-filter="CSR" onclick="setRekapFilter('CSR', this)">CSR</button>
         </div>
       </div>
-    </div>
-
-    <!-- Filter Jenis LTT -->
-    <div class="filter-row" id="rekap-filter">
-      <button class="chip active" data-filter="semua" onclick="setRekapFilter('semua', this)">Semua</button>
-      <button class="chip" data-filter="Reguler" onclick="setRekapFilter('Reguler', this)">Reguler</button>
-      <button class="chip" data-filter="Oplah Rawa" onclick="setRekapFilter('Oplah Rawa', this)">Oplah Rawa</button>
-      <button class="chip" data-filter="Oplah Non Rawa" onclick="setRekapFilter('Oplah Non Rawa', this)">Oplah Non Rawa</button>
-      <button class="chip" data-filter="CSR" onclick="setRekapFilter('CSR', this)">CSR</button>
+      <!-- Waktu -->
+      <div class="waktu-wrap" id="r-waktu-wrap">
+        <button class="btn-waktu has-filter" id="r-btn-waktu" onclick="toggleWaktuDropdown('r')">
+          <i class="ti ti-calendar-event"></i>
+          <span id="r-waktu-label">Bulan Ini</span>
+          <i class="ti ti-chevron-down chevron"></i>
+        </button>
+        <div class="waktu-dropdown waktu-dropdown-right" id="r-waktu-dropdown">
+          <div class="waktu-presets">
+            <button class="btn-waktu-opt" onclick="setRekapDatePreset('hari_ini', 'r')"><i class="ti ti-sun"></i>Hari Ini</button>
+            <button class="btn-waktu-opt" onclick="setRekapDatePreset('minggu_ini', 'r')"><i class="ti ti-calendar-week"></i>Minggu Ini</button>
+            <button class="btn-waktu-opt active" onclick="setRekapDatePreset('bulan_ini', 'r')"><i class="ti ti-calendar-month"></i>Bulan Ini</button>
+            <button class="btn-waktu-opt" onclick="setRekapDatePreset('semua', 'r')"><i class="ti ti-infinity"></i>Semua</button>
+          </div>
+          <div class="waktu-divider"></div>
+          <div class="waktu-custom-section">
+            <div class="waktu-custom-label">Rentang Custom</div>
+            <div class="waktu-custom-row">
+              <input type="date" id="r-date-from" />
+              <span class="date-sep">—</span>
+              <input type="date" id="r-date-to" />
+            </div>
+            <button class="btn-apply-custom" onclick="applyRekapCustomRange()">Terapkan</button>
+          </div>
+        </div>
+      </div>
     </div>
 
     <!-- Stat Cards -->
@@ -1072,11 +1160,56 @@
     return { from: null, to: null }; // 'semua'
   }
 
+  const PRESET_LABELS = {
+    hari_ini:   'Hari Ini',
+    minggu_ini: 'Minggu Ini',
+    bulan_ini:  'Bulan Ini',
+    semua:      'Semua Waktu',
+  };
+
+  function toggleWaktuDropdown(prefix) {
+    const dd  = document.getElementById(prefix + '-waktu-dropdown');
+    const btn = document.getElementById(prefix + '-btn-waktu');
+    const isOpen = dd.classList.contains('open');
+    // Close all
+    document.querySelectorAll('.waktu-dropdown').forEach(d => d.classList.remove('open'));
+    document.querySelectorAll('.btn-waktu').forEach(b => b.classList.remove('open'));
+    if (!isOpen) { dd.classList.add('open'); btn.classList.add('open'); }
+  }
+
+  function closeAllWaktuDropdowns() {
+    document.querySelectorAll('.waktu-dropdown').forEach(d => d.classList.remove('open'));
+    document.querySelectorAll('.btn-waktu').forEach(b => b.classList.remove('open'));
+  }
+
+  document.addEventListener('click', e => {
+    if (!e.target.closest('.waktu-wrap') && !e.target.closest('#download-wrap')) {
+      closeAllWaktuDropdowns();
+      closeDownloadDropdown();
+    }
+  });
+
+  function updateWaktuLabel(prefix, label) {
+    const span = document.getElementById(prefix + '-waktu-label');
+    const btn  = document.getElementById(prefix + '-btn-waktu');
+    if (span) span.textContent = label;
+    // Green tint when filtered, neutral when "semua"
+    if (btn) btn.classList.toggle('has-filter', label !== 'Semua Waktu');
+  }
+
+  function setActiveWaktuOpt(prefix, preset) {
+    document.querySelectorAll('#' + prefix + '-waktu-dropdown .btn-waktu-opt')
+      .forEach(b => b.classList.remove('active'));
+    // find by preset keyword in onclick
+    const match = [...document.querySelectorAll('#' + prefix + '-waktu-dropdown .btn-waktu-opt')]
+      .find(b => b.getAttribute('onclick')?.includes("'" + preset + "'"));
+    if (match) match.classList.add('active');
+  }
+
   function applyTableDatePreset(preset) {
     const r = getDateRange(preset);
     tableDateFrom = r.from;
     tableDateTo   = r.to;
-    // Sync date inputs inside dropdown
     const fi = document.getElementById('t-date-from');
     const ti = document.getElementById('t-date-to');
     if (fi) fi.value = r.from || '';
@@ -1093,32 +1226,33 @@
     if (ti) ti.value = r.to   || '';
   }
 
-  function toggleCustomPicker(prefix) {
-    const dropdown = document.getElementById(prefix + '-custom-dropdown');
-    const isOpen = dropdown.classList.contains('open');
-    // Close all dropdowns first
-    document.querySelectorAll('.custom-picker-dropdown').forEach(d => d.classList.remove('open'));
-    if (!isOpen) dropdown.classList.add('open');
+  function setTableDatePreset(preset, prefix) {
+    applyTableDatePreset(preset);
+    setActiveWaktuOpt('t', preset);
+    updateWaktuLabel('t', PRESET_LABELS[preset] || preset);
+    closeAllWaktuDropdowns();
+    currentPage = 1;
+    renderTable(true);
   }
 
-  // Close custom picker when clicking outside
-  document.addEventListener('click', e => {
-    if (!e.target.closest('.custom-picker-wrap')) {
-      document.querySelectorAll('.custom-picker-dropdown').forEach(d => d.classList.remove('open'));
-    }
-  });
+  function setRekapDatePreset(preset, prefix) {
+    applyRekapDatePreset(preset);
+    setActiveWaktuOpt('r', preset);
+    updateWaktuLabel('r', PRESET_LABELS[preset] || preset);
+    closeAllWaktuDropdowns();
+    renderRekap();
+  }
 
   function applyTableCustomRange() {
     const from = document.getElementById('t-date-from')?.value || null;
     const to   = document.getElementById('t-date-to')?.value   || null;
-    if (!from && !to) return;
+    if (!from || !to) { return; }
     tableDateFrom = from;
     tableDateTo   = to;
-    // Mark Custom button active, deactivate presets
-    document.querySelectorAll('#table-date-filter .btn-preset').forEach(b => b.classList.remove('active'));
-    const customBtn = document.querySelector('#t-custom-wrap .btn-preset');
-    if (customBtn) customBtn.classList.add('active');
-    document.getElementById('t-custom-dropdown').classList.remove('open');
+    document.querySelectorAll('#t-waktu-dropdown .btn-waktu-opt').forEach(b => b.classList.remove('active'));
+    const label = from + ' — ' + to;
+    updateWaktuLabel('t', label);
+    closeAllWaktuDropdowns();
     currentPage = 1;
     renderTable(true);
   }
@@ -1126,28 +1260,13 @@
   function applyRekapCustomRange() {
     const from = document.getElementById('r-date-from')?.value || null;
     const to   = document.getElementById('r-date-to')?.value   || null;
-    if (!from && !to) return;
+    if (!from || !to) { return; }
     rekapDateFrom = from;
     rekapDateTo   = to;
-    document.querySelectorAll('#rekap-date-filter .btn-preset').forEach(b => b.classList.remove('active'));
-    const customBtn = document.querySelector('#r-custom-wrap .btn-preset');
-    if (customBtn) customBtn.classList.add('active');
-    document.getElementById('r-custom-dropdown').classList.remove('open');
-    renderRekap();
-  }
-
-  function setTableDatePreset(preset, btn) {
-    document.querySelectorAll('#table-date-filter .btn-preset').forEach(b => b.classList.remove('active'));
-    if (btn) btn.classList.add('active');
-    applyTableDatePreset(preset);
-    currentPage = 1;
-    renderTable(true);
-  }
-
-  function setRekapDatePreset(preset, btn) {
-    document.querySelectorAll('#rekap-date-filter .btn-preset').forEach(b => b.classList.remove('active'));
-    if (btn) btn.classList.add('active');
-    applyRekapDatePreset(preset);
+    document.querySelectorAll('#r-waktu-dropdown .btn-waktu-opt').forEach(b => b.classList.remove('active'));
+    const label = from + ' — ' + to;
+    updateWaktuLabel('r', label);
+    closeAllWaktuDropdowns();
     renderRekap();
   }
 
@@ -1816,7 +1935,7 @@
   window.updateData             = updateData;
   window.setTableDatePreset     = setTableDatePreset;
   window.setRekapDatePreset     = setRekapDatePreset;
-  window.toggleCustomPicker     = toggleCustomPicker;
+  window.toggleWaktuDropdown    = toggleWaktuDropdown;
   window.applyTableCustomRange  = applyTableCustomRange;
   window.applyRekapCustomRange  = applyRekapCustomRange;
 
