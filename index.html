@@ -413,7 +413,7 @@
 
     /* ── REKAP TOOLBAR ── */
     .rekap-toolbar {
-      display: grid; grid-template-columns: 260px 180px;
+      display: grid; grid-template-columns: 260px 160px;
       align-items: end; gap: 12px; margin-bottom: 1.5rem;
     }
     .rekap-toolbar-left,
@@ -457,6 +457,14 @@
       .rekap-toolbar { grid-template-columns: 1fr 1fr; gap: 8px; align-items: end; }
       .rekap-select-wrap { max-width: none; }
       .rekap-toolbar .waktu-wrap { min-width: 0; width: 100%; }
+      .rekap-toolbar .btn-waktu {
+        min-height: 38px;
+        height: 38px;
+        padding: 7px 8px;
+        gap: 4px;
+        font-size: 12px;
+        border-radius: 10px;
+      }
       .rekap-toolbar-label { font-size: 10px; }
       .rekap-select { min-height: 38px; padding-top: 7px; padding-bottom: 7px; font-size: 12px; }
     }
@@ -693,17 +701,16 @@
     }
     @media (max-width: 600px) {
       .filter-toolbar {
-        flex-wrap: nowrap;
+        display: grid;
+        grid-template-columns: minmax(92px, 1fr) 88px 96px 96px;
+        align-items: center;
         gap: 6px;
-        overflow-x: auto;
-        padding-bottom: 4px;
+        overflow: visible;
+        padding-bottom: 0;
         margin-bottom: 0.9rem;
-        scrollbar-width: none;
       }
-      .filter-toolbar::-webkit-scrollbar { display: none; }
       .filter-toolbar-search {
-        flex: 0 0 145px;
-        min-width: 145px;
+        min-width: 0;
       }
       .filter-toolbar-search i {
         left: 9px;
@@ -717,11 +724,12 @@
       }
       .filter-toolbar-divider { display: none; }
       .filter-toolbar #t-waktu-wrap {
-        flex: 0 0 112px;
+        min-width: 0;
       }
       .filter-toolbar #t-btn-waktu {
         width: 100%;
         height: 36px;
+        min-height: 36px;
         padding: 7px 8px;
         gap: 4px;
         justify-content: center;
@@ -730,7 +738,8 @@
       }
       .filter-toolbar #t-btn-waktu .ti-calendar-event { display: none; }
       .filter-select {
-        flex: 0 0 132px;
+        width: 100%;
+        min-width: 0;
         height: 36px;
         padding: 7px 24px 7px 9px;
         font-size: 11px;
