@@ -1066,24 +1066,35 @@
         border-radius: 50%;
       }
       .container {
-        padding: 1rem 0.65rem 3rem;
+        padding: 1rem 0.65rem 5.75rem;
       }
       .card {
-        padding: 1.25rem;
+        padding: 1rem;
+        border-radius: 12px;
+        margin-bottom: 1rem;
       }
+      .section-label { margin-bottom: 0.9rem; }
       .tabs {
+        position: fixed;
+        left: 10px;
+        right: 10px;
+        bottom: 10px;
+        bottom: max(10px, env(safe-area-inset-bottom));
+        z-index: 900;
         display: grid;
         grid-template-columns: repeat(4, minmax(0, 1fr));
-        gap: 3px;
-        padding: 4px;
-        margin-bottom: 1rem;
-        border-radius: 10px;
+        gap: 4px;
+        padding: 5px;
+        margin-bottom: 0;
+        border-radius: 16px;
+        border-color: var(--border-strong);
+        box-shadow: 0 14px 34px rgba(19, 27, 20, 0.18);
       }
       .tab {
         min-width: 0;
-        min-height: 44px;
+        min-height: 48px;
         padding: 6px 2px;
-        border-radius: 7px;
+        border-radius: 11px;
         flex-direction: column;
         gap: 2px;
         font-size: 10px;
@@ -1096,7 +1107,7 @@
         line-height: 1;
       }
       .tab.active {
-        box-shadow: 0 2px 7px rgba(46, 125, 50, 0.12);
+        box-shadow: 0 5px 13px rgba(46, 125, 50, 0.2);
       }
     }
 
@@ -1169,8 +1180,8 @@
           <input type="date" id="f-tanggal" />
         </div>
         <div class="field">
-          <label for="f-user">Nama User</label>
-          <input type="text" id="f-user" placeholder="Nama petugas" />
+          <label for="f-user">Identitas</label>
+          <input type="text" id="f-user" placeholder="Nama Petani" />
         </div>
         <div class="field">
           <label for="f-desa">Desa</label>
