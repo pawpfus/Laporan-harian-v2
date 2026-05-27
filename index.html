@@ -719,13 +719,13 @@
     @media (prefers-color-scheme: dark) { .btn-page-active { color: #0d130e !important; } }
 
     /* ── PRODUKSI PANEL ── */
-    #panel-produksi { display: none; flex-direction: column; gap: 16px; }
+    #panel-produksi { display: none; flex-direction: column; gap: 12px; }
     #panel-produksi.active { display: flex; }
 
     /* ─ Top bar ─ */
     .produksi-topbar {
       display: flex; align-items: center; justify-content: space-between;
-      gap: 12px; flex-wrap: wrap;
+      gap: 10px; flex-wrap: wrap;
     }
     .produksi-topbar-left { display: flex; flex-direction: column; gap: 2px; }
     .produksi-topbar-title {
@@ -733,15 +733,15 @@
     }
     .produksi-topbar-sub { font-size: 12px; color: var(--text-muted); }
     .btn-produksi-add {
-      display: inline-flex; align-items: center; gap: 8px;
-      padding: 10px 18px; font-size: 13px; font-weight: 700; font-family: inherit;
+      display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+      min-height: 44px; padding: 10px 16px; font-size: 13px; font-weight: 700; font-family: inherit;
       background: var(--green-600); color: #fff; border: none;
-      border-radius: 99px; cursor: pointer; transition: all 0.2s;
-      box-shadow: 0 4px 14px rgba(46,125,50,0.22); white-space: nowrap;
+      border-radius: 10px; cursor: pointer; transition: all 0.2s;
+      box-shadow: 0 3px 10px rgba(46,125,50,0.18); white-space: nowrap;
       letter-spacing: 0.01em;
     }
     @media (prefers-color-scheme: dark) { .btn-produksi-add { color: #0d130e; } }
-    .btn-produksi-add:hover { filter: brightness(1.08); transform: translateY(-2px); box-shadow: 0 6px 18px rgba(46,125,50,0.28); }
+    .btn-produksi-add:hover { filter: brightness(1.06); transform: translateY(-1px); box-shadow: 0 5px 14px rgba(46,125,50,0.24); }
 
     /* ─ Formula bar ─ */
     .produksi-formula {
@@ -759,19 +759,19 @@
     }
 
     /* ─ Calculator cards ─ */
-    .produksi-cards { display: flex; flex-direction: column; gap: 12px; }
+    .produksi-cards { display: flex; flex-direction: column; gap: 10px; }
 
     .calc-card {
       background: var(--surface); border: 1px solid var(--border);
-      border-radius: 16px; overflow: hidden;
-      box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+      border-radius: 10px; overflow: hidden;
+      box-shadow: 0 1px 8px rgba(0,0,0,0.035);
       transition: box-shadow 0.2s;
     }
-    .calc-card:hover { box-shadow: 0 6px 20px rgba(0,0,0,0.07); }
+    .calc-card:hover { box-shadow: 0 4px 14px rgba(0,0,0,0.06); }
 
     .calc-card-header {
       display: flex; align-items: center; justify-content: space-between;
-      padding: 12px 16px 10px; border-bottom: 1px solid var(--border);
+      padding: 10px 12px; border-bottom: 1px solid var(--border);
       background: var(--bg); gap: 10px;
     }
     .calc-card-num {
@@ -789,34 +789,34 @@
     .calc-card-name-placeholder { color: var(--text-muted); font-weight: 400; }
     .calc-card-sub { font-size: 11px; color: var(--text-muted); }
     .btn-hapus-baris {
-      background: transparent; border: none; color: var(--text-muted);
-      cursor: pointer; padding: 6px; border-radius: 8px; font-size: 16px;
-      display: flex; align-items: center; transition: all 0.15s; flex-shrink: 0;
+      width: 36px; height: 36px; background: transparent; border: none; color: var(--text-muted);
+      cursor: pointer; padding: 0; border-radius: 8px; font-size: 16px;
+      display: flex; align-items: center; justify-content: center; transition: all 0.15s; flex-shrink: 0;
     }
     .btn-hapus-baris:hover { background: var(--red-50); color: var(--red-600); }
 
     .calc-card-body {
-      display: grid; grid-template-columns: 1fr 1fr; gap: 0;
+      display: flex; flex-direction: column;
     }
-    @media (max-width: 640px) { .calc-card-body { grid-template-columns: 1fr; } }
 
     /* Left: input fields */
     .calc-inputs {
-      padding: 14px 16px; display: flex; flex-direction: column; gap: 10px;
-      border-right: 1px solid var(--border);
+      padding: 12px; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
     }
-    @media (max-width: 640px) { .calc-inputs { border-right: none; border-bottom: 1px solid var(--border); } }
 
     .calc-field { display: flex; flex-direction: column; gap: 4px; }
+    .calc-field-full { grid-column: 1 / -1; }
     .calc-field-label {
-      font-size: 10px; font-weight: 600; color: var(--text-muted);
+      font-size: 10px; font-weight: 700; color: var(--text-muted);
       text-transform: uppercase; letter-spacing: 0.07em;
     }
+    .calc-field-control { position: relative; display: flex; align-items: center; }
     .calc-field-row { display: flex; gap: 6px; }
     .calc-input {
       flex: 1; font-family: inherit; font-size: 14px; font-weight: 500;
-      padding: 9px 11px; border: 1.5px solid var(--border-strong);
-      border-radius: 10px; background: var(--bg); color: var(--text);
+      min-height: 42px; padding: 9px 10px; border: 1px solid var(--border-strong);
+      border-radius: 8px; background: var(--bg); color: var(--text);
       outline: none; transition: all 0.18s; min-width: 0;
     }
     .calc-input:focus {
@@ -824,44 +824,51 @@
       box-shadow: 0 0 0 3px rgba(46,125,50,0.1);
     }
     .calc-input.num { text-align: right; font-variant-numeric: tabular-nums; }
+    .calc-field-control .calc-input.num { padding-right: 44px; width: 100%; }
     select.calc-input { cursor: pointer; padding-right: 8px; }
     .calc-input-unit {
-      display: flex; align-items: center; padding: 0 10px;
-      background: var(--bg); border: 1.5px solid var(--border-strong);
-      border-radius: 10px; font-size: 12px; font-weight: 600;
-      color: var(--text-muted); white-space: nowrap; flex-shrink: 0;
+      position: absolute; right: 8px; top: 50%; transform: translateY(-50%);
+      font-size: 11px; font-weight: 700; color: var(--text-muted);
+      pointer-events: none; white-space: nowrap;
     }
 
     /* Right: result display */
     .calc-results {
-      padding: 14px 16px; display: grid;
-      grid-template-columns: 1fr 1fr;
+      padding: 10px 12px 12px; display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
       gap: 10px; align-content: start;
+      border-top: 1px solid var(--border);
+      background: var(--bg);
     }
-    @media (max-width: 400px) { .calc-results { grid-template-columns: 1fr; } }
 
-    .calc-result-item { display: flex; flex-direction: column; gap: 3px; }
+    .calc-result-item {
+      min-width: 0; display: flex; flex-direction: column; gap: 2px;
+      padding: 9px; background: var(--surface); border: 1px solid var(--border);
+      border-radius: 8px;
+    }
     .calc-result-label {
       font-size: 10px; font-weight: 700; color: var(--text-muted);
-      text-transform: uppercase; letter-spacing: 0.07em;
+      text-transform: uppercase; letter-spacing: 0.04em;
     }
     .calc-result-val {
-      font-size: 20px; font-weight: 800; color: var(--text);
+      font-size: 17px; font-weight: 800; color: var(--text);
       line-height: 1.1; font-variant-numeric: tabular-nums;
       transition: color 0.2s;
+      overflow-wrap: anywhere;
     }
     .calc-result-val.has-val { color: var(--green-600); }
     .calc-result-unit { font-size: 10px; color: var(--text-muted); font-weight: 500; }
-    .calc-result-item.primary .calc-result-val { font-size: 26px; }
+    .calc-result-item.primary .calc-result-val { font-size: 17px; }
 
     /* ─ Total bar ─ */
     .produksi-total-bar {
-      background: linear-gradient(135deg, var(--green-600), #1b5e20);
-      border-radius: 16px; padding: 18px 20px;
-      display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-      gap: 16px;
+      background: var(--green-600);
+      border-radius: 10px; padding: 12px;
+      display: grid; grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 8px;
+      box-shadow: 0 6px 24px rgba(46,125,50,0.22);
     }
-    .ptb-item { display: flex; flex-direction: column; gap: 4px; }
+    .ptb-item { min-width: 0; display: flex; flex-direction: column; gap: 4px; }
     .ptb-label {
       font-size: 10px; font-weight: 700; color: rgba(255,255,255,0.65);
       text-transform: uppercase; letter-spacing: 0.08em;
@@ -879,13 +886,57 @@
 
     /* ─ Empty state ─ */
     .produksi-empty {
-      text-align: center; padding: 3rem 1rem;
+      text-align: center; padding: 2rem 1rem;
       color: var(--text-muted); font-size: 14px;
       background: var(--surface); border: 2px dashed var(--border);
-      border-radius: 16px;
+      border-radius: 10px;
     }
     .produksi-empty i { font-size: 40px; display: block; margin-bottom: 12px; opacity: 0.25; }
     .produksi-empty strong { display: block; font-size: 15px; font-weight: 700; color: var(--text); margin-bottom: 4px; }
+
+    @media (max-width: 720px) {
+      #panel-produksi { gap: 10px; }
+      .produksi-topbar { align-items: stretch; }
+      .produksi-topbar-left { display: none; }
+      .btn-produksi-add { width: 100%; }
+      .calc-inputs { padding: 10px; gap: 8px; }
+      .calc-results { grid-template-columns: repeat(2, minmax(0, 1fr)); padding: 8px 10px 10px; gap: 8px; }
+      .produksi-total-bar { grid-template-columns: repeat(2, minmax(0, 1fr)); position: sticky; bottom: 10px; z-index: 4; }
+      .ptb-val { font-size: 18px; }
+    }
+
+    @media (max-width: 480px) {
+      #panel-produksi { gap: 8px; }
+      .produksi-cards { gap: 8px; }
+      .btn-produksi-add { min-height: 38px; padding: 8px 12px; font-size: 12px; }
+      .calc-card-header { padding: 8px 9px; gap: 8px; }
+      .calc-card-num { width: 22px; height: 22px; font-size: 11px; }
+      .calc-card-name { font-size: 13px; }
+      .calc-card-sub { font-size: 10px; }
+      .btn-hapus-baris { width: 32px; height: 32px; }
+      .calc-inputs { grid-template-columns: repeat(2, minmax(0, 1fr)); padding: 8px; gap: 7px; }
+      .calc-field-full { grid-column: 1 / -1; }
+      .calc-field-label { font-size: 9px; letter-spacing: 0.04em; }
+      .calc-input { min-height: 36px; padding: 7px 8px; font-size: 13px; border-radius: 7px; }
+      .calc-field-control .calc-input.num { padding-right: 38px; }
+      .calc-input-unit { right: 7px; font-size: 9px; }
+      .calc-results { padding: 7px 8px 8px; gap: 6px; }
+      .calc-result-item { padding: 7px; border-radius: 7px; }
+      .calc-result-label { font-size: 9px; }
+      .calc-result-val,
+      .calc-result-item.primary .calc-result-val { font-size: 15px; }
+      .calc-result-unit { display: none; }
+      .produksi-total-bar { bottom: 6px; padding: 8px; gap: 6px; }
+      .ptb-label { font-size: 8.5px; letter-spacing: 0.04em; }
+      .ptb-val { font-size: 15px; }
+      .ptb-unit { font-size: 9px; }
+    }
+
+    @media (max-width: 340px) {
+      .calc-inputs,
+      .calc-results,
+      .produksi-total-bar { grid-template-columns: 1fr; }
+    }
 
     /* ── EDIT ACTION BUTTON ── */
     .btn-edit {
@@ -988,14 +1039,47 @@
         border-radius: 50%;
       }
       .container {
-        padding: 1.25rem 1rem 3.5rem;
+        padding: 1rem 0.65rem 3rem;
       }
       .card {
         padding: 1.25rem;
       }
+      .tabs {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 3px;
+        padding: 4px;
+        margin-bottom: 1rem;
+        border-radius: 10px;
+      }
       .tab {
-        padding: 9px 8px;
-        font-size: 13px;
+        min-width: 0;
+        min-height: 44px;
+        padding: 6px 2px;
+        border-radius: 7px;
+        flex-direction: column;
+        gap: 2px;
+        font-size: 10px;
+        line-height: 1.1;
+        white-space: nowrap;
+        box-shadow: none;
+      }
+      .tab i {
+        font-size: 16px;
+        line-height: 1;
+      }
+      .tab.active {
+        box-shadow: 0 2px 7px rgba(46, 125, 50, 0.12);
+      }
+    }
+
+    @media (max-width: 340px) {
+      .container {
+        padding-left: 0.5rem;
+        padding-right: 0.5rem;
+      }
+      .tab {
+        font-size: 9px;
       }
     }
   </style>
@@ -2194,62 +2278,50 @@
         </div>
         <div class="calc-card-body">
           <div class="calc-inputs">
-            <div class="calc-field">
+            <div class="calc-field calc-field-full">
               <div class="calc-field-label">Nama Petani / Poktan</div>
               <input class="calc-input input-nama" value="${row.nama}" placeholder="Nama petani atau kelompok tani…"
                 oninput="updateProduksiRow(${row.id},'nama',this.value)" />
             </div>
             <div class="calc-field">
-              <div class="calc-field-row">
-                <div class="calc-field" style="flex:1">
-                  <div class="calc-field-label">Desa</div>
-                  <input class="calc-input" value="${row.desa}" placeholder="Nama desa…"
-                    oninput="updateProduksiRow(${row.id},'desa',this.value)" />
-                </div>
-                <div class="calc-field" style="flex:1">
-                  <div class="calc-field-label">Komoditas</div>
-                  <select class="calc-input" onchange="updateProduksiRow(${row.id},'komoditas',this.value)">${komodOpts}</select>
-                </div>
+              <div class="calc-field-label">Desa</div>
+              <input class="calc-input" value="${row.desa}" placeholder="Nama desa…"
+                oninput="updateProduksiRow(${row.id},'desa',this.value)" />
+            </div>
+            <div class="calc-field">
+              <div class="calc-field-label">Komoditas</div>
+              <select class="calc-input" onchange="updateProduksiRow(${row.id},'komoditas',this.value)">${komodOpts}</select>
+            </div>
+            <div class="calc-field">
+              <div class="calc-field-label">Luas</div>
+              <div class="calc-field-control">
+                <input class="calc-input num" type="number" min="0" step="0.01" value="${row.luas}" placeholder="0,00"
+                  oninput="updateProduksiRow(${row.id},'luas',this.value)" />
+                <span class="calc-input-unit">Ha</span>
               </div>
             </div>
             <div class="calc-field">
-              <div class="calc-field-row">
-                <div class="calc-field" style="flex:1">
-                  <div class="calc-field-label">Luas</div>
-                  <div class="calc-field-row">
-                    <input class="calc-input num" type="number" min="0" step="0.01" value="${row.luas}" placeholder="0,00"
-                      oninput="updateProduksiRow(${row.id},'luas',this.value)" />
-                    <span class="calc-input-unit">Ha</span>
-                  </div>
-                </div>
-                <div class="calc-field" style="flex:1">
-                  <div class="calc-field-label">Kadar Air</div>
-                  <div class="calc-field-row">
-                    <input class="calc-input num" type="number" min="0" max="99" step="0.1" value="${row.kadarAir}" placeholder="14"
-                      oninput="updateProduksiRow(${row.id},'kadarAir',this.value)" />
-                    <span class="calc-input-unit">%</span>
-                  </div>
-                </div>
+              <div class="calc-field-label">Kadar Air</div>
+              <div class="calc-field-control">
+                <input class="calc-input num" type="number" min="0" max="99" step="0.1" value="${row.kadarAir}" placeholder="14"
+                  oninput="updateProduksiRow(${row.id},'kadarAir',this.value)" />
+                <span class="calc-input-unit">%</span>
               </div>
             </div>
             <div class="calc-field">
-              <div class="calc-field-row">
-                <div class="calc-field" style="flex:1">
-                  <div class="calc-field-label">Jumlah Karung</div>
-                  <div class="calc-field-row">
-                    <input class="calc-input num" type="number" min="0" step="1" value="${row.karung}" placeholder="0"
-                      oninput="updateProduksiRow(${row.id},'karung',this.value)" />
-                    <span class="calc-input-unit">krg</span>
-                  </div>
-                </div>
-                <div class="calc-field" style="flex:1">
-                  <div class="calc-field-label">Berat / Karung</div>
-                  <div class="calc-field-row">
-                    <input class="calc-input num" type="number" min="0" step="0.1" value="${row.beratKarung}" placeholder="0,0"
-                      oninput="updateProduksiRow(${row.id},'beratKarung',this.value)" />
-                    <span class="calc-input-unit">kg</span>
-                  </div>
-                </div>
+              <div class="calc-field-label">Jumlah Karung</div>
+              <div class="calc-field-control">
+                <input class="calc-input num" type="number" min="0" step="1" value="${row.karung}" placeholder="0"
+                  oninput="updateProduksiRow(${row.id},'karung',this.value)" />
+                <span class="calc-input-unit">krg</span>
+              </div>
+            </div>
+            <div class="calc-field">
+              <div class="calc-field-label">Berat Rata-rata</div>
+              <div class="calc-field-control">
+                <input class="calc-input num" type="number" min="0" step="0.1" value="${row.beratKarung}" placeholder="0,0"
+                  oninput="updateProduksiRow(${row.id},'beratKarung',this.value)" />
+                <span class="calc-input-unit">kg</span>
               </div>
             </div>
           </div>
