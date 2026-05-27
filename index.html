@@ -702,7 +702,7 @@
     @media (max-width: 600px) {
       .filter-toolbar {
         display: grid;
-        grid-template-columns: minmax(92px, 1fr) 88px 96px 96px;
+        grid-template-columns: minmax(0, 1fr) 112px;
         align-items: center;
         gap: 6px;
         overflow: visible;
@@ -711,6 +711,20 @@
       }
       .filter-toolbar-search {
         min-width: 0;
+      }
+      .filter-select {
+        width: 100%;
+        min-width: 0;
+        height: 36px;
+        padding: 7px 24px 7px 9px;
+        font-size: 11px;
+        border-radius: 8px;
+      }
+      #t-filter-komoditas {
+        grid-column: 1;
+      }
+      #t-filter-kegiatan {
+        grid-column: 2;
       }
       .filter-toolbar-search i {
         left: 9px;
@@ -737,14 +751,6 @@
         border-radius: 8px;
       }
       .filter-toolbar #t-btn-waktu .ti-calendar-event { display: none; }
-      .filter-select {
-        width: 100%;
-        min-width: 0;
-        height: 36px;
-        padding: 7px 24px 7px 9px;
-        font-size: 11px;
-        border-radius: 8px;
-      }
     }
 
     /* ── PAGINATION ── */
