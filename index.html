@@ -718,6 +718,175 @@
     }
     @media (prefers-color-scheme: dark) { .btn-page-active { color: #0d130e !important; } }
 
+    /* ── PRODUKSI PANEL ── */
+    #panel-produksi { display: none; flex-direction: column; gap: 16px; }
+    #panel-produksi.active { display: flex; }
+
+    /* ─ Top bar ─ */
+    .produksi-topbar {
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 12px; flex-wrap: wrap;
+    }
+    .produksi-topbar-left { display: flex; flex-direction: column; gap: 2px; }
+    .produksi-topbar-title {
+      font-size: 16px; font-weight: 800; color: var(--text); letter-spacing: -0.3px;
+    }
+    .produksi-topbar-sub { font-size: 12px; color: var(--text-muted); }
+    .btn-produksi-add {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 10px 18px; font-size: 13px; font-weight: 700; font-family: inherit;
+      background: var(--green-600); color: #fff; border: none;
+      border-radius: 99px; cursor: pointer; transition: all 0.2s;
+      box-shadow: 0 4px 14px rgba(46,125,50,0.22); white-space: nowrap;
+      letter-spacing: 0.01em;
+    }
+    @media (prefers-color-scheme: dark) { .btn-produksi-add { color: #0d130e; } }
+    .btn-produksi-add:hover { filter: brightness(1.08); transform: translateY(-2px); box-shadow: 0 6px 18px rgba(46,125,50,0.28); }
+
+    /* ─ Formula bar ─ */
+    .produksi-formula {
+      display: flex; flex-wrap: wrap; align-items: center; gap: 6px 0;
+      font-size: 11.5px; color: var(--text-muted);
+      padding: 10px 16px; background: var(--bg);
+      border: 1px solid var(--border); border-radius: var(--radius-md);
+    }
+    .pf-item { display: flex; align-items: center; gap: 0; }
+    .pf-label { font-weight: 700; color: var(--text); padding: 0 4px; }
+    .pf-eq { padding: 0 4px; }
+    .pf-sep {
+      width: 1px; height: 14px; background: var(--border-strong);
+      margin: 0 12px; opacity: 0.5;
+    }
+
+    /* ─ Calculator cards ─ */
+    .produksi-cards { display: flex; flex-direction: column; gap: 12px; }
+
+    .calc-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 16px; overflow: hidden;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+      transition: box-shadow 0.2s;
+    }
+    .calc-card:hover { box-shadow: 0 6px 20px rgba(0,0,0,0.07); }
+
+    .calc-card-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 12px 16px 10px; border-bottom: 1px solid var(--border);
+      background: var(--bg); gap: 10px;
+    }
+    .calc-card-num {
+      width: 26px; height: 26px; border-radius: 50%;
+      background: var(--green-600); color: #fff;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 12px; font-weight: 800; flex-shrink: 0;
+    }
+    @media (prefers-color-scheme: dark) { .calc-card-num { color: #0d130e; } }
+    .calc-card-identity { display: flex; flex-direction: column; gap: 1px; flex: 1; min-width: 0; }
+    .calc-card-name {
+      font-size: 14px; font-weight: 700; color: var(--text);
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .calc-card-name-placeholder { color: var(--text-muted); font-weight: 400; }
+    .calc-card-sub { font-size: 11px; color: var(--text-muted); }
+    .btn-hapus-baris {
+      background: transparent; border: none; color: var(--text-muted);
+      cursor: pointer; padding: 6px; border-radius: 8px; font-size: 16px;
+      display: flex; align-items: center; transition: all 0.15s; flex-shrink: 0;
+    }
+    .btn-hapus-baris:hover { background: var(--red-50); color: var(--red-600); }
+
+    .calc-card-body {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 0;
+    }
+    @media (max-width: 640px) { .calc-card-body { grid-template-columns: 1fr; } }
+
+    /* Left: input fields */
+    .calc-inputs {
+      padding: 14px 16px; display: flex; flex-direction: column; gap: 10px;
+      border-right: 1px solid var(--border);
+    }
+    @media (max-width: 640px) { .calc-inputs { border-right: none; border-bottom: 1px solid var(--border); } }
+
+    .calc-field { display: flex; flex-direction: column; gap: 4px; }
+    .calc-field-label {
+      font-size: 10px; font-weight: 600; color: var(--text-muted);
+      text-transform: uppercase; letter-spacing: 0.07em;
+    }
+    .calc-field-row { display: flex; gap: 6px; }
+    .calc-input {
+      flex: 1; font-family: inherit; font-size: 14px; font-weight: 500;
+      padding: 9px 11px; border: 1.5px solid var(--border-strong);
+      border-radius: 10px; background: var(--bg); color: var(--text);
+      outline: none; transition: all 0.18s; min-width: 0;
+    }
+    .calc-input:focus {
+      border-color: var(--green-600); background: var(--surface);
+      box-shadow: 0 0 0 3px rgba(46,125,50,0.1);
+    }
+    .calc-input.num { text-align: right; font-variant-numeric: tabular-nums; }
+    select.calc-input { cursor: pointer; padding-right: 8px; }
+    .calc-input-unit {
+      display: flex; align-items: center; padding: 0 10px;
+      background: var(--bg); border: 1.5px solid var(--border-strong);
+      border-radius: 10px; font-size: 12px; font-weight: 600;
+      color: var(--text-muted); white-space: nowrap; flex-shrink: 0;
+    }
+
+    /* Right: result display */
+    .calc-results {
+      padding: 14px 16px; display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px; align-content: start;
+    }
+    @media (max-width: 400px) { .calc-results { grid-template-columns: 1fr; } }
+
+    .calc-result-item { display: flex; flex-direction: column; gap: 3px; }
+    .calc-result-label {
+      font-size: 10px; font-weight: 700; color: var(--text-muted);
+      text-transform: uppercase; letter-spacing: 0.07em;
+    }
+    .calc-result-val {
+      font-size: 20px; font-weight: 800; color: var(--text);
+      line-height: 1.1; font-variant-numeric: tabular-nums;
+      transition: color 0.2s;
+    }
+    .calc-result-val.has-val { color: var(--green-600); }
+    .calc-result-unit { font-size: 10px; color: var(--text-muted); font-weight: 500; }
+    .calc-result-item.primary .calc-result-val { font-size: 26px; }
+
+    /* ─ Total bar ─ */
+    .produksi-total-bar {
+      background: linear-gradient(135deg, var(--green-600), #1b5e20);
+      border-radius: 16px; padding: 18px 20px;
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+      gap: 16px;
+    }
+    .ptb-item { display: flex; flex-direction: column; gap: 4px; }
+    .ptb-label {
+      font-size: 10px; font-weight: 700; color: rgba(255,255,255,0.65);
+      text-transform: uppercase; letter-spacing: 0.08em;
+    }
+    .ptb-val {
+      font-size: 22px; font-weight: 900; color: #fff;
+      font-variant-numeric: tabular-nums; line-height: 1;
+    }
+    .ptb-unit { font-size: 10px; color: rgba(255,255,255,0.55); }
+    @media (prefers-color-scheme: dark) {
+      .ptb-val { color: #0d130e; }
+      .ptb-label { color: rgba(13,19,14,0.55); }
+      .ptb-unit  { color: rgba(13,19,14,0.45); }
+    }
+
+    /* ─ Empty state ─ */
+    .produksi-empty {
+      text-align: center; padding: 3rem 1rem;
+      color: var(--text-muted); font-size: 14px;
+      background: var(--surface); border: 2px dashed var(--border);
+      border-radius: 16px;
+    }
+    .produksi-empty i { font-size: 40px; display: block; margin-bottom: 12px; opacity: 0.25; }
+    .produksi-empty strong { display: block; font-size: 15px; font-weight: 700; color: var(--text); margin-bottom: 4px; }
+
     /* ── EDIT ACTION BUTTON ── */
     .btn-edit {
       background: transparent; border: none; color: var(--text-muted);
@@ -873,6 +1042,9 @@
     </button>
     <button class="tab" onclick="switchTab('rekap')" id="tab-rekap" role="tab">
       <i class="ti ti-chart-bar"></i> Rekap
+    </button>
+    <button class="tab" onclick="switchTab('produksi')" id="tab-produksi" role="tab">
+      <i class="ti ti-scale"></i> Produksi
     </button>
   </div>
 
@@ -1108,6 +1280,39 @@
     </div>
 
   </div><!-- /panel-rekap -->
+
+  <!-- PANEL PRODUKSI -->
+  <div class="panel" id="panel-produksi">
+
+    <!-- Top Bar -->
+    <div class="produksi-topbar">
+      <div class="produksi-topbar-left">
+        <div class="produksi-topbar-title"><i class="ti ti-scale" style="margin-right:6px;opacity:.7"></i>Kalkulator Timbang Hasil</div>
+        <div class="produksi-topbar-sub">Hitung GKP · GKG · Beras · Produktivitas secara otomatis</div>
+      </div>
+      <button class="btn-produksi-add" onclick="tambahBarisProduksi()">
+        <i class="ti ti-plus"></i> Tambah Petani
+      </button>
+    </div>
+
+    <!-- Formula Bar -->
+    <div class="produksi-formula">
+      <div class="pf-item"><span class="pf-label">GKP</span><span class="pf-eq">= Karung × Berat</span></div>
+      <div class="pf-sep"></div>
+      <div class="pf-item"><span class="pf-label">GKG</span><span class="pf-eq">= GKP × (100−KA) / 86</span></div>
+      <div class="pf-sep"></div>
+      <div class="pf-item"><span class="pf-label">Beras</span><span class="pf-eq">= GKG × 0,63</span></div>
+      <div class="pf-sep"></div>
+      <div class="pf-item"><span class="pf-label">Produktivitas</span><span class="pf-eq">= GKP / Luas / 1000</span></div>
+    </div>
+
+    <!-- Calculator Cards -->
+    <div class="produksi-cards" id="produksi-cards"></div>
+
+    <!-- Total Bar -->
+    <div id="produksi-total-wrap"></div>
+
+  </div><!-- /panel-produksi -->
 
 </div><!-- /container -->
 
@@ -1891,12 +2096,13 @@
 
   // ─── TABS ───────────────────────────────────────────────────────────
   function switchTab(name) {
-    ['input','data','rekap'].forEach(t => {
+    ['input','data','rekap','produksi'].forEach(t => {
       document.getElementById('panel-' + t).className = 'panel' + (t === name ? ' active' : '');
       document.getElementById('tab-'   + t).className = 'tab'   + (t === name ? ' active' : '');
     });
-    if (name === 'data')  renderTable(true);
-    if (name === 'rekap') updateRekap();
+    if (name === 'data')     renderTable(true);
+    if (name === 'rekap')    updateRekap();
+    if (name === 'produksi') renderProduksiTable();
   }
 
   // ─── DOWNLOAD DROPDOWN ──────────────────────────────────────────────
@@ -1916,8 +2122,206 @@
     if (!e.target.closest('#download-wrap')) closeDownloadDropdown();
   });
 
-  // ─── EXPOSE GLOBALS ─────────────────────────────────────────────────
-  window.switchTab       = switchTab;
+  // ─── PRODUKSI / TIMBANG HASIL ──────────────────────────────────────
+  let produksiRows = [];
+  let produksiIdCounter = 0;
+  const KOMODITAS_LIST = ['Padi','Jagung','Kedelai'];
+
+  function tambahBarisProduksi() {
+    const id = ++produksiIdCounter;
+    produksiRows.push({ id, nama:'', desa:'', komoditas:'Padi', luas:'', karung:'', beratKarung:'', kadarAir:14 });
+    renderProduksiCards();
+    setTimeout(() => {
+      const el = document.querySelector(`#calc-card-${id} .input-nama`);
+      if (el) el.focus();
+    }, 60);
+  }
+
+  function hapusBarisProduksi(id) {
+    produksiRows = produksiRows.filter(r => r.id !== id);
+    renderProduksiCards();
+  }
+
+  function updateProduksiRow(id, field, value) {
+    const row = produksiRows.find(r => r.id === id);
+    if (!row) return;
+    row[field] = value;
+    const nm  = document.querySelector(`#calc-card-${id} .calc-card-name`);
+    const sub = document.querySelector(`#calc-card-${id} .calc-card-sub`);
+    if (nm) { nm.textContent = row.nama || 'Nama petani…'; nm.classList.toggle('calc-card-name-placeholder', !row.nama); }
+    if (sub) sub.textContent = [row.desa, row.komoditas].filter(Boolean).join(' · ') || 'Desa · Komoditas';
+    const { gkp, gkg, beras, produk } = calcProduksi(row);
+    const setRes = (sel, val, dec) => {
+      const el = document.querySelector(`#calc-card-${id} ${sel}`);
+      if (!el) return;
+      el.textContent = val > 0 ? fmt(val, dec) : '—';
+      el.classList.toggle('has-val', val > 0);
+    };
+    setRes('.res-gkp', gkp, 1); setRes('.res-gkg', gkg, 1);
+    setRes('.res-beras', beras, 1); setRes('.res-produk', produk, 3);
+    renderTotalBar();
+  }
+
+  function calcProduksi(row) {
+    const luas   = parseFloat(row.luas)        || 0;
+    const karung = parseFloat(row.karung)      || 0;
+    const berat  = parseFloat(row.beratKarung) || 0;
+    const ka     = parseFloat(row.kadarAir)    ?? 14;
+    const gkp    = karung * berat;
+    const gkg    = ka < 100 ? gkp * (100 - ka) / 86 : 0;
+    const beras  = gkg * 0.63;
+    const produk = luas > 0 ? (gkp / luas / 1000) : 0;
+    return { gkp, gkg, beras, produk };
+  }
+
+  function fmt(n, dec = 1) {
+    if (!n || isNaN(n)) return '—';
+    return n.toLocaleString('id-ID', { minimumFractionDigits: dec, maximumFractionDigits: dec });
+  }
+
+  function renderProduksiCards() {
+    const container = document.getElementById('produksi-cards');
+    if (!container) return;
+    if (!produksiRows.length) {
+      container.innerHTML = `
+        <div class="produksi-empty">
+          <i class="ti ti-scale"></i>
+          <strong>Belum ada data</strong>
+          Klik "+ Tambah Petani" untuk mulai menghitung
+        </div>`;
+      renderTotalBar(); return;
+    }
+    container.innerHTML = produksiRows.map((row, idx) => {
+      const { gkp, gkg, beras, produk } = calcProduksi(row);
+      const komodOpts = KOMODITAS_LIST.map(k => `<option${k===row.komoditas?' selected':''}>${k}</option>`).join('');
+      const subText  = [row.desa, row.komoditas].filter(Boolean).join(' · ') || 'Desa · Komoditas';
+      return `
+      <div class="calc-card" id="calc-card-${row.id}">
+        <div class="calc-card-header">
+          <div class="calc-card-num">${idx+1}</div>
+          <div class="calc-card-identity">
+            <div class="calc-card-name${!row.nama?' calc-card-name-placeholder':''}">${row.nama||'Nama petani…'}</div>
+            <div class="calc-card-sub">${subText}</div>
+          </div>
+          <button class="btn-hapus-baris" onclick="hapusBarisProduksi(${row.id})" title="Hapus"><i class="ti ti-x"></i></button>
+        </div>
+        <div class="calc-card-body">
+          <div class="calc-inputs">
+            <div class="calc-field">
+              <div class="calc-field-label">Nama Petani / Poktan</div>
+              <input class="calc-input input-nama" value="${row.nama}" placeholder="Nama petani atau kelompok tani…"
+                oninput="updateProduksiRow(${row.id},'nama',this.value)" />
+            </div>
+            <div class="calc-field">
+              <div class="calc-field-row">
+                <div class="calc-field" style="flex:1">
+                  <div class="calc-field-label">Desa</div>
+                  <input class="calc-input" value="${row.desa}" placeholder="Nama desa…"
+                    oninput="updateProduksiRow(${row.id},'desa',this.value)" />
+                </div>
+                <div class="calc-field" style="flex:1">
+                  <div class="calc-field-label">Komoditas</div>
+                  <select class="calc-input" onchange="updateProduksiRow(${row.id},'komoditas',this.value)">${komodOpts}</select>
+                </div>
+              </div>
+            </div>
+            <div class="calc-field">
+              <div class="calc-field-row">
+                <div class="calc-field" style="flex:1">
+                  <div class="calc-field-label">Luas</div>
+                  <div class="calc-field-row">
+                    <input class="calc-input num" type="number" min="0" step="0.01" value="${row.luas}" placeholder="0,00"
+                      oninput="updateProduksiRow(${row.id},'luas',this.value)" />
+                    <span class="calc-input-unit">Ha</span>
+                  </div>
+                </div>
+                <div class="calc-field" style="flex:1">
+                  <div class="calc-field-label">Kadar Air</div>
+                  <div class="calc-field-row">
+                    <input class="calc-input num" type="number" min="0" max="99" step="0.1" value="${row.kadarAir}" placeholder="14"
+                      oninput="updateProduksiRow(${row.id},'kadarAir',this.value)" />
+                    <span class="calc-input-unit">%</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="calc-field">
+              <div class="calc-field-row">
+                <div class="calc-field" style="flex:1">
+                  <div class="calc-field-label">Jumlah Karung</div>
+                  <div class="calc-field-row">
+                    <input class="calc-input num" type="number" min="0" step="1" value="${row.karung}" placeholder="0"
+                      oninput="updateProduksiRow(${row.id},'karung',this.value)" />
+                    <span class="calc-input-unit">krg</span>
+                  </div>
+                </div>
+                <div class="calc-field" style="flex:1">
+                  <div class="calc-field-label">Berat / Karung</div>
+                  <div class="calc-field-row">
+                    <input class="calc-input num" type="number" min="0" step="0.1" value="${row.beratKarung}" placeholder="0,0"
+                      oninput="updateProduksiRow(${row.id},'beratKarung',this.value)" />
+                    <span class="calc-input-unit">kg</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="calc-results">
+            <div class="calc-result-item primary">
+              <div class="calc-result-label">GKP</div>
+              <div class="calc-result-val res-gkp${gkp>0?' has-val':''}">${gkp>0?fmt(gkp):'—'}</div>
+              <div class="calc-result-unit">kg · Gabah Kering Panen</div>
+            </div>
+            <div class="calc-result-item primary">
+              <div class="calc-result-label">GKG</div>
+              <div class="calc-result-val res-gkg${gkg>0?' has-val':''}">${gkg>0?fmt(gkg):'—'}</div>
+              <div class="calc-result-unit">kg · KA standar 14%</div>
+            </div>
+            <div class="calc-result-item primary">
+              <div class="calc-result-label">Beras</div>
+              <div class="calc-result-val res-beras${beras>0?' has-val':''}">${beras>0?fmt(beras):'—'}</div>
+              <div class="calc-result-unit">kg · rendemen 63%</div>
+            </div>
+            <div class="calc-result-item primary">
+              <div class="calc-result-label">Produktivitas</div>
+              <div class="calc-result-val res-produk${produk>0?' has-val':''}">${produk>0?fmt(produk,3):'—'}</div>
+              <div class="calc-result-unit">ton / Ha</div>
+            </div>
+          </div>
+        </div>
+      </div>`;
+    }).join('');
+    renderTotalBar();
+  }
+
+  function renderTotalBar() {
+    const wrap = document.getElementById('produksi-total-wrap');
+    if (!wrap) return;
+    if (!produksiRows.length) { wrap.innerHTML = ''; return; }
+    let totalLuas=0, totalGKP=0, totalGKG=0, totalBeras=0;
+    produksiRows.forEach(row => {
+      const c = calcProduksi(row);
+      totalLuas += parseFloat(row.luas)||0;
+      totalGKP  += c.gkp; totalGKG += c.gkg; totalBeras += c.beras;
+    });
+    const totalProduk = totalLuas > 0 ? (totalGKP / totalLuas / 1000) : 0;
+    wrap.innerHTML = `
+      <div class="produksi-total-bar">
+        <div class="ptb-item"><div class="ptb-label">Total Luas</div><div class="ptb-val">${fmt(totalLuas,2)}</div><div class="ptb-unit">Hektar</div></div>
+        <div class="ptb-item"><div class="ptb-label">Total GKP</div><div class="ptb-val">${fmt(totalGKP)}</div><div class="ptb-unit">kg</div></div>
+        <div class="ptb-item"><div class="ptb-label">Total GKG</div><div class="ptb-val">${fmt(totalGKG)}</div><div class="ptb-unit">kg</div></div>
+        <div class="ptb-item"><div class="ptb-label">Total Beras</div><div class="ptb-val">${fmt(totalBeras)}</div><div class="ptb-unit">kg</div></div>
+        <div class="ptb-item"><div class="ptb-label">Produktivitas Rata-rata</div><div class="ptb-val">${fmt(totalProduk,3)}</div><div class="ptb-unit">ton/Ha</div></div>
+      </div>`;
+  }
+
+  function renderProduksiTable() { renderProduksiCards(); }
+
+    // ─── EXPOSE GLOBALS ─────────────────────────────────────────────────
+  window.switchTab            = switchTab;
+  window.tambahBarisProduksi  = tambahBarisProduksi;
+  window.hapusBarisProduksi   = hapusBarisProduksi;
+  window.updateProduksiRow    = updateProduksiRow;
   window.simpanData      = simpanData;
   window.hapusData       = hapusData;
   window.exportPDF              = exportPDF;
