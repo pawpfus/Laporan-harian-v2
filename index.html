@@ -403,7 +403,8 @@
     }
     .filter-search input {
       width: 100%;
-      padding: 8px 10px 8px 32px;
+      height: 36px;
+      padding: 0 10px 0 32px;
       font-family: var(--font-ui); font-size: 13px;
       border: 1px solid var(--rule-2);
       border-radius: var(--r-md);
@@ -424,7 +425,8 @@
     }
     .filter-select {
       font-family: var(--font-ui); font-size: 12px; font-weight: 600;
-      padding: 8px 28px 8px 10px;
+      height: 36px;
+      padding: 0 28px 0 10px;
       border: 1px solid var(--rule-2);
       border-radius: var(--r-md);
       background: var(--ground);
@@ -447,7 +449,8 @@
     .waktu-wrap { position: relative; }
     .btn-waktu {
       display: inline-flex; align-items: center; gap: 6px;
-      padding: 8px 11px;
+      height: 36px;
+      padding: 0 11px;
       font-size: 12px; font-weight: 600; font-family: var(--font-ui);
       border: 1px solid var(--rule-2);
       border-radius: var(--r-md);
@@ -1014,10 +1017,10 @@
       .filter-search { grid-column: 1 / -1; }
       #t-filter-komoditas { grid-column: 1; }
       #t-filter-kegiatan  { grid-column: 2; }
-      .filter-select { width: 100%; height: 34px; padding: 6px 22px 6px 8px; font-size: 11px; }
+      .filter-select { width: 100%; height: 34px; padding: 0 22px 0 8px; font-size: 11px; }
       .filter-search input { height: 34px; font-size: 12px; }
       #t-waktu-wrap { grid-column: 1 / -1; }
-      #t-btn-waktu { width: 100%; height: 34px; min-height: 34px; justify-content: center; font-size: 11px; }
+      #t-btn-waktu { width: 100%; height: 34px; justify-content: center; font-size: 11px; }
       .rekap-toolbar { gap: 8px; }
       .stats-grid { grid-template-columns: 1fr 1fr; }
       .stat-val { font-size: 22px; }
@@ -1148,20 +1151,6 @@
           <span class="section-label" style="margin:0"><i class="ti ti-table"></i> Data Laporan</span>
           <span class="data-count" id="data-count">0 laporan</span>
         </div>
-        <div class="download-wrap" id="download-wrap">
-          <button class="btn-download" id="btn-download" onclick="toggleDownloadDropdown()">
-            <i class="ti ti-download"></i> Download
-            <i class="ti ti-chevron-down chevron"></i>
-          </button>
-          <div class="download-dropdown" id="download-dropdown">
-            <button class="btn-dl-option pdf" onclick="exportPDF(); closeDownloadDropdown()">
-              <i class="ti ti-file-type-pdf"></i> Export PDF
-            </button>
-            <button class="btn-dl-option excel" onclick="exportExcel(); closeDownloadDropdown()">
-              <i class="ti ti-file-spreadsheet"></i> Export Excel
-            </button>
-          </div>
-        </div>
       </div>
 
       <div class="filter-toolbar">
@@ -1206,6 +1195,24 @@
       </div>
 
       <div id="table-container"></div>
+
+      <div style="height:1px;background:var(--rule);margin:1.25rem 0 1rem"></div>
+      <div style="display:flex;justify-content:flex-end">
+      <div class="download-wrap" id="download-wrap" style="position:relative">
+        <button class="btn-download" id="btn-download" onclick="toggleDownloadDropdown()">
+          <i class="ti ti-download"></i> Download
+          <i class="ti ti-chevron-down chevron"></i>
+        </button>
+        <div class="download-dropdown" id="download-dropdown" style="bottom:calc(100% + 6px);top:auto">
+          <button class="btn-dl-option pdf" onclick="exportPDF(); closeDownloadDropdown()">
+            <i class="ti ti-file-type-pdf"></i> Export PDF
+          </button>
+          <button class="btn-dl-option excel" onclick="exportExcel(); closeDownloadDropdown()">
+            <i class="ti ti-file-spreadsheet"></i> Export Excel
+          </button>
+        </div>
+      </div>
+      </div>
     </div>
   </div>
 
