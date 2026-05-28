@@ -643,7 +643,8 @@
       pointer-events: none;
     }
     .rekap-select {
-      padding: 8px 11px 8px 33px;
+      height: 36px;
+      padding: 0 11px 0 33px;
       font-family: var(--font-ui); font-size: 13px; font-weight: 600;
       border: 1px solid var(--rule-2); border-radius: var(--r-md);
       background: var(--surface); color: var(--ink);
@@ -1021,9 +1022,10 @@
       .filter-select { width: 100%; height: 34px; padding: 0 22px 0 8px; font-size: 11px; }
       .filter-search input { height: 34px; font-size: 12px; }
       #t-btn-waktu { width: 100%; height: 34px; justify-content: center; font-size: 11px; }
-      .rekap-toolbar { gap: 6px; display: grid; grid-template-columns: 1fr 1fr; }
+      .rekap-toolbar { gap: 6px; display: grid; grid-template-columns: 1fr 1fr; align-items: end; }
       .rekap-field { width: 100%; }
-      .rekap-select { min-width: unset; width: 100%; }
+      .rekap-select-wrap { width: 100%; }
+      .rekap-select { min-width: unset; width: 100%; height: 36px; }
       #r-waktu-wrap { width: 100%; }
       #r-btn-waktu { width: 100%; height: 36px; justify-content: center; }
       .stats-grid { grid-template-columns: 1fr 1fr; }
