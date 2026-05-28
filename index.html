@@ -5,1193 +5,1045 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Laporan Pertanian</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css" />
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      --green-50: #eef7ee;
-      --green-100: #d5ecd2;
-      --green-400: #4caf50;
-      --green-600: #2e7d32;
-      --green-700: #1b5e20;
-      --green-800: #0d3012;
-      --amber-50: #fff8eb;
-      --amber-400: #fb8c00;
-      --amber-600: #d97706;
-      --amber-700: #b45309;
-      --blue-50: #eef6ff;
-      --blue-400: #60a5fa;
-      --blue-600: #2563eb;
-      --blue-800: #1e3a8a;
-      --teal-50: #ecfdf5;
-      --teal-400: #34d399;
-      --teal-600: #059669;
-      --coral-50: #fff5f5;
-      --coral-400: #f87171;
-      --coral-600: #dc2626;
-      --red-50: #fff5f5;
-      --red-600: #e11d48;
-      --gray-50: #f4f6f3;
-      --gray-100: #e1e5e0;
-      --gray-200: #c2c7c0;
-      --gray-400: #8c938a;
-      --gray-500: #6b7269;
-      --gray-700: #424741;
-      --bg: #f4f6f3;
-      --surface: #ffffff;
-      --text: #131b14;
-      --text-muted: #6b7269;
-      --border: rgba(46, 82, 38, 0.08);
-      --border-strong: rgba(46, 82, 38, 0.18);
-      --radius-md: 10px;
-      --radius-lg: 16px;
+      /* Palette — Forest Precision */
+      --ink:        #1a1f1a;
+      --ink-2:      #3a4039;
+      --ink-3:      #6b7569;
+      --ink-4:      #9da89c;
+      --rule:       #e2e8e1;
+      --rule-2:     #d0d8cf;
+      --surface:    #ffffff;
+      --ground:     #f5f7f4;
+      --ground-2:   #edf0ec;
+      --moss:       #2d5c2e;
+      --moss-2:     #1e4020;
+      --moss-3:     #dcecdc;
+      --moss-4:     #f0f7f0;
+      --amber:      #c47c12;
+      --amber-bg:   #fdf4e3;
+      --sky:        #1a5fa8;
+      --sky-bg:     #e8f0fb;
+      --coral:      #c0392b;
+      --coral-bg:   #fdecea;
+      --teal:       #0f7a6b;
+      --teal-bg:    #e6f5f3;
+
+      --r-sm:  6px;
+      --r-md:  10px;
+      --r-lg:  14px;
+      --r-xl:  18px;
+
+      --font-ui:   'Instrument Sans', system-ui, sans-serif;
+      --font-mono: 'DM Mono', 'Courier New', monospace;
+
+      --topbar-h: 60px;
+      --nav-h: 58px;
     }
 
     @media (prefers-color-scheme: dark) {
       :root {
-        --bg: #0b0f0b;
-        --surface: #121812;
-        --text: #edf2ec;
-        --text-muted: #8d968b;
-        --border: rgba(255, 255, 255, 0.06);
-        --border-strong: rgba(255, 255, 255, 0.12);
-        --green-50: #122815;
-        --green-100: #1a3c1f;
-        --green-400: #66bb6a;
-        --green-600: #81c784;
-        --green-700: #a5d6a7;
-        --green-800: #c8e6c9;
-        --amber-50: #2b1c08;
-        --amber-400: #ffb74d;
-        --amber-600: #ffa726;
-        --amber-700: #ffcc80;
-        --blue-50: #0a1e36;
-        --blue-400: #64b5f6;
-        --blue-600: #90caf9;
-        --blue-800: #bbdefb;
-        --teal-50: #08261b;
-        --teal-400: #4db6ac;
-        --teal-600: #80cbc4;
-        --coral-50: #331010;
-        --coral-400: #e57373;
-        --coral-600: #ef9a9a;
-        --red-50: #331010;
-        --red-600: #f48fb1;
-        --gray-50: #182019;
-        --gray-100: #252f26;
-        --gray-200: #39463b;
-        --gray-400: #8d968b;
-        --gray-500: #a5aea3;
-        --gray-700: #ccd4cb;
+        --ink:      #e8ede7;
+        --ink-2:    #c5ccc4;
+        --ink-3:    #8a9489;
+        --ink-4:    #5a635a;
+        --rule:     #2a312a;
+        --rule-2:   #333c33;
+        --surface:  #161c16;
+        --ground:   #0f140f;
+        --ground-2: #1a211a;
+        --moss:     #5db85f;
+        --moss-2:   #7dca7f;
+        --moss-3:   #1a301b;
+        --moss-4:   #0f1e10;
+        --amber:    #f0a030;
+        --amber-bg: #241a08;
+        --sky:      #5ba3e8;
+        --sky-bg:   #0d1e35;
+        --coral:    #e85c50;
+        --coral-bg: #2a1210;
+        --teal:     #3dd4bc;
+        --teal-bg:  #081f1d;
       }
     }
 
+    html { scroll-behavior: smooth; }
+
     body {
-      font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
-      background: var(--bg);
-      color: var(--text);
+      font-family: var(--font-ui);
+      background: var(--ground);
+      color: var(--ink);
       min-height: 100vh;
       line-height: 1.5;
       -webkit-font-smoothing: antialiased;
+      font-size: 14px;
     }
 
-    /* ── TOPBAR ── */
+    /* ── TOPBAR ─────────────────────────────────────────── */
     .topbar {
-      background: rgba(255, 255, 255, 0.75);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      border-bottom: 1px solid var(--border);
-      padding: 0 2rem;
-      height: 64px;
+      height: var(--topbar-h);
+      background: var(--surface);
+      border-bottom: 1px solid var(--rule);
       display: flex;
       align-items: center;
-      gap: 16px;
+      padding: 0 1.5rem;
+      gap: 12px;
       position: sticky;
       top: 0;
-      z-index: 100;
-      transition: background 0.3s, border 0.3s;
+      z-index: 200;
     }
-    @media (prefers-color-scheme: dark) {
-      .topbar {
-        background: rgba(18, 24, 18, 0.8);
-      }
-    }
-    .topbar-icon {
-      width: 38px; height: 38px;
-      border-radius: var(--radius-md);
-      background: linear-gradient(135deg, var(--green-100), var(--green-50));
+
+    .topbar-logo {
+      width: 34px; height: 34px;
+      background: var(--moss);
+      border-radius: var(--r-md);
       display: flex; align-items: center; justify-content: center;
       flex-shrink: 0;
-      box-shadow: 0 4px 10px rgba(46, 125, 50, 0.12);
     }
-    .topbar-icon i { font-size: 20px; color: var(--green-600); }
-    .topbar-title { font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
-    .topbar-sub { font-size: 12px; color: var(--text-muted); margin-top: 1px; }
-    .db-status {
+    .topbar-logo i { color: #fff; font-size: 18px; }
+
+    .topbar-wordmark {
+      font-size: 15px;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+      color: var(--ink);
+    }
+    .topbar-sub {
+      font-size: 12px;
+      color: var(--ink-3);
+      margin-top: 1px;
+    }
+
+    .db-pill {
       margin-left: auto;
-      display: flex; align-items: center; gap: 8px;
-      font-size: 13px; color: var(--text-muted);
-      background: var(--gray-50);
-      padding: 6px 12px;
-      border-radius: 20px;
-      border: 1px solid var(--border);
-    }
-    .db-dot {
-      width: 8px; height: 8px; border-radius: 50%;
-      background: var(--gray-200); transition: background 0.3s;
-    }
-    
-    @keyframes pulse-green {
-      0% { box-shadow: 0 0 0 0 rgba(74, 222, 128, 0.5); }
-      70% { box-shadow: 0 0 0 6px rgba(74, 222, 128, 0); }
-      100% { box-shadow: 0 0 0 0 rgba(74, 222, 128, 0); }
-    }
-    @keyframes pulse-red {
-      0% { box-shadow: 0 0 0 0 rgba(225, 29, 72, 0.5); }
-      70% { box-shadow: 0 0 0 6px rgba(225, 29, 72, 0); }
-      100% { box-shadow: 0 0 0 0 rgba(225, 29, 72, 0); }
-    }
-
-    .db-dot.ok  { background: #4ade80; animation: pulse-green 2s infinite; }
-    .db-dot.err { background: var(--red-600); animation: pulse-red 2s infinite; }
-
-    /* ── CONTAINER ── */
-    .container { max-width: 880px; margin: 0 auto; padding: 2rem 1.5rem 5rem; }
-
-    /* ── ALERT ── */
-    .alert {
-      padding: 12px 16px; border-radius: var(--radius-md);
-      font-size: 14px; margin-bottom: 1.5rem;
-      display: flex; align-items: center; gap: 10px;
-      animation: fadeIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      font-size: 12px;
       font-weight: 500;
+      color: var(--ink-3);
+      background: var(--ground);
+      border: 1px solid var(--rule);
+      padding: 5px 11px 5px 8px;
+      border-radius: 99px;
+      cursor: default;
+      user-select: none;
     }
-    @keyframes fadeIn { from { opacity:0; transform:translateY(-8px); } to { opacity:1; transform:none; } }
-    .alert.success { background: var(--green-50);  color: var(--green-700);  border: 1px solid rgba(46, 125, 50, 0.2); }
-    .alert.warning { background: var(--amber-50);  color: var(--amber-700);  border: 1px solid rgba(217, 119, 6, 0.2); }
-    .alert.error   { background: var(--red-50);    color: var(--red-600);    border: 1px solid rgba(225, 29, 72, 0.2); }
+
+    .db-dot {
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      background: var(--rule-2);
+      transition: background 0.4s;
+      flex-shrink: 0;
+    }
+    @keyframes pulse-ok {
+      0%,100% { box-shadow: 0 0 0 0 rgba(45,92,46,0.4); }
+      50% { box-shadow: 0 0 0 4px rgba(45,92,46,0); }
+    }
+    @keyframes pulse-err {
+      0%,100% { box-shadow: 0 0 0 0 rgba(192,57,43,0.4); }
+      50% { box-shadow: 0 0 0 4px rgba(192,57,43,0); }
+    }
+    .db-dot.ok  { background: #4caf50; animation: pulse-ok 2s infinite; }
+    .db-dot.err { background: var(--coral); animation: pulse-err 2s infinite; }
+
+    /* ── CONTAINER ─────────────────────────────────────── */
+    .shell {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 1.5rem 1.25rem 6rem;
+    }
+
+    /* ── ALERT ─────────────────────────────────────────── */
+    .alert {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 11px 14px;
+      border-radius: var(--r-md);
+      font-size: 13px;
+      font-weight: 500;
+      margin-bottom: 1.25rem;
+      border: 1px solid transparent;
+      animation: alertIn 0.25s ease;
+    }
+    @keyframes alertIn {
+      from { opacity:0; transform: translateY(-6px); }
+      to   { opacity:1; transform: none; }
+    }
     .alert.hidden  { display: none; }
-    .alert i { font-size: 18px; flex-shrink: 0; }
+    .alert.success { background: var(--moss-4); color: var(--moss); border-color: var(--moss-3); }
+    .alert.warning { background: var(--amber-bg); color: var(--amber); border-color: rgba(196,124,18,.2); }
+    .alert.error   { background: var(--coral-bg); color: var(--coral); border-color: rgba(192,57,43,.2); }
+    .alert i { font-size: 17px; flex-shrink: 0; }
 
-    /* ── TABS ── */
+    /* ── TABS / BOTTOM NAV ─────────────────────────────── */
     .tabs {
-      display: flex; gap: 6px;
-      background: var(--surface); border: 1px solid var(--border);
-      border-radius: 14px; padding: 6px; margin-bottom: 2rem;
-      box-shadow: inset 0 2px 4px rgba(0,0,0,0.01);
+      display: flex;
+      gap: 4px;
+      background: var(--surface);
+      border: 1px solid var(--rule);
+      border-radius: var(--r-xl);
+      padding: 5px;
+      margin-bottom: 1.5rem;
     }
+
     .tab {
-      flex: 1; padding: 11px 12px; font-size: 14px; font-weight: 600;
-      border: none; background: none; cursor: pointer;
-      border-radius: 10px; font-family: inherit;
-      color: var(--text-muted); transition: all 0.2s ease;
-      display: flex; align-items: center; justify-content: center; gap: 8px;
+      flex: 1;
+      padding: 10px 8px;
+      font-size: 13px;
+      font-weight: 600;
+      font-family: var(--font-ui);
+      border: none;
+      background: none;
+      cursor: pointer;
+      border-radius: 11px;
+      color: var(--ink-3);
+      transition: color 0.15s, background 0.15s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+      letter-spacing: -0.01em;
     }
-    .tab:hover { color: var(--text); background: rgba(46, 125, 50, 0.04); }
-    .tab.active { background: var(--green-600); color: #ffffff; box-shadow: 0 4px 12px rgba(46, 125, 50, 0.15); }
+    .tab i { font-size: 16px; }
+    .tab:hover { color: var(--ink); background: var(--ground); }
+    .tab.active {
+      background: var(--moss);
+      color: #fff;
+    }
     @media (prefers-color-scheme: dark) {
-      .tab.active { background: var(--green-600); color: #0d130e; box-shadow: 0 4px 12px rgba(129, 199, 132, 0.2); }
+      .tab.active { color: #e8ede7; }
     }
-    .tab i { font-size: 17px; }
-    .panel { display: none; }
+
+    .panel { display: none; animation: panelIn 0.2s ease; }
     .panel.active { display: block; }
+    @keyframes panelIn {
+      from { opacity: 0; transform: translateY(4px); }
+      to   { opacity: 1; transform: none; }
+    }
+    #panel-produksi { display: none; flex-direction: column; gap: 12px; }
+    #panel-produksi.active { display: flex; }
 
-    /* ── CARD ── */
+    /* ── CARD ──────────────────────────────────────────── */
     .card {
-      background: var(--surface); border: 1px solid var(--border);
-      border-radius: var(--radius-lg); padding: 2rem; margin-bottom: 1.5rem;
-      box-shadow: 0 10px 30px -10px rgba(46, 82, 38, 0.04), 0 1px 3px rgba(0, 0, 0, 0.01);
-      transition: transform 0.3s, box-shadow 0.3s;
-    }
-    .card:hover {
-      box-shadow: 0 12px 35px -10px rgba(46, 82, 38, 0.06), 0 2px 5px rgba(0, 0, 0, 0.01);
-    }
-    .section-label {
-      font-size: 12px; font-weight: 600; color: var(--text-muted);
-      text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 1.25rem;
-      display: flex; align-items: center; gap: 6px;
+      background: var(--surface);
+      border: 1px solid var(--rule);
+      border-radius: var(--r-lg);
+      padding: 1.5rem;
+      margin-bottom: 1.25rem;
     }
 
-    /* ── FORM ── */
-    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-    @media (max-width: 500px) { .form-grid { grid-template-columns: 1fr; } }
-    .field { display: flex; flex-direction: column; gap: 6px; }
-    .field label { font-size: 13px; font-weight: 500; color: var(--text-muted); }
+    /* ── SECTION LABEL ─────────────────────────────────── */
+    .section-label {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--ink-3);
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* ── FORM ──────────────────────────────────────────── */
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    @media (max-width: 480px) { .form-grid { grid-template-columns: 1fr; } }
+
+    .field { display: flex; flex-direction: column; gap: 5px; }
+    .field label {
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--ink-3);
+      letter-spacing: 0.01em;
+    }
     .field input, .field select {
-      font-family: inherit; font-size: 14px; padding: 10px 12px;
-      border: 1px solid var(--border-strong); border-radius: var(--radius-md);
-      background: var(--bg); color: var(--text); outline: none; transition: all 0.2s ease;
+      font-family: var(--font-ui);
+      font-size: 14px;
+      padding: 9px 11px;
+      border: 1px solid var(--rule-2);
+      border-radius: var(--r-md);
+      background: var(--ground);
+      color: var(--ink);
+      outline: none;
+      transition: border-color 0.15s, background 0.15s, box-shadow 0.15s;
+      width: 100%;
     }
     .field input:focus, .field select:focus {
-      border-color: var(--green-600);
-      box-shadow: 0 0 0 4px rgba(46, 125, 50, 0.12);
+      border-color: var(--moss);
       background: var(--surface);
+      box-shadow: 0 0 0 3px rgba(45,92,46,0.12);
     }
-    .divider { height: 1px; background: var(--border); margin: 1.75rem 0; }
 
-    /* ── BUTTONS ── */
+    .divider {
+      height: 1px;
+      background: var(--rule);
+      margin: 1.25rem 0;
+    }
+
+    /* ── SUBMIT BUTTON ─────────────────────────────────── */
     .btn-submit {
-      width: 100%; padding: 13px;
-      background: linear-gradient(135deg, var(--green-600), var(--green-700)); color: #ffffff;
-      border: none; border-radius: var(--radius-md);
-      font-size: 15px; font-weight: 600; font-family: inherit;
-      cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;
-      transition: all 0.25s ease;
-      box-shadow: 0 4px 12px rgba(46, 125, 50, 0.18);
+      width: 100%;
+      padding: 12px;
+      background: var(--moss);
+      color: #fff;
+      border: none;
+      border-radius: var(--r-md);
+      font-family: var(--font-ui);
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: background 0.15s, transform 0.1s;
+      letter-spacing: -0.01em;
     }
-    @media (prefers-color-scheme: dark) {
-      .btn-submit {
-        background: linear-gradient(135deg, var(--green-600), var(--green-100));
-        color: #0d130e;
-        box-shadow: 0 4px 12px rgba(129, 199, 132, 0.15);
-      }
-    }
-    .btn-submit:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 16px rgba(46, 125, 50, 0.28);
-      filter: brightness(1.05);
-    }
-    .btn-submit:active { transform: translateY(0); }
-    .btn-submit:disabled { opacity: 0.6; cursor: not-allowed; transform: none; box-shadow: none; }
-    .btn-submit i { font-size: 18px; }
+    .btn-submit:hover { background: var(--moss-2); }
+    .btn-submit:active { transform: scale(0.99); }
+    .btn-submit:disabled { opacity: 0.55; cursor: not-allowed; transform: none; }
+    .btn-submit i { font-size: 17px; }
+    @media (prefers-color-scheme: dark) { .btn-submit { color: #e8ede7; } }
 
-    /* ── DOWNLOAD BUTTON ── */
+    /* ── DATA HEADER ───────────────────────────────────── */
+    .data-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1rem;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .data-header-left { display: flex; align-items: center; gap: 10px; }
+
+    .data-count {
+      font-size: 11px;
+      font-weight: 600;
+      font-family: var(--font-mono);
+      background: var(--moss-4);
+      color: var(--moss);
+      padding: 3px 9px;
+      border-radius: 99px;
+      letter-spacing: 0.02em;
+    }
+
+    /* ── DOWNLOAD DROPDOWN ─────────────────────────────── */
     .download-wrap { position: relative; }
     .btn-download {
-      display: inline-flex; align-items: center; gap: 7px;
-      padding: 9px 14px; font-size: 13px; font-weight: 600; font-family: inherit;
-      border-radius: var(--radius-md); cursor: pointer; transition: all 0.2s ease;
-      background: var(--surface); color: var(--text);
-      border: 1px solid var(--border-strong);
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 8px 12px;
+      font-size: 13px; font-weight: 600; font-family: var(--font-ui);
+      border: 1px solid var(--rule-2);
+      border-radius: var(--r-md);
+      background: var(--surface);
+      color: var(--ink);
+      cursor: pointer;
+      transition: border-color 0.15s, background 0.15s;
     }
-    .btn-download:hover { background: var(--bg); transform: translateY(-1px); box-shadow: 0 4px 10px rgba(0,0,0,0.06); }
-    .btn-download i { font-size: 16px; }
-    .btn-download .chevron { font-size: 12px; opacity: 0.5; transition: transform 0.2s; }
+    .btn-download:hover { background: var(--ground); border-color: var(--rule-2); }
+    .btn-download i { font-size: 15px; }
+    .btn-download .chevron { font-size: 11px; opacity: 0.45; transition: transform 0.2s; }
     .btn-download.open .chevron { transform: rotate(180deg); }
+
+    @keyframes dropIn { from { opacity:0; transform:translateY(-5px); } to { opacity:1; transform:none; } }
 
     .download-dropdown {
       display: none;
-      position: absolute; top: calc(100% + 8px); right: 0;
-      background: var(--surface); border: 1px solid var(--border-strong);
-      border-radius: var(--radius-lg); padding: 6px;
-      box-shadow: 0 12px 28px rgba(0,0,0,0.1);
-      z-index: 200; min-width: 160px;
-      animation: dropIn 0.18s cubic-bezier(0.4,0,0.2,1);
+      position: absolute; top: calc(100% + 6px); right: 0;
+      background: var(--surface);
+      border: 1px solid var(--rule);
+      border-radius: var(--r-lg);
+      padding: 5px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+      z-index: 300; min-width: 150px;
+      animation: dropIn 0.15s ease;
     }
     .download-dropdown.open { display: block; }
     .btn-dl-option {
-      display: flex; align-items: center; gap: 10px;
-      width: 100%; padding: 9px 12px; border: none; background: none;
-      font-family: inherit; font-size: 13px; font-weight: 600;
-      border-radius: 8px; cursor: pointer; transition: background 0.15s;
+      display: flex; align-items: center; gap: 9px;
+      width: 100%; padding: 8px 11px;
+      border: none; background: none;
+      font-family: var(--font-ui); font-size: 13px; font-weight: 600;
+      border-radius: 7px; cursor: pointer;
+      transition: background 0.12s;
       text-align: left;
     }
-    .btn-dl-option:hover { background: var(--bg); }
-    .btn-dl-option.pdf  { color: var(--red-600); }
-    .btn-dl-option.excel { color: var(--green-600); }
-    .btn-dl-option i { font-size: 17px; }
+    .btn-dl-option:hover { background: var(--ground); }
+    .btn-dl-option.pdf   { color: var(--coral); }
+    .btn-dl-option.excel { color: var(--moss); }
+    .btn-dl-option i { font-size: 16px; }
 
-    /* ── DATA HEADER ── */
-    .data-header {
-      display: flex; align-items: center; justify-content: space-between;
-      margin-bottom: 1.25rem; flex-wrap: wrap; gap: 12px;
+    /* ── FILTER TOOLBAR ────────────────────────────────── */
+    .filter-toolbar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 1rem;
+      flex-wrap: wrap;
     }
-    .data-header-right { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
-    .data-count {
-      font-size: 12px; background: var(--green-50); color: var(--green-600);
-      padding: 5px 12px; border-radius: 99px; font-weight: 600;
+    .filter-search {
+      flex: 1; min-width: 180px;
+      position: relative;
+    }
+    .filter-search i {
+      position: absolute;
+      left: 10px; top: 50%;
+      transform: translateY(-50%);
+      font-size: 15px;
+      color: var(--ink-4);
+      pointer-events: none;
+    }
+    .filter-search input {
+      width: 100%;
+      padding: 8px 10px 8px 32px;
+      font-family: var(--font-ui); font-size: 13px;
+      border: 1px solid var(--rule-2);
+      border-radius: var(--r-md);
+      background: var(--ground);
+      color: var(--ink);
+      outline: none;
+      transition: all 0.15s;
+    }
+    .filter-search input:focus {
+      border-color: var(--moss);
+      background: var(--surface);
+      box-shadow: 0 0 0 3px rgba(45,92,46,0.1);
+    }
+    .filter-sep {
+      width: 1px; height: 22px;
+      background: var(--rule-2);
+      flex-shrink: 0;
+    }
+    .filter-select {
+      font-family: var(--font-ui); font-size: 12px; font-weight: 600;
+      padding: 8px 28px 8px 10px;
+      border: 1px solid var(--rule-2);
+      border-radius: var(--r-md);
+      background: var(--ground);
+      color: var(--ink);
+      outline: none;
+      cursor: pointer;
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 24 24' fill='none' stroke='%236b7569' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 9px center;
+      transition: all 0.15s;
+    }
+    .filter-select:focus {
+      border-color: var(--moss);
+      background-color: var(--surface);
+      box-shadow: 0 0 0 3px rgba(45,92,46,0.1);
     }
 
-    /* ── TABLE ── */
+    /* ── WAKTU DROPDOWN ────────────────────────────────── */
+    .waktu-wrap { position: relative; }
+    .btn-waktu {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 8px 11px;
+      font-size: 12px; font-weight: 600; font-family: var(--font-ui);
+      border: 1px solid var(--rule-2);
+      border-radius: var(--r-md);
+      background: var(--ground);
+      color: var(--ink);
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.15s;
+    }
+    .btn-waktu i { font-size: 14px; }
+    .btn-waktu:hover { background: var(--surface); border-color: var(--rule-2); }
+    .btn-waktu.has-filter {
+      background: var(--moss-4);
+      color: var(--moss);
+      border-color: var(--moss-3);
+    }
+    .btn-waktu i.chevron { font-size: 10px; opacity: 0.5; transition: transform 0.2s; }
+    .btn-waktu.open i.chevron { transform: rotate(180deg); }
+
+    .waktu-dropdown {
+      display: none;
+      position: absolute; top: calc(100% + 6px); left: 0;
+      background: var(--surface);
+      border: 1px solid var(--rule);
+      border-radius: var(--r-lg);
+      padding: 6px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+      z-index: 300; min-width: 210px;
+      animation: dropIn 0.15s ease;
+    }
+    .waktu-dropdown.open { display: block; }
+    .waktu-dropdown-right { left: auto; right: 0; }
+
+    .waktu-presets { display: flex; flex-direction: column; gap: 1px; margin-bottom: 6px; }
+    .btn-waktu-opt {
+      display: flex; align-items: center; gap: 9px;
+      width: 100%; padding: 8px 10px;
+      border: none; background: none;
+      font-family: var(--font-ui); font-size: 13px; font-weight: 500;
+      color: var(--ink);
+      border-radius: 7px; cursor: pointer;
+      transition: background 0.12s;
+      text-align: left;
+    }
+    .btn-waktu-opt i { font-size: 15px; opacity: 0.55; flex-shrink: 0; }
+    .btn-waktu-opt:hover { background: var(--ground); }
+    .btn-waktu-opt.active { background: var(--moss-4); color: var(--moss); font-weight: 600; }
+    .btn-waktu-opt.active i { opacity: 1; }
+
+    .waktu-divider { height: 1px; background: var(--rule); margin: 4px 0; }
+    .waktu-custom-section { padding: 4px 2px 2px; }
+    .waktu-custom-label {
+      font-size: 10px; font-weight: 700;
+      letter-spacing: 0.07em; text-transform: uppercase;
+      color: var(--ink-3); margin-bottom: 7px;
+    }
+    .waktu-custom-row {
+      display: flex; align-items: center; gap: 6px; margin-bottom: 7px;
+    }
+    .waktu-custom-row input[type=date] {
+      flex: 1; font-family: var(--font-ui); font-size: 12px;
+      padding: 6px 7px;
+      border: 1px solid var(--rule-2); border-radius: var(--r-sm);
+      background: var(--ground); color: var(--ink);
+      outline: none; transition: all 0.15s; min-width: 0;
+    }
+    .waktu-custom-row input[type=date]:focus {
+      border-color: var(--moss);
+      box-shadow: 0 0 0 3px rgba(45,92,46,0.1);
+      background: var(--surface);
+    }
+    .date-sep { font-size: 11px; color: var(--ink-4); flex-shrink: 0; }
+    .btn-apply-custom {
+      width: 100%; padding: 7px;
+      font-size: 12px; font-weight: 600;
+      background: var(--moss); color: #fff;
+      border: none; border-radius: var(--r-sm);
+      cursor: pointer; font-family: var(--font-ui);
+      transition: background 0.15s;
+    }
+    @media (prefers-color-scheme: dark) { .btn-apply-custom { color: #e8ede7; } }
+    .btn-apply-custom:hover { background: var(--moss-2); }
+
+    /* ── TABLE ─────────────────────────────────────────── */
     .table-wrap {
       overflow-x: auto;
-      border-radius: 12px;
-      border: 1px solid var(--border);
-      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.01);
+      border: 1px solid var(--rule);
+      border-radius: var(--r-md);
     }
-    table { width: 100%; border-collapse: collapse; font-size: 14px; min-width: 620px; }
-    thead tr { background: var(--bg); }
+    table {
+      width: 100%; border-collapse: collapse;
+      font-size: 13px; min-width: 600px;
+    }
+    thead tr { background: var(--ground); }
     th {
-      text-align: left; padding: 12px 16px; font-weight: 600; font-size: 11px;
-      color: var(--text-muted); border-bottom: 1px solid var(--border);
-      white-space: nowrap; text-transform: uppercase; letter-spacing: 0.06em;
+      text-align: left;
+      padding: 10px 13px;
+      font-size: 10.5px;
+      font-weight: 600;
+      letter-spacing: 0.07em;
+      text-transform: uppercase;
+      color: var(--ink-3);
+      border-bottom: 1px solid var(--rule);
+      white-space: nowrap;
     }
     td {
-      padding: 12px 16px;
-      border-bottom: 1px solid var(--border);
-      color: var(--text);
+      padding: 11px 13px;
+      border-bottom: 1px solid var(--rule);
+      color: var(--ink);
       white-space: nowrap;
-      transition: background 0.15s ease;
     }
+    td.mono { font-family: var(--font-mono); font-size: 13px; }
     tr:last-child td { border-bottom: none; }
-    tbody tr:hover td { background: var(--bg); }
+    tbody tr:hover td { background: var(--ground); }
 
-    /* ── BADGES ── */
-    .badge { display: inline-block; padding: 3px 10px; border-radius: 99px; font-size: 11px; font-weight: 600; }
-    .badge-padi    { background: var(--green-50); color: var(--green-600); border: 1px solid rgba(46, 125, 50, 0.12); }
-    .badge-jagung  { background: var(--amber-50); color: var(--amber-600); border: 1px solid rgba(217, 119, 6, 0.12); }
-    .badge-kedelai { background: var(--blue-50);  color: var(--blue-600); border: 1px solid rgba(37, 99, 235, 0.12); }
-
-    .btn-hapus {
-      background: transparent; border: none; color: var(--text-muted);
-      cursor: pointer; padding: 6px 8px; border-radius: 8px;
-      font-size: 14px; transition: all 0.2s ease;
-      display: inline-flex; align-items: center; justify-content: center;
+    /* ── BADGES ─────────────────────────────────────────── */
+    .badge {
+      display: inline-flex; align-items: center;
+      padding: 2px 8px; border-radius: 99px;
+      font-size: 11px; font-weight: 600; letter-spacing: 0.02em;
     }
-    .btn-hapus:hover { background: var(--red-50); color: var(--red-600); transform: scale(1.05); }
-    .btn-hapus i { font-size: 16px; }
+    .badge-padi    { background: var(--moss-4);   color: var(--moss); }
+    .badge-jagung  { background: var(--amber-bg);  color: var(--amber); }
+    .badge-kedelai { background: var(--sky-bg);    color: var(--sky); }
 
-    /* ── EMPTY / LOADING ── */
-    .empty-state { text-align: center; padding: 3.5rem; color: var(--text-muted); font-size: 14px; }
-    .empty-state i { font-size: 40px; display: block; margin-bottom: 12px; opacity: 0.35; }
+    /* ── ROW ACTION BUTTONS ────────────────────────────── */
+    .btn-row-action {
+      background: none; border: none; cursor: pointer;
+      color: var(--ink-4);
+      padding: 5px 6px; border-radius: 6px;
+      font-size: 13px;
+      display: inline-flex; align-items: center;
+      transition: all 0.15s;
+    }
+    .btn-row-action.edit:hover  { background: var(--moss-4); color: var(--moss); }
+    .btn-row-action.trash:hover { background: var(--coral-bg); color: var(--coral); }
+    .btn-row-action i { font-size: 15px; }
+
+    /* ── EMPTY / LOADING ───────────────────────────────── */
+    .empty-state {
+      text-align: center; padding: 3rem 1rem;
+      color: var(--ink-3); font-size: 14px;
+    }
+    .empty-state i { font-size: 38px; display: block; margin-bottom: 10px; opacity: 0.25; }
     .loading-state {
-      text-align: center; padding: 2.5rem; color: var(--text-muted); font-size: 14px;
-      display: flex; align-items: center; justify-content: center; gap: 10px;
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      padding: 2rem; color: var(--ink-3); font-size: 13px;
     }
     @keyframes spin { to { transform: rotate(360deg); } }
-    .spin { display: inline-block; animation: spin 1s linear infinite; }
+    .spin { display: inline-block; animation: spin 0.8s linear infinite; }
 
-    /* ── REKAP: STAT CARDS ── */
-    .stats-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-      gap: 16px;
-      margin-bottom: 2rem;
+    /* ── PAGINATION ────────────────────────────────────── */
+    .pagination-bar {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-top: 1rem; padding-top: 0.75rem;
+      border-top: 1px solid var(--rule);
+      flex-wrap: wrap; gap: 8px;
     }
-    .stat-card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-lg);
-      padding: 20px 16px;
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.015);
-      transition: all 0.25s ease;
-      position: relative;
-      overflow: hidden;
+    .pagination-info { font-size: 12px; color: var(--ink-3); }
+    .pagination-info strong { color: var(--ink); font-family: var(--font-mono); }
+    .pagination-buttons { display: flex; gap: 4px; }
+    .btn-page {
+      min-width: 32px; height: 32px;
+      padding: 0 8px;
+      font-size: 12px; font-weight: 600; font-family: var(--font-mono);
+      border-radius: 7px; border: 1px solid var(--rule);
+      background: var(--surface); color: var(--ink);
+      cursor: pointer; transition: all 0.15s;
     }
-    .stat-card::before {
-      content: '';
-      position: absolute;
-      top: 0; left: 0; width: 4px; height: 100%;
-      background: transparent;
-      transition: background 0.3s;
-    }
-    .stat-card:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 12px 28px rgba(46, 82, 38, 0.05);
-    }
-    .stat-card.total::before { background: var(--green-600); }
-    .stat-card.luas::before { background: var(--blue-600); }
-    .stat-card.desa::before { background: var(--amber-600); }
-    .stat-card.kelompok::before { background: var(--teal-600); }
+    .btn-page:hover:not(:disabled) { background: var(--ground); border-color: var(--rule-2); }
+    .btn-page:disabled { opacity: 0.35; cursor: not-allowed; }
+    .btn-page-active { background: var(--moss) !important; color: #fff !important; border-color: var(--moss) !important; }
+    @media (prefers-color-scheme: dark) { .btn-page-active { color: #e8ede7 !important; } }
 
-    .stat-icon {
-      width: 40px; height: 40px;
-      border-radius: 50%;
-      display: flex; align-items: center; justify-content: center;
-      margin-bottom: 12px;
-      font-size: 20px;
-    }
-    .stat-card.total .stat-icon { background: var(--green-50); color: var(--green-600); }
-    .stat-card.luas .stat-icon { background: var(--blue-50); color: var(--blue-600); }
-    .stat-card.desa .stat-icon { background: var(--amber-50); color: var(--amber-600); }
-    .stat-card.kelompok .stat-icon { background: var(--teal-50); color: var(--teal-600); }
-
-    .stat-label {
-      font-size: 12px;
-      font-weight: 500;
-      color: var(--text-muted);
-      margin-bottom: 4px;
-    }
-    .stat-val {
-      font-size: 26px;
-      font-weight: 700;
-      color: var(--text);
-      line-height: 1.1;
-    }
-
-    /* ── REKAP TOOLBAR ── */
+    /* ── REKAP ─────────────────────────────────────────── */
     .rekap-toolbar {
-      display: grid; grid-template-columns: 260px 160px;
-      align-items: end; gap: 12px; margin-bottom: 1.5rem;
+      display: flex; align-items: flex-end; gap: 10px;
+      margin-bottom: 1.25rem; flex-wrap: wrap;
     }
-    .rekap-toolbar-left,
-    .rekap-toolbar-right {
-      display: flex; flex-direction: column; gap: 6px; min-width: 0;
+    .rekap-field { display: flex; flex-direction: column; gap: 5px; }
+    .rekap-field-label {
+      font-size: 10px; font-weight: 700;
+      letter-spacing: 0.07em; text-transform: uppercase;
+      color: var(--ink-3);
     }
-    .rekap-toolbar-right { align-items: stretch; }
-    .rekap-toolbar .waktu-wrap { width: 100%; }
-    .rekap-toolbar .btn-waktu {
-      width: 100%; min-height: 42px; justify-content: center;
-      padding-left: 12px; padding-right: 12px;
-    }
-    .rekap-toolbar-label {
-      font-size: 12px; font-weight: 600; color: var(--text-muted);
-      white-space: nowrap; text-transform: uppercase; letter-spacing: 0.06em;
-    }
-    .rekap-select-wrap {
-      position: relative; display: flex; align-items: center;
-      max-width: 260px;
-    }
+    .rekap-select-wrap { position: relative; display: flex; align-items: center; }
     .rekap-select-wrap i {
-      position: absolute; left: 12px; font-size: 16px; color: var(--text-muted);
+      position: absolute; left: 10px;
+      font-size: 15px; color: var(--ink-3);
       pointer-events: none;
     }
     .rekap-select {
-      width: 100%; min-height: 42px; padding: 9px 12px 9px 38px;
-      border: 1px solid var(--border-strong); border-radius: 10px;
-      background: var(--surface); color: var(--text); font-family: inherit;
-      font-size: 13px; font-weight: 600; outline: none; cursor: pointer;
-      appearance: none;
+      padding: 8px 11px 8px 33px;
+      font-family: var(--font-ui); font-size: 13px; font-weight: 600;
+      border: 1px solid var(--rule-2); border-radius: var(--r-md);
+      background: var(--surface); color: var(--ink);
+      outline: none; cursor: pointer; appearance: none;
+      min-width: 190px;
     }
     .rekap-select:focus {
-      border-color: var(--green-600);
-      box-shadow: 0 0 0 3px rgba(46,125,50,0.1);
-    }
-    /* dropdown opens to left for right-aligned waktu button */
-    .waktu-dropdown-right {
-      left: auto !important; right: 0;
-    }
-    @media (max-width: 600px) {
-      .rekap-toolbar { grid-template-columns: 1fr 1fr; gap: 8px; align-items: end; }
-      .rekap-select-wrap { max-width: none; }
-      .rekap-toolbar .waktu-wrap { min-width: 0; width: 100%; }
-      .rekap-toolbar .btn-waktu {
-        min-height: 38px;
-        height: 38px;
-        padding: 7px 8px;
-        gap: 4px;
-        font-size: 12px;
-        border-radius: 10px;
-      }
-      .rekap-toolbar-label { font-size: 10px; }
-      .rekap-select { min-height: 38px; padding-top: 7px; padding-bottom: 7px; font-size: 12px; }
-    }
-    @media (max-width: 360px) {
-      .rekap-toolbar { grid-template-columns: 1fr; }
-    }
-    .chip {
-      font-size: 13px; padding: 7px 16px; border-radius: 99px;
-      border: 1px solid var(--border); background: var(--surface);
-      color: var(--text-muted); cursor: pointer; font-family: inherit;
-      font-weight: 500; transition: all 0.2s ease;
-      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.01);
-    }
-    .chip:hover {
-      background: var(--bg);
-      color: var(--text);
-      transform: translateY(-1px);
-    }
-    .chip.active {
-      background: var(--green-600);
-      color: #ffffff;
-      border-color: var(--green-600);
-      box-shadow: 0 4px 10px rgba(46, 125, 50, 0.15);
-    }
-    @media (prefers-color-scheme: dark) {
-      .chip.active {
-        color: #0d130e;
-        box-shadow: 0 4px 10px rgba(129, 199, 132, 0.18);
-      }
+      border-color: var(--moss);
+      box-shadow: 0 0 0 3px rgba(45,92,46,0.1);
     }
 
-    /* ── REKAP: CHART CARD ── */
+    /* ── STAT CARDS ─────────────────────────────────────── */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 12px;
+      margin-bottom: 1.25rem;
+    }
+    .stat-card {
+      background: var(--surface);
+      border: 1px solid var(--rule);
+      border-radius: var(--r-lg);
+      padding: 1rem 1rem 1rem 1.1rem;
+      position: relative;
+      overflow: hidden;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .stat-card:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,0.06); }
+    .stat-card::after {
+      content: '';
+      position: absolute;
+      left: 0; top: 14px; bottom: 14px;
+      width: 3px;
+      border-radius: 0 2px 2px 0;
+    }
+    .stat-card.total::after  { background: var(--moss); }
+    .stat-card.luas::after   { background: var(--sky); }
+    .stat-card.desa::after   { background: var(--amber); }
+    .stat-card.kelompok::after { background: var(--teal); }
+    .stat-label { font-size: 11px; font-weight: 500; color: var(--ink-3); margin-bottom: 5px; }
+    .stat-val {
+      font-size: 28px; font-weight: 700; color: var(--ink);
+      line-height: 1; letter-spacing: -0.03em;
+      font-family: var(--font-mono);
+    }
+
+    /* ── CHART CARD ─────────────────────────────────────── */
     .chart-card {
-      background: var(--surface); border: 1px solid var(--border);
-      border-radius: var(--radius-lg); padding: 1.5rem 1.75rem; margin-bottom: 1.5rem;
-      box-shadow: 0 8px 24px rgba(0,0,0,0.015);
+      background: var(--surface);
+      border: 1px solid var(--rule);
+      border-radius: var(--r-lg);
+      padding: 1.25rem;
+      margin-bottom: 1.25rem;
     }
     .chart-title {
-      font-size: 13px; font-weight: 600; color: var(--text-muted);
-      text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 12px;
-      display: flex; align-items: center; gap: 8px;
+      font-size: 11px; font-weight: 600;
+      letter-spacing: 0.07em; text-transform: uppercase;
+      color: var(--ink-3); margin-bottom: 10px;
+      display: flex; align-items: center; gap: 7px;
     }
-    .chart-title i { font-size: 16px; }
-    .legend-row { display: flex; flex-wrap: wrap; gap: 16px; margin-bottom: 12px; }
-    .legend-item { display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--text-muted); }
-    .legend-dot  { width: 12px; height: 12px; border-radius: 4px; flex-shrink: 0; }
+    .chart-title i { font-size: 15px; }
+    .legend-row { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 10px; }
+    .legend-item { display: flex; align-items: center; gap: 5px; font-size: 12px; color: var(--ink-3); }
+    .legend-dot { width: 8px; height: 8px; border-radius: 2px; flex-shrink: 0; }
 
-    /* ── OFFLINE POPUP ── */
+    /* ── OFFLINE POPUP ─────────────────────────────────── */
     .offline-popup {
-      position: fixed;
-      top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(0,0,0,0.45);
-      backdrop-filter: blur(6px);
-      -webkit-backdrop-filter: blur(6px);
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.5);
+      backdrop-filter: blur(8px);
       display: flex; align-items: center; justify-content: center;
-      z-index: 2000;
+      z-index: 2000; padding: 1rem;
       opacity: 0; pointer-events: none;
-      transition: opacity 0.3s ease;
-      padding: 1rem;
+      transition: opacity 0.25s;
     }
     .offline-popup.active { opacity: 1; pointer-events: auto; }
     .offline-box {
       background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 20px;
+      border: 1px solid var(--rule);
+      border-radius: var(--r-xl);
       padding: 2.5rem 2rem;
-      max-width: 360px; width: 100%;
+      max-width: 340px; width: 100%;
       text-align: center;
-      box-shadow: 0 24px 48px rgba(0,0,0,0.16);
-      transform: translateY(24px) scale(0.97);
-      transition: transform 0.35s cubic-bezier(0.34,1.56,0.64,1);
+      box-shadow: 0 20px 48px rgba(0,0,0,0.2);
+      transform: translateY(16px) scale(0.97);
+      transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1);
     }
-    .offline-popup.active .offline-box { transform: translateY(0) scale(1); }
+    .offline-popup.active .offline-box { transform: none; }
     .offline-icon {
-      width: 64px; height: 64px; border-radius: 50%;
-      background: var(--red-50);
+      width: 56px; height: 56px;
+      border-radius: 50%;
+      background: var(--coral-bg);
       display: flex; align-items: center; justify-content: center;
-      margin: 0 auto 1.25rem;
-      font-size: 30px; color: var(--red-600);
+      margin: 0 auto 1rem;
+      font-size: 26px; color: var(--coral);
     }
-    .offline-title {
-      font-size: 18px; font-weight: 700; color: var(--text); margin-bottom: 8px;
-    }
-    .offline-desc {
-      font-size: 13px; color: var(--text-muted); line-height: 1.6; margin-bottom: 1.5rem;
-    }
+    .offline-title { font-size: 17px; font-weight: 700; margin-bottom: 7px; }
+    .offline-desc  { font-size: 13px; color: var(--ink-3); line-height: 1.6; margin-bottom: 1.5rem; }
     .btn-retry {
-      display: inline-flex; align-items: center; gap: 8px;
-      padding: 11px 24px; border: none; border-radius: 10px;
-      background: var(--green-600); color: #fff;
-      font-size: 14px; font-weight: 600; font-family: inherit;
-      cursor: pointer; transition: all 0.2s ease;
-      box-shadow: 0 4px 12px rgba(46,125,50,0.2);
-    }
-    .btn-retry:hover { filter: brightness(1.08); transform: translateY(-1px); }
-    .btn-retry:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
-    @media (prefers-color-scheme: dark) {
-      .btn-retry { color: #0d130e; }
-    }
-
-    /* ── SETUP CARD (hidden/unused) ── */
-    .setup-card {
-      display: none !important;
-    }
-    .setup-card .setup-title {
-      font-size: 14px; font-weight: 600; color: var(--amber-700); margin-bottom: 10px;
-      display: flex; align-items: center; gap: 8px;
-    }
-    .setup-card .field input { font-size: 13px; font-family: 'Courier New', monospace; }
-    .setup-card .btn-connect {
-      margin-top: 12px; padding: 10px 20px;
-      background: var(--amber-600); color: white;
-      border: none; border-radius: var(--radius-md);
-      font-size: 13px; font-weight: 600; font-family: inherit;
-      cursor: pointer; display: flex; align-items: center; gap: 8px;
-      transition: all 0.2s ease;
-      box-shadow: 0 4px 10px rgba(217, 119, 6, 0.15);
-    }
-    .setup-card .btn-connect:hover { background: var(--amber-700); transform: translateY(-1px); }
-
-    /* ── TABLE FILTER BAR ── */
-    /* ── WAKTU LAPORAN DROPDOWN ── */
-    @keyframes dropIn { from { opacity:0; transform:translateY(-6px); } to { opacity:1; transform:none; } }
-
-    .waktu-wrap { position: relative; }
-    .btn-waktu {
       display: inline-flex; align-items: center; gap: 7px;
-      padding: 9px 14px; font-size: 13px; font-weight: 600; font-family: inherit;
-      border-radius: var(--radius-md); cursor: pointer; transition: all 0.2s;
-      background: var(--surface); color: var(--text);
-      border: 1px solid var(--border-strong); white-space: nowrap;
+      padding: 10px 22px;
+      background: var(--moss); color: #fff;
+      border: none; border-radius: var(--r-md);
+      font-size: 13px; font-weight: 600; font-family: var(--font-ui);
+      cursor: pointer; transition: background 0.15s;
     }
-    .btn-waktu:hover { background: var(--bg); transform: translateY(-1px); box-shadow: 0 4px 10px rgba(0,0,0,0.06); }
-    .btn-waktu.has-filter { background: var(--green-50); color: var(--green-600); border-color: rgba(46,125,50,0.3); }
-    @media (prefers-color-scheme: dark) { .btn-waktu.has-filter { background: var(--green-100); } }
-    .btn-waktu i.chevron { font-size: 12px; opacity: 0.5; transition: transform 0.2s; }
-    .btn-waktu.open i.chevron { transform: rotate(180deg); }
+    .btn-retry:hover { background: var(--moss-2); }
+    .btn-retry:disabled { opacity: 0.55; cursor: not-allowed; }
+    @media (prefers-color-scheme: dark) { .btn-retry { color: #e8ede7; } }
 
-    .waktu-dropdown {
-      display: none; position: absolute; top: calc(100% + 8px); left: 0;
-      background: var(--surface); border: 1px solid var(--border-strong);
-      border-radius: var(--radius-lg); padding: 10px;
-      box-shadow: 0 12px 28px rgba(0,0,0,0.1);
-      z-index: 300; min-width: 220px;
-      animation: dropIn 0.18s cubic-bezier(0.4,0,0.2,1);
-    }
-    .waktu-dropdown.open { display: block; }
-
-    .waktu-presets { display: flex; flex-direction: column; gap: 2px; margin-bottom: 8px; }
-    .btn-waktu-opt {
-      display: flex; align-items: center; gap: 10px;
-      width: 100%; padding: 9px 10px; border: none; background: none;
-      font-family: inherit; font-size: 13px; font-weight: 500; color: var(--text);
-      border-radius: 8px; cursor: pointer; transition: background 0.15s; text-align: left;
-    }
-    .btn-waktu-opt:hover { background: var(--bg); }
-    .btn-waktu-opt.active { background: var(--green-50); color: var(--green-600); font-weight: 600; }
-    @media (prefers-color-scheme: dark) { .btn-waktu-opt.active { background: var(--green-100); } }
-    .btn-waktu-opt i { font-size: 16px; opacity: 0.6; flex-shrink: 0; }
-    .btn-waktu-opt.active i { opacity: 1; }
-
-    .waktu-divider { height: 1px; background: var(--border); margin: 6px 0; }
-
-    .waktu-custom-section { padding: 4px 2px 2px; }
-    .waktu-custom-label {
-      font-size: 11px; font-weight: 600; color: var(--text-muted);
-      text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 8px;
-    }
-    .waktu-custom-row {
-      display: flex; align-items: center; gap: 6px; margin-bottom: 8px;
-    }
-    .waktu-custom-row input[type=date] {
-      flex: 1; font-family: inherit; font-size: 12px; padding: 7px 8px;
-      border: 1px solid var(--border-strong); border-radius: var(--radius-md);
-      background: var(--bg); color: var(--text); outline: none; transition: all 0.2s;
-      min-width: 0;
-    }
-    .waktu-custom-row input[type=date]:focus {
-      border-color: var(--green-600);
-      box-shadow: 0 0 0 3px rgba(46,125,50,0.1);
-      background: var(--surface);
-    }
-    .date-sep { font-size: 11px; color: var(--text-muted); flex-shrink: 0; }
-    .btn-apply-custom {
-      width: 100%; padding: 8px; font-size: 12px; font-weight: 600;
-      background: var(--green-600); color: #fff; border: none;
-      border-radius: var(--radius-md); cursor: pointer; font-family: inherit; transition: all 0.2s;
-    }
-    @media (prefers-color-scheme: dark) { .btn-apply-custom { color: #0d130e; } }
-    .btn-apply-custom:hover { filter: brightness(1.08); }
-
-    /* ── FILTER TOOLBAR ── */
-    .filter-toolbar {
-      display: flex; align-items: center; gap: 8px;
-      margin-bottom: 1.25rem; flex-wrap: wrap;
-    }
-    .filter-toolbar-search {
-      flex: 1; min-width: 180px; position: relative;
-    }
-    .filter-toolbar-search i {
-      position: absolute; left: 11px; top: 50%; transform: translateY(-50%);
-      color: var(--text-muted); font-size: 16px; pointer-events: none;
-    }
-    .filter-toolbar-search input {
-      width: 100%; padding: 9px 12px 9px 34px;
-      font-family: inherit; font-size: 13px;
-      border: 1px solid var(--border-strong); border-radius: var(--radius-md);
-      background: var(--bg); color: var(--text); outline: none; transition: all 0.2s;
-      box-sizing: border-box;
-    }
-    .filter-toolbar-search input:focus {
-      border-color: var(--green-600);
-      box-shadow: 0 0 0 3px rgba(46,125,50,0.1);
-      background: var(--surface);
-    }
-    .filter-toolbar-divider {
-      width: 1px; height: 28px; background: var(--border-strong);
-      flex-shrink: 0; opacity: 0.6;
-    }
-    .filter-select {
-      font-family: inherit; font-size: 13px; font-weight: 500;
-      padding: 9px 32px 9px 12px; border: 1px solid var(--border-strong);
-      border-radius: var(--radius-md); background: var(--bg); color: var(--text);
-      outline: none; transition: all 0.2s; cursor: pointer;
-      appearance: none; -webkit-appearance: none;
-      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
-      background-repeat: no-repeat; background-position: right 10px center;
-      white-space: nowrap;
-    }
-    .filter-select:focus {
-      border-color: var(--green-600);
-      box-shadow: 0 0 0 3px rgba(46,125,50,0.1);
-      background-color: var(--surface);
-    }
-    @media (max-width: 600px) {
-      .filter-toolbar {
-        display: grid;
-        grid-template-columns: minmax(0, 1fr) 112px;
-        align-items: center;
-        gap: 6px;
-        overflow: visible;
-        padding-bottom: 0;
-        margin-bottom: 0.9rem;
-      }
-      .filter-toolbar-search {
-        min-width: 0;
-      }
-      .filter-select {
-        width: 100%;
-        min-width: 0;
-        height: 36px;
-        padding: 7px 24px 7px 9px;
-        font-size: 11px;
-        border-radius: 8px;
-      }
-      #t-filter-komoditas {
-        grid-column: 1;
-      }
-      #t-filter-kegiatan {
-        grid-column: 2;
-      }
-      .filter-toolbar-search i {
-        left: 9px;
-        font-size: 14px;
-      }
-      .filter-toolbar-search input {
-        height: 36px;
-        padding: 7px 9px 7px 29px;
-        font-size: 12px;
-        border-radius: 8px;
-      }
-      .filter-toolbar-divider { display: none; }
-      .filter-toolbar #t-waktu-wrap {
-        min-width: 0;
-      }
-      .filter-toolbar #t-btn-waktu {
-        width: 100%;
-        height: 36px;
-        min-height: 36px;
-        padding: 7px 8px;
-        gap: 4px;
-        justify-content: center;
-        font-size: 11px;
-        border-radius: 8px;
-      }
-      .filter-toolbar #t-btn-waktu .ti-calendar-event { display: none; }
-    }
-
-    /* ── PAGINATION ── */
-    .pagination-bar {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-top: 1.25rem;
-      padding-top: 0.5rem;
-      border-top: 1px solid var(--border);
-      flex-wrap: wrap;
-      gap: 10px;
-    }
-    .pagination-info {
-      font-size: 13px;
-      color: var(--text-muted);
-    }
-    .pagination-buttons {
-      display: flex;
-      gap: 6px;
-    }
-    .btn-page {
-      padding: 6px 12px;
-      font-size: 12px;
-      font-weight: 600;
-      font-family: inherit;
-      border-radius: 8px;
-      border: 1px solid var(--border);
-      background: var(--surface);
-      color: var(--text);
-      cursor: pointer;
-      transition: all 0.2s ease;
-    }
-    .btn-page:hover:not(:disabled) {
-      background: var(--green-50);
-      color: var(--green-600);
-      border-color: rgba(46,125,50,0.2);
-    }
-    .btn-page:disabled {
-      opacity: 0.4;
-      cursor: not-allowed;
-    }
-    .btn-page-active {
-      background: var(--green-600) !important;
-      color: #fff !important;
-      border-color: var(--green-600) !important;
-    }
-    @media (prefers-color-scheme: dark) { .btn-page-active { color: #0d130e !important; } }
-
-    /* ── PRODUKSI PANEL ── */
-    #panel-produksi { display: none; flex-direction: column; gap: 12px; }
-    #panel-produksi.active { display: flex; }
-
-    /* ─ Top bar ─ */
-    .produksi-topbar {
-      display: flex; align-items: center; justify-content: flex-start;
-      gap: 10px; flex-wrap: wrap;
-    }
-    .produksi-topbar-left { display: none; }
-    .produksi-topbar-title {
-      font-size: 16px; font-weight: 800; color: var(--text); letter-spacing: -0.3px;
-    }
-    .produksi-topbar-sub { font-size: 12px; color: var(--text-muted); }
-    .btn-produksi-add {
-      display: inline-flex; align-items: center; justify-content: center; gap: 8px;
-      min-height: 44px; padding: 10px 16px; font-size: 13px; font-weight: 700; font-family: inherit;
-      background: var(--green-600); color: #fff; border: none;
-      border-radius: 10px; cursor: pointer; transition: all 0.2s;
-      box-shadow: 0 3px 10px rgba(46,125,50,0.18); white-space: nowrap;
-      letter-spacing: 0.01em;
-    }
-    @media (prefers-color-scheme: dark) { .btn-produksi-add { color: #0d130e; } }
-    .btn-produksi-add:hover { filter: brightness(1.06); transform: translateY(-1px); box-shadow: 0 5px 14px rgba(46,125,50,0.24); }
-
-    /* ─ Formula bar ─ */
-    .produksi-formula {
-      display: flex; flex-wrap: wrap; align-items: center; gap: 6px 0;
-      font-size: 11.5px; color: var(--text-muted);
-      padding: 10px 16px; background: var(--bg);
-      border: 1px solid var(--border); border-radius: var(--radius-md);
-    }
-    .pf-item { display: flex; align-items: center; gap: 0; }
-    .pf-label { font-weight: 700; color: var(--text); padding: 0 4px; }
-    .pf-eq { padding: 0 4px; }
-    .pf-sep {
-      width: 1px; height: 14px; background: var(--border-strong);
-      margin: 0 12px; opacity: 0.5;
-    }
-
-    /* ─ Calculator cards ─ */
-    .produksi-cards { display: flex; flex-direction: column; gap: 10px; }
-
-    .calc-card {
-      background: var(--surface); border: 1px solid var(--border);
-      border-radius: 10px; overflow: hidden;
-      box-shadow: 0 1px 8px rgba(0,0,0,0.035);
-      transition: box-shadow 0.2s;
-    }
-    .calc-card:hover { box-shadow: 0 4px 14px rgba(0,0,0,0.06); }
-
-    .calc-card-header {
-      display: flex; align-items: center; justify-content: space-between;
-      padding: 10px 12px; border-bottom: 1px solid var(--border);
-      background: var(--bg); gap: 10px;
-    }
-    .calc-card-num {
-      width: 26px; height: 26px; border-radius: 50%;
-      background: var(--green-600); color: #fff;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 12px; font-weight: 800; flex-shrink: 0;
-    }
-    @media (prefers-color-scheme: dark) { .calc-card-num { color: #0d130e; } }
-    .calc-card-identity { display: flex; flex-direction: column; gap: 1px; flex: 1; min-width: 0; }
-    .calc-card-name {
-      font-size: 14px; font-weight: 700; color: var(--text);
-      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-    }
-    .calc-card-name-placeholder { color: var(--text-muted); font-weight: 400; }
-    .calc-card-sub { font-size: 11px; color: var(--text-muted); }
-    .btn-hapus-baris {
-      width: 36px; height: 36px; background: transparent; border: none; color: var(--text-muted);
-      cursor: pointer; padding: 0; border-radius: 8px; font-size: 16px;
-      display: flex; align-items: center; justify-content: center; transition: all 0.15s; flex-shrink: 0;
-    }
-    .btn-hapus-baris:hover { background: var(--red-50); color: var(--red-600); }
-
-    .calc-card-body {
-      display: flex; flex-direction: column;
-    }
-
-    /* Left: input fields */
-    .calc-inputs {
-      padding: 12px; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 10px;
-    }
-
-    .calc-field { display: flex; flex-direction: column; gap: 4px; }
-    .calc-field-full { grid-column: 1 / -1; }
-    .calc-field-label {
-      font-size: 10px; font-weight: 700; color: var(--text-muted);
-      text-transform: uppercase; letter-spacing: 0.07em;
-    }
-    .calc-field-control { position: relative; display: flex; align-items: center; }
-    .calc-field-row { display: flex; gap: 6px; }
-    .calc-input {
-      flex: 1; font-family: inherit; font-size: 14px; font-weight: 500;
-      min-height: 42px; padding: 9px 10px; border: 1px solid var(--border-strong);
-      border-radius: 8px; background: var(--bg); color: var(--text);
-      outline: none; transition: all 0.18s; min-width: 0;
-    }
-    .calc-input:focus {
-      border-color: var(--green-600); background: var(--surface);
-      box-shadow: 0 0 0 3px rgba(46,125,50,0.1);
-    }
-    .calc-input.num { text-align: right; font-variant-numeric: tabular-nums; }
-    .calc-field-control .calc-input.num { padding-right: 44px; width: 100%; }
-    select.calc-input { cursor: pointer; padding-right: 8px; }
-    .calc-input-unit {
-      position: absolute; right: 8px; top: 50%; transform: translateY(-50%);
-      font-size: 11px; font-weight: 700; color: var(--text-muted);
-      pointer-events: none; white-space: nowrap;
-    }
-
-    /* Right: result display */
-    .calc-results {
-      padding: 10px 12px 12px; display: grid;
-      grid-template-columns: repeat(4, minmax(0, 1fr));
-      gap: 10px; align-content: start;
-      border-top: 1px solid var(--border);
-      background: var(--bg);
-    }
-
-    .calc-result-item {
-      min-width: 0; display: flex; flex-direction: column; gap: 2px;
-      padding: 9px; background: var(--surface); border: 1px solid var(--border);
-      border-radius: 8px;
-    }
-    .calc-result-label {
-      font-size: 10px; font-weight: 700; color: var(--text-muted);
-      text-transform: uppercase; letter-spacing: 0.04em;
-    }
-    .calc-result-val {
-      font-size: 17px; font-weight: 800; color: var(--text);
-      line-height: 1.1; font-variant-numeric: tabular-nums;
-      transition: color 0.2s;
-      overflow-wrap: anywhere;
-    }
-    .calc-result-val.has-val { color: var(--green-600); }
-    .calc-result-unit { font-size: 10px; color: var(--text-muted); font-weight: 500; }
-    .calc-result-item.primary .calc-result-val { font-size: 17px; }
-
-    /* ─ Total bar ─ */
-    .produksi-total-bar {
-      background: var(--green-600);
-      border-radius: 10px; padding: 12px;
-      display: grid; grid-template-columns: repeat(5, minmax(0, 1fr));
-      gap: 8px;
-      box-shadow: 0 6px 24px rgba(46,125,50,0.22);
-    }
-    .ptb-item { min-width: 0; display: flex; flex-direction: column; gap: 4px; }
-    .ptb-label {
-      font-size: 10px; font-weight: 700; color: rgba(255,255,255,0.65);
-      text-transform: uppercase; letter-spacing: 0.08em;
-    }
-    .ptb-val {
-      font-size: 22px; font-weight: 900; color: #fff;
-      font-variant-numeric: tabular-nums; line-height: 1;
-    }
-    .ptb-unit { font-size: 10px; color: rgba(255,255,255,0.55); }
-    @media (prefers-color-scheme: dark) {
-      .ptb-val { color: #0d130e; }
-      .ptb-label { color: rgba(13,19,14,0.55); }
-      .ptb-unit  { color: rgba(13,19,14,0.45); }
-    }
-
-    /* ─ Empty state ─ */
-    .produksi-empty {
-      text-align: center; padding: 2rem 1rem;
-      color: var(--text-muted); font-size: 14px;
-      background: var(--surface); border: 2px dashed var(--border);
-      border-radius: 10px;
-    }
-    .produksi-empty i { font-size: 40px; display: block; margin-bottom: 12px; opacity: 0.25; }
-    .produksi-empty strong { display: block; font-size: 15px; font-weight: 700; color: var(--text); margin-bottom: 4px; }
-
-    @media (max-width: 720px) {
-      #panel-produksi { gap: 10px; }
-      .produksi-topbar { align-items: stretch; }
-      .produksi-topbar-left { display: none; }
-      .btn-produksi-add { width: 100%; }
-      .calc-inputs { padding: 10px; gap: 8px; }
-      .calc-results { grid-template-columns: repeat(2, minmax(0, 1fr)); padding: 8px 10px 10px; gap: 8px; }
-      .produksi-total-bar { grid-template-columns: repeat(2, minmax(0, 1fr)); position: sticky; bottom: 10px; z-index: 4; }
-      .ptb-val { font-size: 18px; }
-    }
-
-    @media (max-width: 480px) {
-      #panel-produksi { gap: 8px; }
-      .produksi-cards { gap: 8px; }
-      .btn-produksi-add { min-height: 38px; padding: 8px 12px; font-size: 12px; }
-      .calc-card-header { padding: 8px 9px; gap: 8px; }
-      .calc-card-num { width: 22px; height: 22px; font-size: 11px; }
-      .calc-card-name { font-size: 13px; }
-      .calc-card-sub { font-size: 10px; }
-      .btn-hapus-baris { width: 32px; height: 32px; }
-      .calc-inputs { grid-template-columns: repeat(2, minmax(0, 1fr)); padding: 8px; gap: 7px; }
-      .calc-field-full { grid-column: 1 / -1; }
-      .calc-field-label { font-size: 9px; letter-spacing: 0.04em; }
-      .calc-input { min-height: 36px; padding: 7px 8px; font-size: 13px; border-radius: 7px; }
-      .calc-field-control .calc-input.num { padding-right: 38px; }
-      .calc-input-unit { right: 7px; font-size: 9px; }
-      .calc-results { padding: 7px 8px 8px; gap: 6px; }
-      .calc-result-item { padding: 7px; border-radius: 7px; }
-      .calc-result-label { font-size: 9px; }
-      .calc-result-val,
-      .calc-result-item.primary .calc-result-val { font-size: 15px; }
-      .calc-result-unit { display: none; }
-      .produksi-total-bar { bottom: 6px; padding: 8px; gap: 6px; }
-      .ptb-label { font-size: 8.5px; letter-spacing: 0.04em; }
-      .ptb-val { font-size: 15px; }
-      .ptb-unit { font-size: 9px; }
-    }
-
-    @media (max-width: 340px) {
-      .calc-inputs,
-      .calc-results,
-      .produksi-total-bar { grid-template-columns: 1fr; }
-    }
-
-    /* ── EDIT ACTION BUTTON ── */
-    .btn-edit {
-      background: transparent; border: none; color: var(--text-muted);
-      cursor: pointer; padding: 6px 8px; border-radius: 8px;
-      font-size: 14px; transition: all 0.2s ease;
-      display: inline-flex; align-items: center; justify-content: center;
-    }
-    .btn-edit:hover { background: var(--green-50); color: var(--green-600); transform: scale(1.05); }
-
-    /* ── MODAL DIALOG ── */
+    /* ── MODAL ─────────────────────────────────────────── */
     .modal-overlay {
-      position: fixed;
-      top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(0, 0, 0, 0.4);
-      backdrop-filter: blur(4px);
-      -webkit-backdrop-filter: blur(4px);
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.4);
+      backdrop-filter: blur(6px);
       display: flex; align-items: center; justify-content: center;
-      z-index: 1000;
+      z-index: 1000; padding: 1rem;
       opacity: 0; pointer-events: none;
-      transition: opacity 0.3s ease;
-      padding: 1rem;
+      transition: opacity 0.25s;
     }
-    .modal-overlay.active {
-      opacity: 1; pointer-events: auto;
-    }
+    .modal-overlay.active { opacity: 1; pointer-events: auto; }
     .modal-content {
       background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      width: 100%; max-width: 540px;
-      padding: 1.75rem 2rem;
-      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.12);
-      transform: translateY(20px);
-      transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+      border: 1px solid var(--rule);
+      border-radius: var(--r-xl);
+      width: 100%; max-width: 520px;
+      padding: 1.5rem;
+      box-shadow: 0 16px 40px rgba(0,0,0,0.15);
+      transform: translateY(12px);
+      transition: transform 0.25s cubic-bezier(0.34,1.56,0.64,1);
     }
-    .modal-overlay.active .modal-content {
-      transform: translateY(0);
-    }
+    .modal-overlay.active .modal-content { transform: none; }
     .modal-header {
       display: flex; justify-content: space-between; align-items: center;
       margin-bottom: 1.25rem;
     }
-    .modal-title { font-size: 16px; font-weight: 600; color: var(--text); }
+    .modal-title { font-size: 15px; font-weight: 600; }
     .btn-close-modal {
-      background: none; border: none; font-size: 20px; cursor: pointer; color: var(--text-muted);
-      display: flex; align-items: center; justify-content: center;
+      background: none; border: none; cursor: pointer;
+      color: var(--ink-3); font-size: 18px;
+      display: flex; align-items: center;
+      padding: 4px; border-radius: 6px;
+      transition: color 0.15s, background 0.15s;
     }
-    .btn-close-modal:hover { color: var(--text); }
+    .btn-close-modal:hover { background: var(--ground); color: var(--ink); }
     .modal-footer {
-      display: flex; gap: 8px; justify-content: flex-end; margin-top: 1.75rem;
+      display: flex; gap: 8px; justify-content: flex-end; margin-top: 1.5rem;
     }
     .btn-cancel {
-      padding: 10px 18px; border: 1px solid var(--border); border-radius: 8px;
-      background: var(--bg); color: var(--text); cursor: pointer; font-weight: 600;
-      font-size: 13px; font-family: inherit; transition: all 0.2s;
+      padding: 9px 16px; border: 1px solid var(--rule-2);
+      border-radius: var(--r-md);
+      background: var(--ground); color: var(--ink);
+      cursor: pointer; font-weight: 600; font-size: 13px;
+      font-family: var(--font-ui); transition: background 0.15s;
     }
-    .btn-cancel:hover { background: var(--border); }
+    .btn-cancel:hover { background: var(--rule); }
     .btn-save-edit {
-      padding: 10px 18px; border: none; border-radius: 8px;
-      background: var(--green-600); color: #ffffff; cursor: pointer; font-weight: 600;
-      font-size: 13px; font-family: inherit; transition: all 0.2s;
-      box-shadow: 0 4px 10px rgba(46,125,50,0.15);
+      padding: 9px 16px; border: none; border-radius: var(--r-md);
+      background: var(--moss); color: #fff;
+      cursor: pointer; font-weight: 600; font-size: 13px;
+      font-family: var(--font-ui); transition: background 0.15s;
     }
-    @media (prefers-color-scheme: dark) {
-      .btn-save-edit {
-        color: #0d130e;
-      }
-    }
-    .btn-save-edit:hover { background: var(--green-700); transform: translateY(-1px); }
+    .btn-save-edit:hover { background: var(--moss-2); }
+    @media (prefers-color-scheme: dark) { .btn-save-edit { color: #e8ede7; } }
 
-    /* ── MOBILE RESPONSIVE ── */
+    /* ── PRODUKSI PANEL ─────────────────────────────────── */
+    .produksi-topbar {
+      display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+    }
+    .btn-produksi-add {
+      display: inline-flex; align-items: center; justify-content: center; gap: 7px;
+      min-height: 40px; padding: 9px 15px;
+      font-size: 13px; font-weight: 600; font-family: var(--font-ui);
+      background: var(--moss); color: #fff;
+      border: none; border-radius: var(--r-md);
+      cursor: pointer; transition: background 0.15s;
+      letter-spacing: -0.01em;
+    }
+    .btn-produksi-add:hover { background: var(--moss-2); }
+    @media (prefers-color-scheme: dark) { .btn-produksi-add { color: #e8ede7; } }
+
+    .produksi-formula {
+      display: flex; flex-wrap: wrap; align-items: center; gap: 0;
+      font-size: 11.5px; color: var(--ink-3);
+      padding: 9px 14px;
+      background: var(--ground);
+      border: 1px solid var(--rule);
+      border-radius: var(--r-md);
+      font-family: var(--font-mono);
+    }
+    .pf-label { font-weight: 500; color: var(--ink); padding: 0 3px; }
+    .pf-sep { width: 1px; height: 12px; background: var(--rule-2); margin: 0 10px; opacity: 0.6; }
+
+    .produksi-cards { display: flex; flex-direction: column; gap: 10px; }
+
+    .calc-card {
+      background: var(--surface);
+      border: 1px solid var(--rule);
+      border-radius: var(--r-md);
+      overflow: hidden;
+      transition: box-shadow 0.2s;
+    }
+    .calc-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.06); }
+
+    .calc-card-header {
+      display: flex; align-items: center; gap: 10px;
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--rule);
+      background: var(--ground);
+    }
+    .calc-card-num {
+      width: 24px; height: 24px;
+      border-radius: 50%;
+      background: var(--moss);
+      color: #fff;
+      font-size: 11px; font-weight: 700; font-family: var(--font-mono);
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    @media (prefers-color-scheme: dark) { .calc-card-num { color: #e8ede7; } }
+    .calc-card-identity { flex: 1; min-width: 0; }
+    .calc-card-name {
+      font-size: 14px; font-weight: 600; color: var(--ink);
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .calc-card-name-placeholder { color: var(--ink-3); font-weight: 400; }
+    .calc-card-sub { font-size: 11px; color: var(--ink-3); }
+    .btn-hapus-baris {
+      width: 32px; height: 32px;
+      background: none; border: none; cursor: pointer;
+      color: var(--ink-4); border-radius: 7px;
+      display: flex; align-items: center; justify-content: center;
+      transition: all 0.15s; flex-shrink: 0;
+    }
+    .btn-hapus-baris:hover { background: var(--coral-bg); color: var(--coral); }
+    .btn-hapus-baris i { font-size: 15px; }
+
+    .calc-card-body { display: flex; flex-direction: column; }
+
+    .calc-inputs {
+      padding: 12px;
+      display: grid; grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+    .calc-field { display: flex; flex-direction: column; gap: 4px; }
+    .calc-field-full { grid-column: 1 / -1; }
+    .calc-field-label {
+      font-size: 10px; font-weight: 700;
+      letter-spacing: 0.06em; text-transform: uppercase;
+      color: var(--ink-3);
+    }
+    .calc-field-control { position: relative; display: flex; align-items: center; }
+    .calc-input {
+      flex: 1; font-family: var(--font-ui); font-size: 13px; font-weight: 500;
+      min-height: 38px; padding: 7px 9px;
+      border: 1px solid var(--rule-2); border-radius: var(--r-sm);
+      background: var(--ground); color: var(--ink);
+      outline: none; transition: all 0.15s; min-width: 0; width: 100%;
+    }
+    .calc-input:focus {
+      border-color: var(--moss); background: var(--surface);
+      box-shadow: 0 0 0 3px rgba(45,92,46,0.1);
+    }
+    .calc-input.num {
+      text-align: right;
+      font-family: var(--font-mono);
+      font-size: 14px;
+      padding-right: 36px;
+    }
+    select.calc-input { cursor: pointer; }
+    .calc-input-unit {
+      position: absolute; right: 7px; top: 50%; transform: translateY(-50%);
+      font-size: 10px; font-weight: 600; color: var(--ink-4);
+      font-family: var(--font-mono);
+      pointer-events: none;
+    }
+
+    .calc-results {
+      display: grid; grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 8px;
+      padding: 10px 12px 12px;
+      border-top: 1px solid var(--rule);
+      background: var(--ground);
+    }
+    .calc-result-item {
+      display: flex; flex-direction: column; gap: 2px;
+      padding: 8px; background: var(--surface);
+      border: 1px solid var(--rule);
+      border-radius: var(--r-sm);
+    }
+    .calc-result-label {
+      font-size: 9.5px; font-weight: 700;
+      letter-spacing: 0.06em; text-transform: uppercase;
+      color: var(--ink-3);
+    }
+    .calc-result-val {
+      font-size: 16px; font-weight: 700; color: var(--ink-3);
+      line-height: 1; font-family: var(--font-mono);
+      transition: color 0.2s;
+    }
+    .calc-result-val.has-val { color: var(--moss); }
+    .calc-result-unit { font-size: 10px; color: var(--ink-4); }
+
+    .produksi-total-bar {
+      background: var(--moss);
+      border-radius: var(--r-md); padding: 12px 14px;
+      display: grid; grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 8px;
+    }
+    .ptb-item { min-width: 0; display: flex; flex-direction: column; gap: 3px; }
+    .ptb-label { font-size: 9px; font-weight: 700; letter-spacing: 0.07em; text-transform: uppercase; color: rgba(255,255,255,0.6); }
+    .ptb-val { font-size: 20px; font-weight: 700; color: #fff; font-family: var(--font-mono); line-height: 1; }
+    .ptb-unit { font-size: 9px; color: rgba(255,255,255,0.5); }
+    @media (prefers-color-scheme: dark) {
+      .ptb-val { color: #e8ede7; }
+      .ptb-label { color: rgba(232,237,231,0.5); }
+      .ptb-unit  { color: rgba(232,237,231,0.4); }
+    }
+
+    .produksi-empty {
+      text-align: center; padding: 2.5rem 1rem;
+      color: var(--ink-3); font-size: 14px;
+      background: var(--surface);
+      border: 2px dashed var(--rule-2);
+      border-radius: var(--r-md);
+    }
+    .produksi-empty i { font-size: 36px; display: block; margin-bottom: 10px; opacity: 0.2; }
+    .produksi-empty strong { display: block; font-size: 14px; font-weight: 700; color: var(--ink); margin-bottom: 3px; }
+
+    /* ── SETUP CARD (hidden) ─────────────────────────────── */
+    .setup-card { display: none !important; }
+
+    /* ── MOBILE ─────────────────────────────────────────── */
     @media (max-width: 480px) {
-      .topbar {
-        padding: 0 1rem;
-        gap: 10px;
-        height: 56px;
-      }
-      .topbar-icon {
-        width: 32px;
-        height: 32px;
-      }
-      .topbar-icon i {
-        font-size: 16px;
-      }
-      .topbar-title {
-        font-size: 14px;
-      }
-      .topbar-sub {
-        font-size: 10px;
-      }
-      .db-status span {
-        display: none;
-      }
-      .db-status {
-        padding: 0;
-        width: 28px;
-        height: 28px;
-        justify-content: center;
-        border-radius: 50%;
-      }
-      .container {
-        padding: 1rem 0.65rem 5.75rem;
-      }
-      .card {
-        padding: 1rem;
-        border-radius: 12px;
-        margin-bottom: 1rem;
-      }
-      .section-label { margin-bottom: 0.9rem; }
+      .topbar { padding: 0 1rem; height: 54px; gap: 10px; }
+      .topbar-logo { width: 30px; height: 30px; }
+      .topbar-logo i { font-size: 15px; }
+      .topbar-wordmark { font-size: 14px; }
+      .topbar-sub { font-size: 10px; }
+      .db-pill span { display: none; }
+      .db-pill { padding: 0; width: 26px; height: 26px; justify-content: center; border-radius: 50%; }
+      .shell { padding: 1rem 0.75rem 6.5rem; }
+      .card { padding: 1rem; border-radius: 12px; margin-bottom: 1rem; }
       .tabs {
         position: fixed;
-        left: 10px;
-        right: 10px;
-        bottom: 10px;
-        bottom: max(10px, env(safe-area-inset-bottom));
+        left: 8px; right: 8px;
+        bottom: max(8px, env(safe-area-inset-bottom));
         z-index: 900;
-        display: grid;
-        grid-template-columns: repeat(4, minmax(0, 1fr));
-        gap: 4px;
-        padding: 5px;
-        margin-bottom: 0;
+        display: grid; grid-template-columns: repeat(4, 1fr);
+        gap: 3px; padding: 4px; margin-bottom: 0;
         border-radius: 16px;
-        border-color: var(--border-strong);
-        box-shadow: 0 14px 34px rgba(19, 27, 20, 0.18);
+        box-shadow: 0 8px 24px rgba(0,0,0,0.15);
       }
       .tab {
-        min-width: 0;
-        min-height: 48px;
-        padding: 6px 2px;
-        border-radius: 11px;
-        flex-direction: column;
-        gap: 2px;
-        font-size: 10px;
-        line-height: 1.1;
-        white-space: nowrap;
-        box-shadow: none;
+        min-height: 46px; padding: 5px 2px;
+        border-radius: 12px;
+        flex-direction: column; gap: 2px;
+        font-size: 9.5px;
       }
-      .tab i {
-        font-size: 16px;
-        line-height: 1;
+      .tab i { font-size: 15px; }
+      .calc-inputs { grid-template-columns: 1fr 1fr; padding: 9px; gap: 8px; }
+      .calc-results { grid-template-columns: 1fr 1fr; padding: 8px; gap: 6px; }
+      .produksi-total-bar { grid-template-columns: 1fr 1fr; position: sticky; bottom: 60px; z-index: 4; }
+      .ptb-val { font-size: 16px; }
+      .filter-toolbar {
+        display: grid;
+        grid-template-columns: 1fr 100px;
+        gap: 6px;
       }
-      .tab.active {
-        box-shadow: 0 5px 13px rgba(46, 125, 50, 0.2);
-      }
+      .filter-sep { display: none; }
+      .filter-search { grid-column: 1 / -1; }
+      #t-filter-komoditas { grid-column: 1; }
+      #t-filter-kegiatan  { grid-column: 2; }
+      .filter-select { width: 100%; height: 34px; padding: 6px 22px 6px 8px; font-size: 11px; }
+      .filter-search input { height: 34px; font-size: 12px; }
+      #t-waktu-wrap { grid-column: 1 / -1; }
+      #t-btn-waktu { width: 100%; height: 34px; min-height: 34px; justify-content: center; font-size: 11px; }
+      .rekap-toolbar { gap: 8px; }
+      .stats-grid { grid-template-columns: 1fr 1fr; }
+      .stat-val { font-size: 22px; }
     }
-
     @media (max-width: 340px) {
-      .container {
-        padding-left: 0.5rem;
-        padding-right: 0.5rem;
-      }
-      .tab {
-        font-size: 9px;
-      }
+      .calc-inputs, .calc-results, .produksi-total-bar { grid-template-columns: 1fr; }
+      .stats-grid { grid-template-columns: 1fr; }
+      .tab { font-size: 8.5px; }
     }
   </style>
 </head>
 <body>
 
 <div class="topbar">
-  <div class="topbar-icon"><i class="ti ti-plant"></i></div>
+  <div class="topbar-logo"><i class="ti ti-plant"></i></div>
   <div>
-    <div class="topbar-title">Laporan Pertanian</div>
+    <div class="topbar-wordmark">Laporan Pertanian</div>
     <div class="topbar-sub">Luas tambah tanam harian</div>
   </div>
-  <div class="db-status" title="Status koneksi database">
+  <div class="db-pill" title="Status koneksi database">
     <div class="db-dot" id="db-dot"></div>
     <span id="db-label">Menghubungkan…</span>
   </div>
 </div>
 
-<div class="container">
+<div class="shell">
 
   <div id="alert-box" class="alert hidden">
     <i id="alert-icon" class="ti ti-circle-check"></i>
@@ -1212,10 +1064,10 @@
 
   <div class="tabs" role="tablist">
     <button class="tab active" onclick="switchTab('input')" id="tab-input" role="tab">
-      <i class="ti ti-edit"></i> Input Laporan
+      <i class="ti ti-edit"></i> Input
     </button>
     <button class="tab" onclick="switchTab('data')" id="tab-data" role="tab">
-      <i class="ti ti-table"></i> Lihat Data
+      <i class="ti ti-table"></i> Data
     </button>
     <button class="tab" onclick="switchTab('rekap')" id="tab-rekap" role="tab">
       <i class="ti ti-chart-bar"></i> Rekap
@@ -1228,7 +1080,7 @@
   <!-- PANEL INPUT -->
   <div class="panel active" id="panel-input">
     <div class="card">
-      <div class="section-label">Informasi Umum</div>
+      <div class="section-label"><i class="ti ti-info-circle"></i> Informasi Umum</div>
       <div class="form-grid">
         <div class="field">
           <label for="f-tanggal">Tanggal</label>
@@ -1236,7 +1088,7 @@
         </div>
         <div class="field">
           <label for="f-user">Identitas</label>
-          <input type="text" id="f-user" placeholder="Nama petugas" />
+          <input type="text" id="f-user" placeholder="Nama petani" />
         </div>
         <div class="field">
           <label for="f-desa">Desa</label>
@@ -1248,7 +1100,7 @@
         </div>
       </div>
       <div class="divider"></div>
-      <div class="section-label">Detail Kegiatan</div>
+      <div class="section-label"><i class="ti ti-list-details"></i> Detail Kegiatan</div>
       <div class="form-grid">
         <div class="field">
           <label for="f-jenis">Jenis LTT</label>
@@ -1292,36 +1144,32 @@
   <div class="panel" id="panel-data">
     <div class="card">
       <div class="data-header">
-        <div style="display:flex;align-items:center;gap:10px">
-          <span class="section-label" style="margin:0">Data Laporan</span>
+        <div class="data-header-left">
+          <span class="section-label" style="margin:0"><i class="ti ti-table"></i> Data Laporan</span>
           <span class="data-count" id="data-count">0 laporan</span>
         </div>
-        <div class="data-header-right">
-          <div class="download-wrap" id="download-wrap">
-            <button class="btn-download" id="btn-download" onclick="toggleDownloadDropdown()">
-              <i class="ti ti-download"></i> Download
-              <i class="ti ti-chevron-down chevron"></i>
+        <div class="download-wrap" id="download-wrap">
+          <button class="btn-download" id="btn-download" onclick="toggleDownloadDropdown()">
+            <i class="ti ti-download"></i> Download
+            <i class="ti ti-chevron-down chevron"></i>
+          </button>
+          <div class="download-dropdown" id="download-dropdown">
+            <button class="btn-dl-option pdf" onclick="exportPDF(); closeDownloadDropdown()">
+              <i class="ti ti-file-type-pdf"></i> Export PDF
             </button>
-            <div class="download-dropdown" id="download-dropdown">
-              <button class="btn-dl-option pdf" onclick="exportPDF(); closeDownloadDropdown()">
-                <i class="ti ti-file-type-pdf"></i> Export PDF
-              </button>
-              <button class="btn-dl-option excel" onclick="exportExcel(); closeDownloadDropdown()">
-                <i class="ti ti-file-spreadsheet"></i> Export Excel
-              </button>
-            </div>
+            <button class="btn-dl-option excel" onclick="exportExcel(); closeDownloadDropdown()">
+              <i class="ti ti-file-spreadsheet"></i> Export Excel
+            </button>
           </div>
         </div>
       </div>
-      <!-- Filter Toolbar -->
+
       <div class="filter-toolbar">
-        <!-- Search -->
-        <div class="filter-toolbar-search">
+        <div class="filter-search">
           <i class="ti ti-search"></i>
-          <input type="text" id="t-search" placeholder="Cari desa, kelompok, atau user…" oninput="handleTableSearchFilter()" aria-label="Cari data laporan" />
+          <input type="text" id="t-search" placeholder="Cari desa, kelompok, atau user…" oninput="handleTableSearchFilter()" />
         </div>
-        <div class="filter-toolbar-divider"></div>
-        <!-- Waktu Laporan -->
+        <div class="filter-sep"></div>
         <div class="waktu-wrap" id="t-waktu-wrap">
           <button class="btn-waktu has-filter" id="t-btn-waktu" onclick="toggleWaktuDropdown('t')">
             <i class="ti ti-calendar-event"></i>
@@ -1330,10 +1178,10 @@
           </button>
           <div class="waktu-dropdown" id="t-waktu-dropdown">
             <div class="waktu-presets">
-              <button class="btn-waktu-opt" onclick="setTableDatePreset('hari_ini', 't')"><i class="ti ti-sun"></i>Hari Ini</button>
-              <button class="btn-waktu-opt" onclick="setTableDatePreset('minggu_ini', 't')"><i class="ti ti-calendar-week"></i>Minggu Ini</button>
-              <button class="btn-waktu-opt active" onclick="setTableDatePreset('bulan_ini', 't')"><i class="ti ti-calendar-month"></i>Bulan Ini</button>
-              <button class="btn-waktu-opt" onclick="setTableDatePreset('semua', 't')"><i class="ti ti-infinity"></i>Semua</button>
+              <button class="btn-waktu-opt" onclick="setTableDatePreset('hari_ini','t')"><i class="ti ti-sun"></i>Hari Ini</button>
+              <button class="btn-waktu-opt" onclick="setTableDatePreset('minggu_ini','t')"><i class="ti ti-calendar-week"></i>Minggu Ini</button>
+              <button class="btn-waktu-opt active" onclick="setTableDatePreset('bulan_ini','t')"><i class="ti ti-calendar-month"></i>Bulan Ini</button>
+              <button class="btn-waktu-opt" onclick="setTableDatePreset('semua','t')"><i class="ti ti-infinity"></i>Semua</button>
             </div>
             <div class="waktu-divider"></div>
             <div class="waktu-custom-section">
@@ -1347,34 +1195,25 @@
             </div>
           </div>
         </div>
-        <!-- Komoditas -->
-        <select class="filter-select" id="t-filter-komoditas" onchange="handleTableSearchFilter()" aria-label="Filter Komoditas">
+        <select class="filter-select" id="t-filter-komoditas" onchange="handleTableSearchFilter()">
           <option value="semua">Semua Komoditas</option>
-          <option>Padi</option>
-          <option>Jagung</option>
-          <option>Kedelai</option>
+          <option>Padi</option><option>Jagung</option><option>Kedelai</option>
         </select>
-        <!-- Kegiatan -->
-        <select class="filter-select" id="t-filter-kegiatan" onchange="handleTableSearchFilter()" aria-label="Filter Kegiatan">
+        <select class="filter-select" id="t-filter-kegiatan" onchange="handleTableSearchFilter()">
           <option value="semua">Semua Kegiatan</option>
-          <option>Bera</option>
-          <option>Olah Lahan</option>
-          <option>Tanam</option>
-          <option>Panen</option>
+          <option>Bera</option><option>Olah Lahan</option><option>Tanam</option><option>Panen</option>
         </select>
       </div>
+
       <div id="table-container"></div>
     </div>
   </div>
 
   <!-- PANEL REKAP -->
   <div class="panel" id="panel-rekap">
-
-    <!-- Rekap Toolbar -->
     <div class="rekap-toolbar">
-      <!-- Jenis LTT -->
-      <div class="rekap-toolbar-left">
-        <label class="rekap-toolbar-label" for="rekap-filter">Jenis LTT</label>
+      <div class="rekap-field">
+        <div class="rekap-field-label">Jenis LTT</div>
         <div class="rekap-select-wrap">
           <i class="ti ti-filter"></i>
           <select class="rekap-select" id="rekap-filter" onchange="setRekapFilter(this.value)">
@@ -1386,106 +1225,119 @@
           </select>
         </div>
       </div>
-      <!-- Waktu -->
-      <div class="rekap-toolbar-right">
-      <div class="rekap-toolbar-label">Waktu</div>
-      <div class="waktu-wrap" id="r-waktu-wrap">
-        <button class="btn-waktu has-filter" id="r-btn-waktu" onclick="toggleWaktuDropdown('r')">
-          <i class="ti ti-calendar-event"></i>
-          <span id="r-waktu-label">Bulan Ini</span>
-          <i class="ti ti-chevron-down chevron"></i>
-        </button>
-        <div class="waktu-dropdown waktu-dropdown-right" id="r-waktu-dropdown">
-          <div class="waktu-presets">
-            <button class="btn-waktu-opt" onclick="setRekapDatePreset('hari_ini', 'r')"><i class="ti ti-sun"></i>Hari Ini</button>
-            <button class="btn-waktu-opt" onclick="setRekapDatePreset('minggu_ini', 'r')"><i class="ti ti-calendar-week"></i>Minggu Ini</button>
-            <button class="btn-waktu-opt active" onclick="setRekapDatePreset('bulan_ini', 'r')"><i class="ti ti-calendar-month"></i>Bulan Ini</button>
-            <button class="btn-waktu-opt" onclick="setRekapDatePreset('semua', 'r')"><i class="ti ti-infinity"></i>Semua</button>
-          </div>
-          <div class="waktu-divider"></div>
-          <div class="waktu-custom-section">
-            <div class="waktu-custom-label">Rentang Custom</div>
-            <div class="waktu-custom-row">
-              <input type="date" id="r-date-from" />
-              <span class="date-sep">—</span>
-              <input type="date" id="r-date-to" />
+      <div class="rekap-field">
+        <div class="rekap-field-label">Waktu</div>
+        <div class="waktu-wrap" id="r-waktu-wrap">
+          <button class="btn-waktu has-filter" id="r-btn-waktu" onclick="toggleWaktuDropdown('r')">
+            <i class="ti ti-calendar-event"></i>
+            <span id="r-waktu-label">Bulan Ini</span>
+            <i class="ti ti-chevron-down chevron"></i>
+          </button>
+          <div class="waktu-dropdown waktu-dropdown-right" id="r-waktu-dropdown">
+            <div class="waktu-presets">
+              <button class="btn-waktu-opt" onclick="setRekapDatePreset('hari_ini','r')"><i class="ti ti-sun"></i>Hari Ini</button>
+              <button class="btn-waktu-opt" onclick="setRekapDatePreset('minggu_ini','r')"><i class="ti ti-calendar-week"></i>Minggu Ini</button>
+              <button class="btn-waktu-opt active" onclick="setRekapDatePreset('bulan_ini','r')"><i class="ti ti-calendar-month"></i>Bulan Ini</button>
+              <button class="btn-waktu-opt" onclick="setRekapDatePreset('semua','r')"><i class="ti ti-infinity"></i>Semua</button>
             </div>
-            <button class="btn-apply-custom" onclick="applyRekapCustomRange()">Terapkan</button>
+            <div class="waktu-divider"></div>
+            <div class="waktu-custom-section">
+              <div class="waktu-custom-label">Rentang Custom</div>
+              <div class="waktu-custom-row">
+                <input type="date" id="r-date-from" />
+                <span class="date-sep">—</span>
+                <input type="date" id="r-date-to" />
+              </div>
+              <button class="btn-apply-custom" onclick="applyRekapCustomRange()">Terapkan</button>
+            </div>
           </div>
         </div>
       </div>
-      </div>
     </div>
 
-    <!-- Stat Cards -->
     <div class="stats-grid">
       <div class="stat-card total">
-        <div class="stat-icon"><i class="ti ti-file-description" aria-hidden="true"></i></div>
         <div class="stat-label">Total laporan</div>
         <div class="stat-val" id="stat-total">0</div>
       </div>
       <div class="stat-card luas">
-        <div class="stat-icon"><i class="ti ti-map-2" aria-hidden="true"></i></div>
         <div class="stat-label">Total luas (Ha)</div>
         <div class="stat-val" id="stat-luas">0</div>
       </div>
       <div class="stat-card desa">
-        <div class="stat-icon"><i class="ti ti-home-2" aria-hidden="true"></i></div>
         <div class="stat-label">Jumlah desa</div>
         <div class="stat-val" id="stat-desa">0</div>
       </div>
       <div class="stat-card kelompok">
-        <div class="stat-icon"><i class="ti ti-users" aria-hidden="true"></i></div>
         <div class="stat-label">Kelompok tani</div>
         <div class="stat-val" id="stat-kelompok">0</div>
       </div>
     </div>
 
-    <!-- Chart: Luas per Komoditas -->
     <div class="chart-card">
-      <div class="chart-title">
-        <i class="ti ti-plant-2" aria-hidden="true"></i> Luas per komoditas (Ha)
-      </div>
+      <div class="chart-title"><i class="ti ti-plant-2"></i> Luas per komoditas (Ha)</div>
       <div class="legend-row" id="legend-komoditas"></div>
-      <div style="position:relative;width:100%;height:130px;">
-        <canvas id="chartKomoditas" role="img" aria-label="Bar chart horizontal luas per komoditas"></canvas>
+      <div style="position:relative;width:100%;height:120px;">
+        <canvas id="chartKomoditas"></canvas>
       </div>
     </div>
 
-    <!-- Chart: Luas per Kegiatan -->
     <div class="chart-card">
-      <div class="chart-title">
-        <i class="ti ti-trowel" aria-hidden="true"></i> Luas per kegiatan (Ha)
-      </div>
+      <div class="chart-title"><i class="ti ti-trowel"></i> Luas per kegiatan (Ha)</div>
       <div class="legend-row" id="legend-kegiatan"></div>
-      <div style="position:relative;width:100%;height:170px;">
-        <canvas id="chartKegiatan" role="img" aria-label="Bar chart horizontal luas per kegiatan"></canvas>
+      <div style="position:relative;width:100%;height:160px;">
+        <canvas id="chartKegiatan"></canvas>
       </div>
     </div>
-
-  </div><!-- /panel-rekap -->
+  </div>
 
   <!-- PANEL PRODUKSI -->
   <div class="panel" id="panel-produksi">
-
-    <!-- Top Bar -->
     <div class="produksi-topbar">
-      <div class="produksi-topbar-left">
-      </div>
       <button class="btn-produksi-add" onclick="tambahBarisProduksi()">
         <i class="ti ti-plus"></i> Tambah Petani
       </button>
     </div>
-
-      <!-- Calculator Cards -->
     <div class="produksi-cards" id="produksi-cards"></div>
-
-    <!-- Total Bar -->
     <div id="produksi-total-wrap"></div>
+  </div>
 
-  </div><!-- /panel-produksi -->
+</div>
 
-</div><!-- /container -->
+<!-- MODAL EDIT -->
+<div id="edit-modal" class="modal-overlay" onclick="if(event.target===this) tutupEditModal()">
+  <div class="modal-content">
+    <div class="modal-header">
+      <div class="modal-title"><i class="ti ti-edit" style="margin-right:6px"></i>Edit Laporan</div>
+      <button class="btn-close-modal" onclick="tutupEditModal()"><i class="ti ti-x"></i></button>
+    </div>
+    <input type="hidden" id="edit-id" />
+    <div class="form-grid">
+      <div class="field"><label for="edit-tanggal">Tanggal</label><input type="date" id="edit-tanggal" /></div>
+      <div class="field"><label for="edit-user">Nama User</label><input type="text" id="edit-user" placeholder="Nama petugas" /></div>
+      <div class="field"><label for="edit-desa">Desa</label><input type="text" id="edit-desa" placeholder="Nama desa" /></div>
+      <div class="field"><label for="edit-kelompok">Kelompok Tani</label><input type="text" id="edit-kelompok" placeholder="Nama kelompok" /></div>
+      <div class="field"><label for="edit-jenis">Jenis LTT</label>
+        <select id="edit-jenis">
+          <option>Reguler</option><option>Oplah Rawa</option><option>Oplah Non Rawa</option><option>CSR</option>
+        </select>
+      </div>
+      <div class="field"><label for="edit-kegiatan">Kegiatan</label>
+        <select id="edit-kegiatan">
+          <option>Bera</option><option>Olah Lahan</option><option>Tanam</option><option>Panen</option>
+        </select>
+      </div>
+      <div class="field"><label for="edit-komoditas">Komoditas</label>
+        <select id="edit-komoditas"><option>Padi</option><option>Jagung</option><option>Kedelai</option></select>
+      </div>
+      <div class="field"><label for="edit-luas">Luas (Ha)</label><input type="number" id="edit-luas" min="0" step="0.1" placeholder="0.0" /></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-cancel" onclick="tutupEditModal()">Batal</button>
+      <button class="btn-save-edit" id="btn-update" onclick="updateData()">Simpan Perubahan</button>
+    </div>
+  </div>
+</div>
 
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -1493,12 +1345,10 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <script>
-  // ─── SUPABASE CONFIG ────────────────────────────────────────────────
   let SUPABASE_URL = 'https://penaujinawijzwcimgde.supabase.co';
   let SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBlbmF1amluYXdpanp3Y2ltZ2RlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg5NzgzNzcsImV4cCI6MjA5NDU1NDM3N30.FNNGqO7X5wpZ9Ng8qehPagS74uP-GMo8Z2AdzSEU6v4';
   const LS_URL_KEY = 'sb_url';
   const LS_KEY_KEY = 'sb_key';
-
 
   let sbClient = null;
   let cachedData = [];
@@ -1506,26 +1356,19 @@
   let activeFilter = 'semua';
   let currentPage = 1;
   const rowsPerPage = 10;
-
-  // ─── DATE FILTER STATE ───────────────────────────────────────────────
-  // Shared date range for table
-  let tableDateFrom = null;
-  let tableDateTo   = null;
-  // Shared date range for rekap
-  let rekapDateFrom = null;
-  let rekapDateTo   = null;
+  let tableDateFrom = null, tableDateTo = null;
+  let rekapDateFrom = null, rekapDateTo = null;
 
   function getDateRange(preset) {
     const now = new Date();
-    const pad = n => String(n).padStart(2, '0');
+    const pad = n => String(n).padStart(2,'0');
     const fmt = d => `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
     const todayStr = fmt(now);
-
     if (preset === 'hari_ini') return { from: todayStr, to: todayStr };
     if (preset === 'minggu_ini') {
-      const day = now.getDay(); // 0=Sun
-      const mon = new Date(now); mon.setDate(now.getDate() - (day === 0 ? 6 : day - 1));
-      const sun = new Date(mon); sun.setDate(mon.getDate() + 6);
+      const day = now.getDay();
+      const mon = new Date(now); mon.setDate(now.getDate() - (day===0?6:day-1));
+      const sun = new Date(mon); sun.setDate(mon.getDate()+6);
       return { from: fmt(mon), to: fmt(sun) };
     }
     if (preset === 'bulan_ini') {
@@ -1533,158 +1376,119 @@
       const last = new Date(now.getFullYear(), now.getMonth()+1, 0);
       return { from, to: fmt(last) };
     }
-    return { from: null, to: null }; // 'semua'
+    return { from: null, to: null };
   }
 
-  const PRESET_LABELS = {
-    hari_ini:   'Hari Ini',
-    minggu_ini: 'Minggu Ini',
-    bulan_ini:  'Bulan Ini',
-    semua:      'Semua Waktu',
-  };
+  const PRESET_LABELS = { hari_ini:'Hari Ini', minggu_ini:'Minggu Ini', bulan_ini:'Bulan Ini', semua:'Semua Waktu' };
 
   function toggleWaktuDropdown(prefix) {
-    const dd  = document.getElementById(prefix + '-waktu-dropdown');
-    const btn = document.getElementById(prefix + '-btn-waktu');
+    const dd = document.getElementById(prefix+'-waktu-dropdown');
+    const btn = document.getElementById(prefix+'-btn-waktu');
     const isOpen = dd.classList.contains('open');
-    // Close all
-    document.querySelectorAll('.waktu-dropdown').forEach(d => d.classList.remove('open'));
-    document.querySelectorAll('.btn-waktu').forEach(b => b.classList.remove('open'));
+    document.querySelectorAll('.waktu-dropdown').forEach(d=>d.classList.remove('open'));
+    document.querySelectorAll('.btn-waktu').forEach(b=>b.classList.remove('open'));
     if (!isOpen) { dd.classList.add('open'); btn.classList.add('open'); }
   }
 
   function closeAllWaktuDropdowns() {
-    document.querySelectorAll('.waktu-dropdown').forEach(d => d.classList.remove('open'));
-    document.querySelectorAll('.btn-waktu').forEach(b => b.classList.remove('open'));
+    document.querySelectorAll('.waktu-dropdown').forEach(d=>d.classList.remove('open'));
+    document.querySelectorAll('.btn-waktu').forEach(b=>b.classList.remove('open'));
   }
 
   document.addEventListener('click', e => {
     if (!e.target.closest('.waktu-wrap') && !e.target.closest('#download-wrap')) {
-      closeAllWaktuDropdowns();
-      closeDownloadDropdown();
+      closeAllWaktuDropdowns(); closeDownloadDropdown();
     }
   });
 
   function updateWaktuLabel(prefix, label) {
-    const span = document.getElementById(prefix + '-waktu-label');
-    const btn  = document.getElementById(prefix + '-btn-waktu');
+    const span = document.getElementById(prefix+'-waktu-label');
+    const btn  = document.getElementById(prefix+'-btn-waktu');
     if (span) span.textContent = label;
-    // Green tint when filtered, neutral when "semua"
     if (btn) btn.classList.toggle('has-filter', label !== 'Semua Waktu');
   }
 
   function setActiveWaktuOpt(prefix, preset) {
-    document.querySelectorAll('#' + prefix + '-waktu-dropdown .btn-waktu-opt')
-      .forEach(b => b.classList.remove('active'));
-    // find by preset keyword in onclick
-    const match = [...document.querySelectorAll('#' + prefix + '-waktu-dropdown .btn-waktu-opt')]
-      .find(b => b.getAttribute('onclick')?.includes("'" + preset + "'"));
+    document.querySelectorAll('#'+prefix+'-waktu-dropdown .btn-waktu-opt').forEach(b=>b.classList.remove('active'));
+    const match = [...document.querySelectorAll('#'+prefix+'-waktu-dropdown .btn-waktu-opt')]
+      .find(b=>b.getAttribute('onclick')?.includes("'"+preset+"'"));
     if (match) match.classList.add('active');
   }
 
   function applyTableDatePreset(preset) {
     const r = getDateRange(preset);
-    tableDateFrom = r.from;
-    tableDateTo   = r.to;
+    tableDateFrom = r.from; tableDateTo = r.to;
     const fi = document.getElementById('t-date-from');
     const ti = document.getElementById('t-date-to');
-    if (fi) fi.value = r.from || '';
-    if (ti) ti.value = r.to   || '';
+    if (fi) fi.value = r.from||''; if (ti) ti.value = r.to||'';
   }
 
   function applyRekapDatePreset(preset) {
     const r = getDateRange(preset);
-    rekapDateFrom = r.from;
-    rekapDateTo   = r.to;
+    rekapDateFrom = r.from; rekapDateTo = r.to;
     const fi = document.getElementById('r-date-from');
     const ti = document.getElementById('r-date-to');
-    if (fi) fi.value = r.from || '';
-    if (ti) ti.value = r.to   || '';
+    if (fi) fi.value = r.from||''; if (ti) ti.value = r.to||'';
   }
 
-  function setTableDatePreset(preset, prefix) {
+  function setTableDatePreset(preset) {
     applyTableDatePreset(preset);
     setActiveWaktuOpt('t', preset);
-    updateWaktuLabel('t', PRESET_LABELS[preset] || preset);
-    closeAllWaktuDropdowns();
-    currentPage = 1;
-    renderTable(true);
+    updateWaktuLabel('t', PRESET_LABELS[preset]||preset);
+    closeAllWaktuDropdowns(); currentPage=1; renderTable(true);
   }
 
-  function setRekapDatePreset(preset, prefix) {
+  function setRekapDatePreset(preset) {
     applyRekapDatePreset(preset);
     setActiveWaktuOpt('r', preset);
-    updateWaktuLabel('r', PRESET_LABELS[preset] || preset);
-    closeAllWaktuDropdowns();
-    renderRekap();
+    updateWaktuLabel('r', PRESET_LABELS[preset]||preset);
+    closeAllWaktuDropdowns(); renderRekap();
   }
 
   function applyTableCustomRange() {
-    const from = document.getElementById('t-date-from')?.value || null;
-    const to   = document.getElementById('t-date-to')?.value   || null;
-    if (!from || !to) { return; }
-    tableDateFrom = from;
-    tableDateTo   = to;
-    document.querySelectorAll('#t-waktu-dropdown .btn-waktu-opt').forEach(b => b.classList.remove('active'));
-    const label = from + ' — ' + to;
-    updateWaktuLabel('t', label);
-    closeAllWaktuDropdowns();
-    currentPage = 1;
-    renderTable(true);
+    const from = document.getElementById('t-date-from')?.value||null;
+    const to   = document.getElementById('t-date-to')?.value||null;
+    if (!from||!to) return;
+    tableDateFrom=from; tableDateTo=to;
+    document.querySelectorAll('#t-waktu-dropdown .btn-waktu-opt').forEach(b=>b.classList.remove('active'));
+    updateWaktuLabel('t', from+' — '+to);
+    closeAllWaktuDropdowns(); currentPage=1; renderTable(true);
   }
 
   function applyRekapCustomRange() {
-    const from = document.getElementById('r-date-from')?.value || null;
-    const to   = document.getElementById('r-date-to')?.value   || null;
-    if (!from || !to) { return; }
-    rekapDateFrom = from;
-    rekapDateTo   = to;
-    document.querySelectorAll('#r-waktu-dropdown .btn-waktu-opt').forEach(b => b.classList.remove('active'));
-    const label = from + ' — ' + to;
-    updateWaktuLabel('r', label);
-    closeAllWaktuDropdowns();
-    renderRekap();
+    const from = document.getElementById('r-date-from')?.value||null;
+    const to   = document.getElementById('r-date-to')?.value||null;
+    if (!from||!to) return;
+    rekapDateFrom=from; rekapDateTo=to;
+    document.querySelectorAll('#r-waktu-dropdown .btn-waktu-opt').forEach(b=>b.classList.remove('active'));
+    updateWaktuLabel('r', from+' — '+to);
+    closeAllWaktuDropdowns(); renderRekap();
   }
 
-  // ─── CHART INSTANCES ────────────────────────────────────────────────
-  let chartK = null;
-  let chartG = null;
-
-  const KOMODITAS_COLORS = {
-    'Padi':    '#2e7d32',
-    'Jagung':  '#f59e0b',
-    'Kedelai': '#3b82f6',
-  };
-  const KEGIATAN_COLORS = {
-    'Tanam':      '#10b981',
-    'Panen':      '#f97316',
-    'Olah Lahan': '#6b7280',
-    'Bera':       '#9ca3af',
-  };
-
+  // ── CHART ──
+  let chartK = null, chartG = null;
+  const KOMODITAS_COLORS = { 'Padi':'#2d5c2e', 'Jagung':'#c47c12', 'Kedelai':'#1a5fa8' };
+  const KEGIATAN_COLORS  = { 'Tanam':'#0f7a6b', 'Panen':'#c47c12', 'Olah Lahan':'#6b7569', 'Bera':'#9da89c' };
   const isDark = () => window.matchMedia('(prefers-color-scheme: dark)').matches;
+  function chartAxisColor() { return isDark() ? '#5a635a' : '#9da89c'; }
+  function chartGridColor()  { return isDark() ? 'rgba(255,255,255,0.05)' : 'rgba(26,31,26,0.05)'; }
 
-  function chartAxisColor() { return isDark() ? '#8d968b' : '#6b7269'; }
-  function chartGridColor()  { return isDark() ? 'rgba(255,255,255,0.06)' : 'rgba(46, 82, 38, 0.05)'; }
-
-  function baseChartOptions(numBars) {
+  function baseChartOptions() {
     return {
-      indexAxis: 'y',
-      responsive: true,
-      maintainAspectRatio: false,
-      animation: { duration: 400 },
+      indexAxis: 'y', responsive: true, maintainAspectRatio: false,
+      animation: { duration: 350 },
       plugins: {
         legend: { display: false },
-        tooltip: { callbacks: { label: ctx => '  ' + parseFloat(ctx.parsed.x).toFixed(1) + ' Ha' } }
+        tooltip: { callbacks: { label: ctx => '  '+parseFloat(ctx.parsed.x).toFixed(1)+' Ha' } }
       },
       scales: {
         x: {
           grid: { color: chartGridColor() },
-          ticks: { font: { size: 11, family: 'Plus Jakarta Sans' }, color: chartAxisColor(), callback: v => v + ' Ha' }
+          ticks: { font: { size: 11, family: 'DM Mono' }, color: chartAxisColor(), callback: v=>v+' Ha' }
         },
         y: {
           grid: { display: false },
-          ticks: { font: { size: 12, family: 'Plus Jakarta Sans' }, color: chartAxisColor() }
+          ticks: { font: { size: 12, family: 'Instrument Sans' }, color: chartAxisColor() }
         }
       }
     };
@@ -1693,394 +1497,277 @@
   function initCharts() {
     chartK = new Chart(document.getElementById('chartKomoditas'), {
       type: 'bar',
-      data: { labels: [], datasets: [{ data: [], backgroundColor: [], borderRadius: 6, barThickness: 24 }] },
-      options: baseChartOptions(3)
+      data: { labels:[], datasets:[{ data:[], backgroundColor:[], borderRadius:5, barThickness:22 }] },
+      options: baseChartOptions()
     });
     chartG = new Chart(document.getElementById('chartKegiatan'), {
       type: 'bar',
-      data: { labels: [], datasets: [{ data: [], backgroundColor: [], borderRadius: 6, barThickness: 24 }] },
-      options: baseChartOptions(4)
+      data: { labels:[], datasets:[{ data:[], backgroundColor:[], borderRadius:5, barThickness:22 }] },
+      options: baseChartOptions()
     });
-
-    // Theme changes listener to update charts dynamically
     window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
-      if (chartK && chartG) {
-        const gridCol = chartGridColor();
-        const tickCol = chartAxisColor();
-        
-        chartK.options.scales.x.grid.color = gridCol;
-        chartK.options.scales.x.ticks.color = tickCol;
-        chartK.options.scales.y.ticks.color = tickCol;
-        
-        chartG.options.scales.x.grid.color = gridCol;
-        chartG.options.scales.x.ticks.color = tickCol;
-        chartG.options.scales.y.ticks.color = tickCol;
-        
-        chartK.update();
-        chartG.update();
-      }
+      if (!chartK||!chartG) return;
+      const gridCol=chartGridColor(), tickCol=chartAxisColor();
+      [chartK,chartG].forEach(c => {
+        c.options.scales.x.grid.color = gridCol;
+        c.options.scales.x.ticks.color = tickCol;
+        c.options.scales.y.ticks.color = tickCol;
+        c.update();
+      });
     });
   }
 
   function updateCharts(data) {
-    // Hitung luas per komoditas & kegiatan
-    const kom = {}, keg = {};
+    const kom={}, keg={};
     data.forEach(d => {
-      const luas = parseFloat(d.luas || 0);
-      kom[d.komoditas] = (kom[d.komoditas] || 0) + luas;
-      keg[d.kegiatan]  = (keg[d.kegiatan]  || 0) + luas;
+      const luas = parseFloat(d.luas||0);
+      kom[d.komoditas] = (kom[d.komoditas]||0) + luas;
+      keg[d.kegiatan]  = (keg[d.kegiatan]||0)  + luas;
     });
+    const komEntries = Object.entries(kom).sort((a,b)=>b[1]-a[1]);
+    const kegEntries = Object.entries(keg).sort((a,b)=>b[1]-a[1]);
 
-    // Urutkan dari terbesar
-    const komEntries = Object.entries(kom).sort((a,b) => b[1]-a[1]);
-    const kegEntries = Object.entries(keg).sort((a,b) => b[1]-a[1]);
-
-    // Update chart komoditas
-    chartK.data.labels = komEntries.map(e => e[0]);
-    chartK.data.datasets[0].data  = komEntries.map(e => parseFloat(e[1].toFixed(1)));
-    chartK.data.datasets[0].backgroundColor = komEntries.map(e => KOMODITAS_COLORS[e[0]] || '#639922');
+    chartK.data.labels = komEntries.map(e=>e[0]);
+    chartK.data.datasets[0].data = komEntries.map(e=>parseFloat(e[1].toFixed(1)));
+    chartK.data.datasets[0].backgroundColor = komEntries.map(e=>KOMODITAS_COLORS[e[0]]||'#639922');
     chartK.update();
 
-    // Update chart kegiatan
-    chartG.data.labels = kegEntries.map(e => e[0]);
-    chartG.data.datasets[0].data  = kegEntries.map(e => parseFloat(e[1].toFixed(1)));
-    chartG.data.datasets[0].backgroundColor = kegEntries.map(e => KEGIATAN_COLORS[e[0]] || '#888780');
+    chartG.data.labels = kegEntries.map(e=>e[0]);
+    chartG.data.datasets[0].data = kegEntries.map(e=>parseFloat(e[1].toFixed(1)));
+    chartG.data.datasets[0].backgroundColor = kegEntries.map(e=>KEGIATAN_COLORS[e[0]]||'#888780');
     chartG.update();
 
-    // Legend komoditas
     document.getElementById('legend-komoditas').innerHTML = komEntries.length
-      ? komEntries.map(([k,v]) => `
-          <span class="legend-item">
-            <span class="legend-dot" style="background:${KOMODITAS_COLORS[k]||'#639922'}"></span>
-            ${k} <strong style="color:var(--text);margin-left:3px">${v.toFixed(1)} Ha</strong>
-          </span>`).join('')
-      : '<span style="font-size:13px;color:var(--text-muted)">Belum ada data</span>';
+      ? komEntries.map(([k,v])=>`<span class="legend-item"><span class="legend-dot" style="background:${KOMODITAS_COLORS[k]||'#639922'}"></span>${k} <strong style="color:var(--ink);margin-left:2px;font-family:var(--font-mono)">${v.toFixed(1)} Ha</strong></span>`).join('')
+      : '<span style="font-size:12px;color:var(--ink-3)">Belum ada data</span>';
 
-    // Legend kegiatan
     document.getElementById('legend-kegiatan').innerHTML = kegEntries.length
-      ? kegEntries.map(([k,v]) => `
-          <span class="legend-item">
-            <span class="legend-dot" style="background:${KEGIATAN_COLORS[k]||'#888780'}"></span>
-            ${k} <strong style="color:var(--text);margin-left:3px">${v.toFixed(1)} Ha</strong>
-          </span>`).join('')
-      : '<span style="font-size:13px;color:var(--text-muted)">Belum ada data</span>';
+      ? kegEntries.map(([k,v])=>`<span class="legend-item"><span class="legend-dot" style="background:${KEGIATAN_COLORS[k]||'#888780'}"></span>${k} <strong style="color:var(--ink);margin-left:2px;font-family:var(--font-mono)">${v.toFixed(1)} Ha</strong></span>`).join('')
+      : '<span style="font-size:12px;color:var(--ink-3)">Belum ada data</span>';
   }
 
-  // ─── REKAP ──────────────────────────────────────────────────────────
+  // ── REKAP ──
   function setRekapFilter(filter) {
     activeFilter = filter;
-    const select = document.getElementById('rekap-filter');
-    if (select && select.value !== filter) select.value = filter;
+    const sel = document.getElementById('rekap-filter');
+    if (sel&&sel.value!==filter) sel.value=filter;
     renderRekap();
   }
-
-  async function updateRekap() {
-    await renderRekap();
-  }
-
+  async function updateRekap() { await renderRekap(); }
   async function renderRekap() {
-    // Show loading on stat cards
-    ['stat-total','stat-luas','stat-desa','stat-kelompok'].forEach(id => {
-      const el = document.getElementById(id);
-      if (el) el.innerHTML = '<i class="ti ti-loader spin" style="font-size:18px"></i>';
+    ['stat-total','stat-luas','stat-desa','stat-kelompok'].forEach(id=>{
+      const el=document.getElementById(id);
+      if(el) el.innerHTML='<i class="ti ti-loader spin" style="font-size:16px"></i>';
     });
-
-    const data = await fetchAllForRekap({
-      dateFrom: rekapDateFrom,
-      dateTo:   rekapDateTo,
-      jenis:    activeFilter,
-    });
-
-    const totalLuas     = data.reduce((s,d) => s + parseFloat(d.luas||0), 0);
-    const totalDesa     = new Set(data.map(d => d.desa)).size;
-    const totalKelompok = new Set(data.map(d => d.kelompok_tani)).size;
-
+    const data = await fetchAllForRekap({ dateFrom:rekapDateFrom, dateTo:rekapDateTo, jenis:activeFilter });
+    const totalLuas     = data.reduce((s,d)=>s+parseFloat(d.luas||0),0);
+    const totalDesa     = new Set(data.map(d=>d.desa)).size;
+    const totalKelompok = new Set(data.map(d=>d.kelompok_tani)).size;
     document.getElementById('stat-total').textContent    = data.length;
     document.getElementById('stat-luas').textContent     = totalLuas.toFixed(1);
     document.getElementById('stat-desa').textContent     = totalDesa;
     document.getElementById('stat-kelompok').textContent = totalKelompok;
-
     updateCharts(data);
   }
 
-  // ─── INIT ───────────────────────────────────────────────────────────
+  // ── INIT ──
   async function init() {
     initCharts();
-
-    const url = SUPABASE_URL || localStorage.getItem(LS_URL_KEY) || '';
-    const key = SUPABASE_KEY || localStorage.getItem(LS_KEY_KEY) || '';
-
-    if (!url || !key) { showOfflinePopup(); return; }
-
+    const url = SUPABASE_URL||localStorage.getItem(LS_URL_KEY)||'';
+    const key = SUPABASE_KEY||localStorage.getItem(LS_KEY_KEY)||'';
+    if (!url||!key) { showOfflinePopup(); return; }
     try {
       const { createClient } = window.supabase;
       sbClient = createClient(url, key);
-      const { error } = await sbClient.from('laporan').select('id', { count: 'exact', head: true });
+      const { error } = await sbClient.from('laporan').select('id',{count:'exact',head:true});
       if (error) throw error;
-      setDbStatus(true);
-      hideOfflinePopup();
-      // Apply default date presets
-      applyTableDatePreset('bulan_ini');
-      applyRekapDatePreset('bulan_ini');
-    } catch (e) {
-      setDbStatus(false);
-      showOfflinePopup();
-    }
+      setDbStatus(true); hideOfflinePopup();
+      applyTableDatePreset('bulan_ini'); applyRekapDatePreset('bulan_ini');
+    } catch(e) { setDbStatus(false); showOfflinePopup(); }
   }
 
-  function showOfflinePopup() {
-    document.getElementById('offline-popup').classList.add('active');
-  }
-
-  function hideOfflinePopup() {
-    document.getElementById('offline-popup').classList.remove('active');
-  }
+  function showOfflinePopup() { document.getElementById('offline-popup').classList.add('active'); }
+  function hideOfflinePopup() { document.getElementById('offline-popup').classList.remove('active'); }
 
   async function retryConnection() {
     const btn = document.getElementById('btn-retry');
-    btn.disabled = true;
-    btn.innerHTML = '<i class="ti ti-loader spin"></i> Menghubungkan…';
-
-    const url = SUPABASE_URL || localStorage.getItem(LS_URL_KEY) || '';
-    const key = SUPABASE_KEY || localStorage.getItem(LS_KEY_KEY) || '';
-
+    btn.disabled=true; btn.innerHTML='<i class="ti ti-loader spin"></i> Menghubungkan…';
+    const url = SUPABASE_URL||localStorage.getItem(LS_URL_KEY)||'';
+    const key = SUPABASE_KEY||localStorage.getItem(LS_KEY_KEY)||'';
     try {
       const { createClient } = window.supabase;
       sbClient = createClient(url, key);
-      const { error } = await sbClient.from('laporan').select('id', { count: 'exact', head: true });
+      const { error } = await sbClient.from('laporan').select('id',{count:'exact',head:true});
       if (error) throw error;
-      setDbStatus(true);
-      hideOfflinePopup();
-      showAlert('Berhasil terhubung ke database!', 'success');
-      applyTableDatePreset('bulan_ini');
-      applyRekapDatePreset('bulan_ini');
-      await renderTable(true);
-      await renderRekap();
-    } catch (e) {
-      setDbStatus(false);
-    } finally {
-      btn.disabled = false;
-      btn.innerHTML = '<i class="ti ti-refresh"></i> Coba Lagi';
-    }
+      setDbStatus(true); hideOfflinePopup();
+      showAlert('Berhasil terhubung ke database!','success');
+      applyTableDatePreset('bulan_ini'); applyRekapDatePreset('bulan_ini');
+      await renderTable(true); await renderRekap();
+    } catch(e) { setDbStatus(false); }
+    finally { btn.disabled=false; btn.innerHTML='<i class="ti ti-refresh"></i> Coba Lagi'; }
   }
 
-  async function connectSupabase() {
-    // kept for backward compatibility
-  }
+  async function connectSupabase() {}
 
   function setDbStatus(ok) {
-    document.getElementById('db-dot').className = 'db-dot ' + (ok ? 'ok' : 'err');
-    document.getElementById('db-label').textContent = ok ? 'Terhubung' : 'Terputus';
+    document.getElementById('db-dot').className = 'db-dot '+(ok?'ok':'err');
+    document.getElementById('db-label').textContent = ok?'Terhubung':'Terputus';
   }
 
-  // ─── ALERT ──────────────────────────────────────────────────────────
-  function showAlert(msg, type = 'success') {
-    const box   = document.getElementById('alert-box');
-    const msgEl = document.getElementById('alert-msg');
-    const icon  = document.getElementById('alert-icon');
-    const iconMap = {
-      success: 'ti ti-circle-check',
-      warning: 'ti ti-alert-triangle',
-      error:   'ti ti-circle-x'
-    };
-    box.className = 'alert ' + type;
-    msgEl.textContent = msg;
-    icon.className = iconMap[type] || iconMap.success;
+  // ── ALERT ──
+  function showAlert(msg, type='success') {
+    const box=document.getElementById('alert-box');
+    const msgEl=document.getElementById('alert-msg');
+    const icon=document.getElementById('alert-icon');
+    const iconMap={success:'ti ti-circle-check',warning:'ti ti-alert-triangle',error:'ti ti-circle-x'};
+    box.className='alert '+type;
+    msgEl.textContent=msg;
+    icon.className=iconMap[type]||iconMap.success;
     clearTimeout(box._timer);
-    box._timer = setTimeout(() => { box.className = 'alert hidden'; }, 4000);
+    box._timer=setTimeout(()=>{box.className='alert hidden';},4000);
   }
 
-  // ─── DATA OPS ───────────────────────────────────────────────────────
-  // totalCount from backend (for pagination info)
+  // ── DATA OPS ──
   let totalCount = 0;
 
-  async function fetchData({ page = 1, dateFrom = null, dateTo = null, search = '', komoditas = 'semua', kegiatan = 'semua' } = {}) {
+  async function fetchData({ page=1, dateFrom=null, dateTo=null, search='', komoditas='semua', kegiatan='semua' }={}) {
     if (!sbClient) return [];
-
-    const from = (page - 1) * rowsPerPage;
-    const to   = from + rowsPerPage - 1;
-
-    let q = sbClient
-      .from('laporan')
-      .select('*', { count: 'exact' })
-      .order('tanggal', { ascending: false })
-      .order('created_at', { ascending: false })
-      .range(from, to);
-
-    if (dateFrom) q = q.gte('tanggal', dateFrom);
-    if (dateTo)   q = q.lte('tanggal', dateTo);
-    if (komoditas !== 'semua') q = q.eq('komoditas', komoditas);
-    if (kegiatan  !== 'semua') q = q.eq('kegiatan', kegiatan);
-    if (search) {
-      // Supabase ilike OR — filter client-side after for search (simpler)
-    }
-
+    const from=(page-1)*rowsPerPage, to=from+rowsPerPage-1;
+    let q = sbClient.from('laporan').select('*',{count:'exact'})
+      .order('tanggal',{ascending:false}).order('created_at',{ascending:false}).range(from,to);
+    if (dateFrom) q=q.gte('tanggal',dateFrom);
+    if (dateTo)   q=q.lte('tanggal',dateTo);
+    if (komoditas!=='semua') q=q.eq('komoditas',komoditas);
+    if (kegiatan !=='semua') q=q.eq('kegiatan',kegiatan);
     const { data, error, count } = await q;
-    if (error) { showAlert('Gagal memuat data: ' + error.message, 'error'); return []; }
-
-    let rows = data || [];
-
-    // Client-side search (desa, kelompok_tani, user_name) — only on current page
+    if (error) { showAlert('Gagal memuat data: '+error.message,'error'); return []; }
+    let rows = data||[];
     if (search) {
-      const s = search.toLowerCase();
-      rows = rows.filter(d =>
-        (d.desa || '').toLowerCase().includes(s) ||
-        (d.kelompok_tani || '').toLowerCase().includes(s) ||
-        (d.user_name || '').toLowerCase().includes(s)
-      );
+      const s=search.toLowerCase();
+      rows=rows.filter(d=>(d.desa||'').toLowerCase().includes(s)||(d.kelompok_tani||'').toLowerCase().includes(s)||(d.user_name||'').toLowerCase().includes(s));
     }
-
-    cachedData  = rows;
-    totalCount  = count || 0;
-    return rows;
+    cachedData=rows; totalCount=count||0; return rows;
   }
 
-  // Fetch ALL filtered rows for export (no pagination)
-  async function fetchAllForExport({ dateFrom = null, dateTo = null, komoditas = 'semua', kegiatan = 'semua' } = {}) {
+  async function fetchAllForExport({ dateFrom=null, dateTo=null, komoditas='semua', kegiatan='semua' }={}) {
     if (!sbClient) return [];
-    let q = sbClient.from('laporan').select('*').order('tanggal', { ascending: false });
-    if (dateFrom)             q = q.gte('tanggal', dateFrom);
-    if (dateTo)               q = q.lte('tanggal', dateTo);
-    if (komoditas !== 'semua') q = q.eq('komoditas', komoditas);
-    if (kegiatan  !== 'semua') q = q.eq('kegiatan', kegiatan);
+    let q = sbClient.from('laporan').select('*').order('tanggal',{ascending:false});
+    if (dateFrom) q=q.gte('tanggal',dateFrom);
+    if (dateTo)   q=q.lte('tanggal',dateTo);
+    if (komoditas!=='semua') q=q.eq('komoditas',komoditas);
+    if (kegiatan !=='semua') q=q.eq('kegiatan',kegiatan);
     const { data, error } = await q;
-    if (error) { showAlert('Gagal memuat data ekspor: ' + error.message, 'error'); return []; }
-    return data || [];
+    if (error) { showAlert('Gagal memuat data ekspor: '+error.message,'error'); return []; }
+    return data||[];
   }
 
-  // Fetch ALL filtered rows for rekap stats (no pagination)
-  async function fetchAllForRekap({ dateFrom = null, dateTo = null, jenis = 'semua' } = {}) {
+  async function fetchAllForRekap({ dateFrom=null, dateTo=null, jenis='semua' }={}) {
     if (!sbClient) return [];
-    let q = sbClient.from('laporan').select('*').order('tanggal', { ascending: false });
-    if (dateFrom)          q = q.gte('tanggal', dateFrom);
-    if (dateTo)            q = q.lte('tanggal', dateTo);
-    if (jenis !== 'semua') q = q.eq('jenis_ltt', jenis);
+    let q = sbClient.from('laporan').select('*').order('tanggal',{ascending:false});
+    if (dateFrom) q=q.gte('tanggal',dateFrom);
+    if (dateTo)   q=q.lte('tanggal',dateTo);
+    if (jenis!=='semua') q=q.eq('jenis_ltt',jenis);
     const { data, error } = await q;
-    if (error) { showAlert('Gagal memuat rekap: ' + error.message, 'error'); return []; }
-    return data || [];
+    if (error) { showAlert('Gagal memuat rekap: '+error.message,'error'); return []; }
+    return data||[];
   }
 
   async function simpanData() {
-    if (!sbClient) { showAlert('Belum terhubung ke database', 'warning'); return; }
-    const tanggal  = document.getElementById('f-tanggal').value;
-    const desa     = document.getElementById('f-desa').value.trim();
-    const kelompok = document.getElementById('f-kelompok').value.trim();
-    const user     = document.getElementById('f-user').value.trim();
-    const luas     = parseFloat(document.getElementById('f-luas').value) || 0;
-    if (!desa || !kelompok || !user || !tanggal) {
-      showAlert('Semua data wajib diisi', 'warning'); return;
-    }
-    const btn = document.getElementById('btn-simpan');
-    btn.disabled = true;
-    btn.innerHTML = '<i class="ti ti-loader spin"></i> Menyimpan…';
-    const row = {
-      tanggal, desa,
-      kelompok_tani: kelompok,
-      jenis_ltt:    document.getElementById('f-jenis').value,
-      kegiatan:     document.getElementById('f-kegiatan').value,
-      komoditas:    document.getElementById('f-komoditas').value,
-      luas:         parseFloat(luas.toFixed(2)),
-      user_name:    user
-    };
+    if (!sbClient) { showAlert('Belum terhubung ke database','warning'); return; }
+    const tanggal=document.getElementById('f-tanggal').value;
+    const desa=document.getElementById('f-desa').value.trim();
+    const kelompok=document.getElementById('f-kelompok').value.trim();
+    const user=document.getElementById('f-user').value.trim();
+    const luas=parseFloat(document.getElementById('f-luas').value)||0;
+    if (!desa||!kelompok||!user||!tanggal) { showAlert('Semua data wajib diisi','warning'); return; }
+    const btn=document.getElementById('btn-simpan');
+    btn.disabled=true; btn.innerHTML='<i class="ti ti-loader spin"></i> Menyimpan…';
+    const row={tanggal,desa,kelompok_tani:kelompok,jenis_ltt:document.getElementById('f-jenis').value,
+      kegiatan:document.getElementById('f-kegiatan').value,komoditas:document.getElementById('f-komoditas').value,
+      luas:parseFloat(luas.toFixed(2)),user_name:user};
     const { error } = await sbClient.from('laporan').insert([row]);
-    btn.disabled = false;
-    btn.innerHTML = '<i class="ti ti-device-floppy"></i> Simpan Laporan';
-    if (error) { showAlert('Gagal menyimpan: ' + error.message, 'error'); return; }
-    document.getElementById('f-desa').value     = '';
-    document.getElementById('f-kelompok').value = '';
-    document.getElementById('f-luas').value     = '';
-    showAlert('Laporan berhasil disimpan ke database', 'success');
+    btn.disabled=false; btn.innerHTML='<i class="ti ti-device-floppy"></i> Simpan Laporan';
+    if (error) { showAlert('Gagal menyimpan: '+error.message,'error'); return; }
+    document.getElementById('f-desa').value='';
+    document.getElementById('f-kelompok').value='';
+    document.getElementById('f-luas').value='';
+    showAlert('Laporan berhasil disimpan ke database','success');
     await renderTable(true);
   }
 
   async function hapusData(id) {
     if (!confirm('Hapus laporan ini?')) return;
-    const { error } = await sbClient.from('laporan').delete().eq('id', id);
-    if (error) { showAlert('Gagal menghapus: ' + error.message, 'error'); return; }
-    showAlert('Laporan dihapus', 'warning');
-    await renderTable(true);
-    await renderRekap();
+    const { error } = await sbClient.from('laporan').delete().eq('id',id);
+    if (error) { showAlert('Gagal menghapus: '+error.message,'error'); return; }
+    showAlert('Laporan dihapus','warning');
+    await renderTable(true); await renderRekap();
   }
 
-  // ─── RENDER TABLE ───────────────────────────────────────────────────
+  // ── TABLE ──
   function getBadge(k) {
-    const map = { Padi: 'padi', Jagung: 'jagung', Kedelai: 'kedelai' };
-    return `<span class="badge badge-${map[k] || 'padi'}">${k}</span>`;
+    const map={Padi:'padi',Jagung:'jagung',Kedelai:'kedelai'};
+    return `<span class="badge badge-${map[k]||'padi'}">${k}</span>`;
   }
 
-  async function renderTable(fetchFromServer = true) {
-    const container = document.getElementById('table-container');
-
-    const searchTerm      = (document.getElementById('t-search')?.value || '').toLowerCase().trim();
-    const filterKomoditas = document.getElementById('t-filter-komoditas')?.value || 'semua';
-    const filterKegiatan  = document.getElementById('t-filter-kegiatan')?.value  || 'semua';
+  async function renderTable(fetchFromServer=true) {
+    const container=document.getElementById('table-container');
+    const searchTerm=(document.getElementById('t-search')?.value||'').toLowerCase().trim();
+    const filterKomoditas=document.getElementById('t-filter-komoditas')?.value||'semua';
+    const filterKegiatan=document.getElementById('t-filter-kegiatan')?.value||'semua';
 
     if (fetchFromServer) {
-      container.innerHTML = `<div class="loading-state"><i class="ti ti-loader spin"></i> Memuat data…</div>`;
-      await fetchData({
-        page: currentPage,
-        dateFrom:  tableDateFrom,
-        dateTo:    tableDateTo,
-        search:    searchTerm,
-        komoditas: filterKomoditas,
-        kegiatan:  filterKegiatan,
-      });
+      container.innerHTML=`<div class="loading-state"><i class="ti ti-loader spin"></i> Memuat data…</div>`;
+      await fetchData({ page:currentPage, dateFrom:tableDateFrom, dateTo:tableDateTo, search:searchTerm, komoditas:filterKomoditas, kegiatan:filterKegiatan });
     }
 
-    document.getElementById('data-count').textContent = totalCount + ' laporan';
+    document.getElementById('data-count').textContent=totalCount+' laporan';
 
     if (!cachedData.length) {
-      container.innerHTML = `<div class="empty-state"><i class="ti ti-inbox"></i>Tidak ada data laporan yang cocok</div>`;
+      container.innerHTML=`<div class="empty-state"><i class="ti ti-inbox"></i>Tidak ada data yang cocok</div>`;
       return;
     }
 
-    const totalPages = Math.max(1, Math.ceil(totalCount / rowsPerPage));
-    if (currentPage > totalPages) currentPage = totalPages;
+    const totalPages=Math.max(1,Math.ceil(totalCount/rowsPerPage));
+    if (currentPage>totalPages) currentPage=totalPages;
 
-    const rows = cachedData.map(d => `
+    const rows=cachedData.map(d=>`
       <tr>
-        <td>${d.tanggal}</td>
+        <td class="mono">${d.tanggal}</td>
         <td>${d.desa}</td>
         <td>${d.kelompok_tani}</td>
         <td>${d.jenis_ltt}</td>
         <td>${d.kegiatan}</td>
         <td>${getBadge(d.komoditas)}</td>
-        <td style="text-align:right">${parseFloat(d.luas).toFixed(1)}</td>
+        <td class="mono" style="text-align:right">${parseFloat(d.luas).toFixed(1)}</td>
         <td>${d.user_name}</td>
-        <td style="text-align:right">
-          <button class="btn-edit" onclick="bukaEditModal('${d.id}')" title="Edit"><i class="ti ti-edit"></i></button>
-          <button class="btn-hapus" onclick="hapusData('${d.id}')" title="Hapus"><i class="ti ti-trash"></i></button>
+        <td style="text-align:right;white-space:nowrap">
+          <button class="btn-row-action edit" onclick="bukaEditModal('${d.id}')" title="Edit"><i class="ti ti-edit"></i></button>
+          <button class="btn-row-action trash" onclick="hapusData('${d.id}')" title="Hapus"><i class="ti ti-trash"></i></button>
         </td>
       </tr>`).join('');
 
-    let paginationHtml = '';
-    if (totalPages > 1) {
-      // Build page number buttons (show up to 5 around current)
-      const maxBtns = 5;
-      let startP = Math.max(1, currentPage - Math.floor(maxBtns/2));
-      let endP   = Math.min(totalPages, startP + maxBtns - 1);
-      if (endP - startP < maxBtns - 1) startP = Math.max(1, endP - maxBtns + 1);
-      let pageBtns = '';
-      for (let p = startP; p <= endP; p++) {
-        pageBtns += `<button class="btn-page${p === currentPage ? ' btn-page-active' : ''}" onclick="goToPage(${p})" ${p === currentPage ? 'disabled' : ''}>${p}</button>`;
+    let paginationHtml='';
+    if (totalPages>1) {
+      const maxBtns=5;
+      let startP=Math.max(1,currentPage-Math.floor(maxBtns/2));
+      let endP=Math.min(totalPages,startP+maxBtns-1);
+      if (endP-startP<maxBtns-1) startP=Math.max(1,endP-maxBtns+1);
+      let pageBtns='';
+      for (let p=startP;p<=endP;p++) {
+        pageBtns+=`<button class="btn-page${p===currentPage?' btn-page-active':''}" onclick="goToPage(${p})" ${p===currentPage?'disabled':''}>${p}</button>`;
       }
-      paginationHtml = `
-        <div class="pagination-bar">
-          <span class="pagination-info">
-            Halaman <strong>${currentPage}</strong> dari <strong>${totalPages}</strong>
-            &nbsp;·&nbsp; Total <strong>${totalCount}</strong> data
-          </span>
-          <div class="pagination-buttons">
-            <button class="btn-page" onclick="goToPage(1)" ${currentPage===1?'disabled':''} title="Halaman pertama">«</button>
-            <button class="btn-page" onclick="changePage(-1)" ${currentPage===1?'disabled':''}>‹</button>
-            ${pageBtns}
-            <button class="btn-page" onclick="changePage(1)" ${currentPage===totalPages?'disabled':''}>›</button>
-            <button class="btn-page" onclick="goToPage(${totalPages})" ${currentPage===totalPages?'disabled':''} title="Halaman terakhir">»</button>
-          </div>
-        </div>`;
+      paginationHtml=`<div class="pagination-bar">
+        <span class="pagination-info">Halaman <strong>${currentPage}</strong> dari <strong>${totalPages}</strong> · Total <strong>${totalCount}</strong></span>
+        <div class="pagination-buttons">
+          <button class="btn-page" onclick="goToPage(1)" ${currentPage===1?'disabled':''}>«</button>
+          <button class="btn-page" onclick="changePage(-1)" ${currentPage===1?'disabled':''}>‹</button>
+          ${pageBtns}
+          <button class="btn-page" onclick="changePage(1)" ${currentPage===totalPages?'disabled':''}>›</button>
+          <button class="btn-page" onclick="goToPage(${totalPages})" ${currentPage===totalPages?'disabled':''}>»</button>
+        </div></div>`;
     }
 
-    container.innerHTML = `
+    container.innerHTML=`
       <div class="table-wrap">
         <table>
           <thead><tr>
@@ -2090,284 +1777,190 @@
           </tr></thead>
           <tbody>${rows}</tbody>
         </table>
-      </div>
-      ${paginationHtml}`;
+      </div>${paginationHtml}`;
   }
 
-  function handleTableSearchFilter() {
-    currentPage = 1;
-    renderTable(true);
-  }
+  function handleTableSearchFilter() { currentPage=1; renderTable(true); }
+  function changePage(offset) { currentPage+=offset; renderTable(true); }
+  function goToPage(p) { currentPage=p; renderTable(true); }
 
-  function changePage(offset) {
-    currentPage += offset;
-    renderTable(true);
-  }
-
-  function goToPage(p) {
-    currentPage = p;
-    renderTable(true);
-  }
-
-  // ─── EDIT MODAL OPS ─────────────────────────────────────────────────
+  // ── EDIT MODAL ──
   function bukaEditModal(id) {
-    const item = cachedData.find(d => d.id === id);
+    const item=cachedData.find(d=>d.id===id);
     if (!item) return;
-    document.getElementById('edit-id').value = item.id;
-    document.getElementById('edit-tanggal').value = item.tanggal;
-    document.getElementById('edit-user').value = item.user_name || '';
-    document.getElementById('edit-desa').value = item.desa || '';
-    document.getElementById('edit-kelompok').value = item.kelompok_tani || '';
-    document.getElementById('edit-jenis').value = item.jenis_ltt || 'Reguler';
-    document.getElementById('edit-kegiatan').value = item.kegiatan || 'Bera';
-    document.getElementById('edit-komoditas').value = item.komoditas || 'Padi';
-    document.getElementById('edit-luas').value = item.luas || 0.0;
-    
+    document.getElementById('edit-id').value=item.id;
+    document.getElementById('edit-tanggal').value=item.tanggal;
+    document.getElementById('edit-user').value=item.user_name||'';
+    document.getElementById('edit-desa').value=item.desa||'';
+    document.getElementById('edit-kelompok').value=item.kelompok_tani||'';
+    document.getElementById('edit-jenis').value=item.jenis_ltt||'Reguler';
+    document.getElementById('edit-kegiatan').value=item.kegiatan||'Bera';
+    document.getElementById('edit-komoditas').value=item.komoditas||'Padi';
+    document.getElementById('edit-luas').value=item.luas||0;
     document.getElementById('edit-modal').classList.add('active');
   }
-
-  function tutupEditModal() {
-    document.getElementById('edit-modal').classList.remove('active');
-  }
+  function tutupEditModal() { document.getElementById('edit-modal').classList.remove('active'); }
 
   async function updateData() {
-    if (!sbClient) { showAlert('Belum terhubung ke database', 'warning'); return; }
-    const id = document.getElementById('edit-id').value;
-    const tanggal  = document.getElementById('edit-tanggal').value;
-    const desa     = document.getElementById('edit-desa').value.trim();
-    const kelompok = document.getElementById('edit-kelompok').value.trim();
-    const user     = document.getElementById('edit-user').value.trim();
-    const luas     = parseFloat(document.getElementById('edit-luas').value) || 0;
-    
-    if (!desa || !kelompok || !user || !tanggal) {
-      showAlert('Semua data wajib diisi', 'warning'); return;
-    }
-    
-    const btn = document.getElementById('btn-update');
-    btn.disabled = true;
-    btn.innerHTML = '<i class="ti ti-loader spin"></i> Menyimpan…';
-    
-    const row = {
-      tanggal, desa,
-      kelompok_tani: kelompok,
-      jenis_ltt:    document.getElementById('edit-jenis').value,
-      kegiatan:     document.getElementById('edit-kegiatan').value,
-      komoditas:    document.getElementById('edit-komoditas').value,
-      luas:         parseFloat(luas.toFixed(2)),
-      user_name:    user
-    };
-    
-    const { error } = await sbClient.from('laporan').update(row).eq('id', id);
-    btn.disabled = false;
-    btn.innerHTML = 'Simpan Perubahan';
-    
-    if (error) {
-      showAlert('Gagal memperbarui: ' + error.message, 'error');
-      return;
-    }
-    
-    tutupEditModal();
-    showAlert('Laporan berhasil diperbarui!', 'success');
-    await renderTable(true);
-    await renderRekap();
+    if (!sbClient) { showAlert('Belum terhubung ke database','warning'); return; }
+    const id=document.getElementById('edit-id').value;
+    const tanggal=document.getElementById('edit-tanggal').value;
+    const desa=document.getElementById('edit-desa').value.trim();
+    const kelompok=document.getElementById('edit-kelompok').value.trim();
+    const user=document.getElementById('edit-user').value.trim();
+    const luas=parseFloat(document.getElementById('edit-luas').value)||0;
+    if (!desa||!kelompok||!user||!tanggal) { showAlert('Semua data wajib diisi','warning'); return; }
+    const btn=document.getElementById('btn-update');
+    btn.disabled=true; btn.innerHTML='<i class="ti ti-loader spin"></i> Menyimpan…';
+    const row={tanggal,desa,kelompok_tani:kelompok,jenis_ltt:document.getElementById('edit-jenis').value,
+      kegiatan:document.getElementById('edit-kegiatan').value,komoditas:document.getElementById('edit-komoditas').value,
+      luas:parseFloat(luas.toFixed(2)),user_name:user};
+    const { error } = await sbClient.from('laporan').update(row).eq('id',id);
+    btn.disabled=false; btn.innerHTML='Simpan Perubahan';
+    if (error) { showAlert('Gagal memperbarui: '+error.message,'error'); return; }
+    tutupEditModal(); showAlert('Laporan berhasil diperbarui!','success');
+    await renderTable(true); await renderRekap();
   }
 
-  // ─── EXPORT ─────────────────────────────────────────────────────────
+  // ── EXPORT ──
   async function getExportRows() {
-    const filterKomoditas = document.getElementById('t-filter-komoditas')?.value || 'semua';
-    const filterKegiatan  = document.getElementById('t-filter-kegiatan')?.value  || 'semua';
-    const all = await fetchAllForExport({
-      dateFrom:  tableDateFrom,
-      dateTo:    tableDateTo,
-      komoditas: filterKomoditas,
-      kegiatan:  filterKegiatan,
-    });
-    return all.map(d => ({
-      Tanggal:           d.tanggal,
-      Desa:              d.desa,
-      'Kelompok Tani':   d.kelompok_tani,
-      'Jenis LTT':       d.jenis_ltt,
-      Kegiatan:          d.kegiatan,
-      Komoditas:         d.komoditas,
-      'Luas (Ha)':       parseFloat(d.luas),
-      User:              d.user_name
-    }));
+    const filterKomoditas=document.getElementById('t-filter-komoditas')?.value||'semua';
+    const filterKegiatan=document.getElementById('t-filter-kegiatan')?.value||'semua';
+    const all=await fetchAllForExport({ dateFrom:tableDateFrom, dateTo:tableDateTo, komoditas:filterKomoditas, kegiatan:filterKegiatan });
+    return all.map(d=>({ Tanggal:d.tanggal, Desa:d.desa, 'Kelompok Tani':d.kelompok_tani,
+      'Jenis LTT':d.jenis_ltt, Kegiatan:d.kegiatan, Komoditas:d.komoditas,
+      'Luas (Ha)':parseFloat(d.luas), User:d.user_name }));
   }
 
   async function exportPDF() {
-    showAlert('Menyiapkan data ekspor…', 'success');
-    const rows = await getExportRows();
-    if (!rows.length) { showAlert('Tidak ada data untuk diekspor', 'warning'); return; }
-    
+    showAlert('Menyiapkan data ekspor…','success');
+    const rows=await getExportRows();
+    if (!rows.length) { showAlert('Tidak ada data untuk diekspor','warning'); return; }
     try {
-      const { jsPDF } = window.jspdf;
-      const doc = new jsPDF('l', 'mm', 'a4');
-      
-      // Title
-      doc.setFont('helvetica', 'bold');
-      doc.setFontSize(16);
-      doc.text('LAPORAN PERTANIAN', 14, 15);
-      
-      doc.setFontSize(10);
-      doc.setFont('helvetica', 'normal');
-      doc.text(`Dicetak pada: ${new Date().toLocaleString('id-ID')}`, 14, 21);
-      
-      // AutoTable
-      const headers = [['Tanggal', 'Desa', 'Kelompok Tani', 'Jenis LTT', 'Kegiatan', 'Komoditas', 'Luas (Ha)', 'User']];
-      const body = rows.map(r => [
-        r.Tanggal,
-        r.Desa,
-        r['Kelompok Tani'],
-        r['Jenis LTT'],
-        r.Kegiatan,
-        r.Komoditas,
-        r['Luas (Ha)'].toFixed(1),
-        r.User
-      ]);
-      
-      // Calculate total area
-      const totalLuas = rows.reduce((s, r) => s + r['Luas (Ha)'], 0);
-      const foot = [['Total', '', '', '', '', '', totalLuas.toFixed(1) + ' Ha', '']];
-      
-      doc.autoTable({
-        head: headers,
-        body: body,
-        foot: foot,
-        startY: 26,
-        theme: 'striped',
-        headStyles: { fillColor: [46, 125, 50], textColor: [255, 255, 255], fontStyle: 'bold' },
-        footStyles: { fillColor: [240, 244, 240], textColor: [46, 125, 50], fontStyle: 'bold' },
-        styles: { font: 'helvetica', fontSize: 9 },
-        columnStyles: {
-          6: { halign: 'right' }
-        }
-      });
-      
+      const { jsPDF }=window.jspdf;
+      const doc=new jsPDF('l','mm','a4');
+      doc.setFont('helvetica','bold'); doc.setFontSize(16);
+      doc.text('LAPORAN PERTANIAN',14,15);
+      doc.setFontSize(10); doc.setFont('helvetica','normal');
+      doc.text(`Dicetak pada: ${new Date().toLocaleString('id-ID')}`,14,21);
+      const headers=[['Tanggal','Desa','Kelompok Tani','Jenis LTT','Kegiatan','Komoditas','Luas (Ha)','User']];
+      const body=rows.map(r=>[r.Tanggal,r.Desa,r['Kelompok Tani'],r['Jenis LTT'],r.Kegiatan,r.Komoditas,r['Luas (Ha)'].toFixed(1),r.User]);
+      const totalLuas=rows.reduce((s,r)=>s+r['Luas (Ha)'],0);
+      const foot=[['Total','','','','','',totalLuas.toFixed(1)+' Ha','']];
+      doc.autoTable({ head:headers, body:body, foot:foot, startY:26, theme:'striped',
+        headStyles:{fillColor:[45,92,46],textColor:[255,255,255],fontStyle:'bold'},
+        footStyles:{fillColor:[240,245,240],textColor:[45,92,46],fontStyle:'bold'},
+        styles:{font:'helvetica',fontSize:9}, columnStyles:{6:{halign:'right'}} });
       doc.save(`laporan_pertanian_${today()}.pdf`);
-      showAlert('File PDF berhasil diunduh', 'success');
-    } catch (error) {
-      console.error(error);
-      showAlert('Gagal mengekspor PDF: ' + error.message, 'error');
-    }
+      showAlert('File PDF berhasil diunduh','success');
+    } catch(error) { showAlert('Gagal mengekspor PDF: '+error.message,'error'); }
   }
 
   async function exportExcel() {
-    showAlert('Menyiapkan data ekspor…', 'success');
-    const rows = await getExportRows();
-    if (!rows.length) { showAlert('Tidak ada data untuk diekspor', 'warning'); return; }
-    const ws = XLSX.utils.json_to_sheet(rows);
-    ws['!cols'] = [{wch:12},{wch:20},{wch:22},{wch:16},{wch:14},{wch:12},{wch:12},{wch:16}];
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, 'Laporan');
-    XLSX.writeFile(wb, `laporan_pertanian_${today()}.xlsx`);
-    showAlert('File Excel berhasil diunduh', 'success');
+    showAlert('Menyiapkan data ekspor…','success');
+    const rows=await getExportRows();
+    if (!rows.length) { showAlert('Tidak ada data untuk diekspor','warning'); return; }
+    const ws=XLSX.utils.json_to_sheet(rows);
+    ws['!cols']=[{wch:12},{wch:20},{wch:22},{wch:16},{wch:14},{wch:12},{wch:12},{wch:16}];
+    const wb=XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb,ws,'Laporan');
+    XLSX.writeFile(wb,`laporan_pertanian_${today()}.xlsx`);
+    showAlert('File Excel berhasil diunduh','success');
   }
 
   function today() { return new Date().toISOString().split('T')[0]; }
 
-  // ─── TABS ───────────────────────────────────────────────────────────
+  // ── TABS ──
   function switchTab(name) {
-    ['input','data','rekap','produksi'].forEach(t => {
-      document.getElementById('panel-' + t).className = 'panel' + (t === name ? ' active' : '');
-      document.getElementById('tab-'   + t).className = 'tab'   + (t === name ? ' active' : '');
+    ['input','data','rekap','produksi'].forEach(t=>{
+      document.getElementById('panel-'+t).className='panel'+(t===name?' active':'');
+      document.getElementById('tab-'+t).className='tab'+(t===name?' active':'');
     });
-    if (name === 'data')     renderTable(true);
-    if (name === 'rekap')    updateRekap();
-    if (name === 'produksi') renderProduksiTable();
+    if (name==='data')     renderTable(true);
+    if (name==='rekap')    updateRekap();
+    if (name==='produksi') renderProduksiTable();
   }
 
-  // ─── DOWNLOAD DROPDOWN ──────────────────────────────────────────────
+  // ── DOWNLOAD DROPDOWN ──
   function toggleDownloadDropdown() {
-    const btn = document.getElementById('btn-download');
-    const dd  = document.getElementById('download-dropdown');
-    const open = dd.classList.toggle('open');
-    btn.classList.toggle('open', open);
+    const btn=document.getElementById('btn-download');
+    const dd=document.getElementById('download-dropdown');
+    const open=dd.classList.toggle('open');
+    btn.classList.toggle('open',open);
   }
-
   function closeDownloadDropdown() {
     document.getElementById('download-dropdown')?.classList.remove('open');
     document.getElementById('btn-download')?.classList.remove('open');
   }
 
-  document.addEventListener('click', e => {
-    if (!e.target.closest('#download-wrap')) closeDownloadDropdown();
-  });
-
-  // ─── PRODUKSI / TIMBANG HASIL ──────────────────────────────────────
-  let produksiRows = [];
-  let produksiIdCounter = 0;
-  const KOMODITAS_LIST = ['Padi','Jagung','Kedelai'];
+  // ── PRODUKSI ──
+  let produksiRows=[], produksiIdCounter=0;
+  const KOMODITAS_LIST=['Padi','Jagung','Kedelai'];
 
   function tambahBarisProduksi() {
-    const id = ++produksiIdCounter;
-    produksiRows.push({ id, nama:'', desa:'', komoditas:'Padi', luas:'', karung:'', beratKarung:'', kadarAir:14 });
+    const id=++produksiIdCounter;
+    produksiRows.push({id,nama:'',desa:'',komoditas:'Padi',luas:'',karung:'',beratKarung:'',kadarAir:14});
     renderProduksiCards();
-    setTimeout(() => {
-      const el = document.querySelector(`#calc-card-${id} .input-nama`);
-      if (el) el.focus();
-    }, 60);
+    setTimeout(()=>{
+      const el=document.querySelector(`#calc-card-${id} .input-nama`);
+      if(el) el.focus();
+    },60);
   }
 
   function hapusBarisProduksi(id) {
-    produksiRows = produksiRows.filter(r => r.id !== id);
+    produksiRows=produksiRows.filter(r=>r.id!==id);
     renderProduksiCards();
   }
 
-  function updateProduksiRow(id, field, value) {
-    const row = produksiRows.find(r => r.id === id);
+  function updateProduksiRow(id,field,value) {
+    const row=produksiRows.find(r=>r.id===id);
     if (!row) return;
-    row[field] = value;
-    const nm  = document.querySelector(`#calc-card-${id} .calc-card-name`);
-    const sub = document.querySelector(`#calc-card-${id} .calc-card-sub`);
-    if (nm) { nm.textContent = row.nama || 'Nama petani…'; nm.classList.toggle('calc-card-name-placeholder', !row.nama); }
-    if (sub) sub.textContent = [row.desa, row.komoditas].filter(Boolean).join(' · ') || 'Desa · Komoditas';
-    const { gkp, gkg, beras, produk } = calcProduksi(row);
-    const setRes = (sel, val, dec) => {
-      const el = document.querySelector(`#calc-card-${id} ${sel}`);
-      if (!el) return;
-      el.textContent = val > 0 ? fmt(val, dec) : '—';
-      el.classList.toggle('has-val', val > 0);
+    row[field]=value;
+    const nm=document.querySelector(`#calc-card-${id} .calc-card-name`);
+    const sub=document.querySelector(`#calc-card-${id} .calc-card-sub`);
+    if(nm){nm.textContent=row.nama||'Nama petani…';nm.classList.toggle('calc-card-name-placeholder',!row.nama);}
+    if(sub) sub.textContent=[row.desa,row.komoditas].filter(Boolean).join(' · ')||'Desa · Komoditas';
+    const {gkp,gkg,beras,produk}=calcProduksi(row);
+    const setRes=(sel,val,dec)=>{
+      const el=document.querySelector(`#calc-card-${id} ${sel}`);
+      if(!el) return;
+      el.textContent=val>0?fmt(val,dec):'—';
+      el.classList.toggle('has-val',val>0);
     };
-    setRes('.res-gkp', gkp, 1); setRes('.res-gkg', gkg, 1);
-    setRes('.res-beras', beras, 1); setRes('.res-produk', produk, 3);
+    setRes('.res-gkp',gkp,1); setRes('.res-gkg',gkg,1);
+    setRes('.res-beras',beras,1); setRes('.res-produk',produk,3);
     renderTotalBar();
   }
 
   function calcProduksi(row) {
-    const luas   = parseFloat(row.luas)        || 0;
-    const karung = parseFloat(row.karung)      || 0;
-    const berat  = parseFloat(row.beratKarung) || 0;
-    const ka     = parseFloat(row.kadarAir)    ?? 14;
-    const gkp    = karung * berat;
-    const gkg    = ka < 100 ? gkp * (100 - ka) / 86 : 0;
-    const beras  = gkg * 0.63;
-    const produk = luas > 0 ? (gkp / luas / 1000) : 0;
-    return { gkp, gkg, beras, produk };
+    const luas=parseFloat(row.luas)||0;
+    const karung=parseFloat(row.karung)||0;
+    const berat=parseFloat(row.beratKarung)||0;
+    const ka=parseFloat(row.kadarAir)??14;
+    const gkp=karung*berat;
+    const gkg=ka<100?gkp*(100-ka)/86:0;
+    const beras=gkg*0.63;
+    const produk=luas>0?(gkp/luas/1000):0;
+    return {gkp,gkg,beras,produk};
   }
 
-  function fmt(n, dec = 1) {
-    if (!n || isNaN(n)) return '—';
-    return n.toLocaleString('id-ID', { minimumFractionDigits: dec, maximumFractionDigits: dec });
+  function fmt(n,dec=1) {
+    if(!n||isNaN(n)) return '—';
+    return n.toLocaleString('id-ID',{minimumFractionDigits:dec,maximumFractionDigits:dec});
   }
 
   function renderProduksiCards() {
-    const container = document.getElementById('produksi-cards');
+    const container=document.getElementById('produksi-cards');
     if (!container) return;
     if (!produksiRows.length) {
-      container.innerHTML = `
-        <div class="produksi-empty">
-          <i class="ti ti-scale"></i>
-          <strong>Belum ada data</strong>
-          Klik "+ Tambah Petani" untuk mulai menghitung
-        </div>`;
+      container.innerHTML=`<div class="produksi-empty"><i class="ti ti-scale"></i><strong>Belum ada data</strong>Klik "+ Tambah Petani" untuk mulai menghitung</div>`;
       renderTotalBar(); return;
     }
-    container.innerHTML = produksiRows.map((row, idx) => {
-      const { gkp, gkg, beras, produk } = calcProduksi(row);
-      const komodOpts = KOMODITAS_LIST.map(k => `<option${k===row.komoditas?' selected':''}>${k}</option>`).join('');
-      const subText  = [row.desa, row.komoditas].filter(Boolean).join(' · ') || 'Desa · Komoditas';
-      return `
-      <div class="calc-card" id="calc-card-${row.id}">
+    container.innerHTML=produksiRows.map((row,idx)=>{
+      const {gkp,gkg,beras,produk}=calcProduksi(row);
+      const komodOpts=KOMODITAS_LIST.map(k=>`<option${k===row.komoditas?' selected':''}>${k}</option>`).join('');
+      const subText=[row.desa,row.komoditas].filter(Boolean).join(' · ')||'Desa · Komoditas';
+      return `<div class="calc-card" id="calc-card-${row.id}">
         <div class="calc-card-header">
           <div class="calc-card-num">${idx+1}</div>
           <div class="calc-card-identity">
@@ -2426,25 +2019,25 @@
             </div>
           </div>
           <div class="calc-results">
-            <div class="calc-result-item primary">
+            <div class="calc-result-item">
               <div class="calc-result-label">GKP</div>
               <div class="calc-result-val res-gkp${gkp>0?' has-val':''}">${gkp>0?fmt(gkp):'—'}</div>
-              <div class="calc-result-unit">· Gabah Kering Panen</div>
+              <div class="calc-result-unit">Gabah Kering Panen</div>
             </div>
-            <div class="calc-result-item primary">
+            <div class="calc-result-item">
               <div class="calc-result-label">GKG</div>
               <div class="calc-result-val res-gkg${gkg>0?' has-val':''}">${gkg>0?fmt(gkg):'—'}</div>
-              <div class="calc-result-unit">· KA standar 14%</div>
+              <div class="calc-result-unit">KA standar 14%</div>
             </div>
-            <div class="calc-result-item primary">
+            <div class="calc-result-item">
               <div class="calc-result-label">Beras</div>
               <div class="calc-result-val res-beras${beras>0?' has-val':''}">${beras>0?fmt(beras):'—'}</div>
-              <div class="calc-result-unit">· rendemen 63%</div>
+              <div class="calc-result-unit">rendemen 63%</div>
             </div>
-            <div class="calc-result-item primary">
+            <div class="calc-result-item">
               <div class="calc-result-label">Produktivitas</div>
               <div class="calc-result-val res-produk${produk>0?' has-val':''}">${produk>0?fmt(produk,3):'—'}</div>
-              <div class="calc-result-unit">· ton / Ha</div>
+              <div class="calc-result-unit">ton / Ha</div>
             </div>
           </div>
         </div>
@@ -2454,121 +2047,44 @@
   }
 
   function renderTotalBar() {
-    const wrap = document.getElementById('produksi-total-wrap');
+    const wrap=document.getElementById('produksi-total-wrap');
     if (!wrap) return;
-    if (!produksiRows.length) { wrap.innerHTML = ''; return; }
-    let totalLuas=0, totalGKP=0, totalGKG=0, totalBeras=0;
-    produksiRows.forEach(row => {
-      const c = calcProduksi(row);
-      totalLuas += parseFloat(row.luas)||0;
-      totalGKP  += c.gkp; totalGKG += c.gkg; totalBeras += c.beras;
+    if (!produksiRows.length) { wrap.innerHTML=''; return; }
+    let totalLuas=0,totalGKP=0,totalGKG=0,totalBeras=0;
+    produksiRows.forEach(row=>{
+      const c=calcProduksi(row);
+      totalLuas+=parseFloat(row.luas)||0;
+      totalGKP+=c.gkp; totalGKG+=c.gkg; totalBeras+=c.beras;
     });
-    const totalProduk = totalLuas > 0 ? (totalGKP / totalLuas / 1000) : 0;
-    wrap.innerHTML = `
-      <div class="produksi-total-bar">
-        <div class="ptb-item"><div class="ptb-label">Total Luas</div><div class="ptb-val">${fmt(totalLuas,2)}</div><div class="ptb-unit">Hektar</div></div>
-        <div class="ptb-item"><div class="ptb-label">Total GKP</div><div class="ptb-val">${fmt(totalGKP)}</div><div class="ptb-unit">kg</div></div>
-        <div class="ptb-item"><div class="ptb-label">Total GKG</div><div class="ptb-val">${fmt(totalGKG)}</div><div class="ptb-unit">kg</div></div>
-        <div class="ptb-item"><div class="ptb-label">Total Beras</div><div class="ptb-val">${fmt(totalBeras)}</div><div class="ptb-unit">kg</div></div>
-        <div class="ptb-item"><div class="ptb-label">Produktivitas Rata-rata</div><div class="ptb-val">${fmt(totalProduk,3)}</div><div class="ptb-unit">ton/Ha</div></div>
-      </div>`;
+    const totalProduk=totalLuas>0?(totalGKP/totalLuas/1000):0;
+    wrap.innerHTML=`<div class="produksi-total-bar">
+      <div class="ptb-item"><div class="ptb-label">Total Luas</div><div class="ptb-val">${fmt(totalLuas,2)}</div><div class="ptb-unit">Hektar</div></div>
+      <div class="ptb-item"><div class="ptb-label">Total GKP</div><div class="ptb-val">${fmt(totalGKP)}</div><div class="ptb-unit">kg</div></div>
+      <div class="ptb-item"><div class="ptb-label">Total GKG</div><div class="ptb-val">${fmt(totalGKG)}</div><div class="ptb-unit">kg</div></div>
+      <div class="ptb-item"><div class="ptb-label">Total Beras</div><div class="ptb-val">${fmt(totalBeras)}</div><div class="ptb-unit">kg</div></div>
+      <div class="ptb-item"><div class="ptb-label">Produktivitas Rata-rata</div><div class="ptb-val">${fmt(totalProduk,3)}</div><div class="ptb-unit">ton/Ha</div></div>
+    </div>`;
   }
 
   function renderProduksiTable() { renderProduksiCards(); }
 
-    // ─── EXPOSE GLOBALS ─────────────────────────────────────────────────
-  window.switchTab            = switchTab;
-  window.tambahBarisProduksi  = tambahBarisProduksi;
-  window.hapusBarisProduksi   = hapusBarisProduksi;
-  window.updateProduksiRow    = updateProduksiRow;
-  window.simpanData      = simpanData;
-  window.hapusData       = hapusData;
-  window.exportPDF              = exportPDF;
-  window.exportExcel            = exportExcel;
-  window.toggleDownloadDropdown = toggleDownloadDropdown;
-  window.closeDownloadDropdown  = closeDownloadDropdown;
-  window.connectSupabase = connectSupabase;
-  window.retryConnection        = retryConnection;
-  window.setRekapFilter         = setRekapFilter;
-  window.handleTableSearchFilter = handleTableSearchFilter;
-  window.changePage             = changePage;
-  window.goToPage               = goToPage;
-  window.bukaEditModal          = bukaEditModal;
-  window.tutupEditModal         = tutupEditModal;
-  window.updateData             = updateData;
-  window.setTableDatePreset     = setTableDatePreset;
-  window.setRekapDatePreset     = setRekapDatePreset;
-  window.toggleWaktuDropdown    = toggleWaktuDropdown;
-  window.applyTableCustomRange  = applyTableCustomRange;
-  window.applyRekapCustomRange  = applyRekapCustomRange;
+  // ── EXPOSE ──
+  window.switchTab=switchTab; window.tambahBarisProduksi=tambahBarisProduksi;
+  window.hapusBarisProduksi=hapusBarisProduksi; window.updateProduksiRow=updateProduksiRow;
+  window.simpanData=simpanData; window.hapusData=hapusData;
+  window.exportPDF=exportPDF; window.exportExcel=exportExcel;
+  window.toggleDownloadDropdown=toggleDownloadDropdown; window.closeDownloadDropdown=closeDownloadDropdown;
+  window.connectSupabase=connectSupabase; window.retryConnection=retryConnection;
+  window.setRekapFilter=setRekapFilter; window.handleTableSearchFilter=handleTableSearchFilter;
+  window.changePage=changePage; window.goToPage=goToPage;
+  window.bukaEditModal=bukaEditModal; window.tutupEditModal=tutupEditModal; window.updateData=updateData;
+  window.setTableDatePreset=setTableDatePreset; window.setRekapDatePreset=setRekapDatePreset;
+  window.toggleWaktuDropdown=toggleWaktuDropdown;
+  window.applyTableCustomRange=applyTableCustomRange; window.applyRekapCustomRange=applyRekapCustomRange;
 
-  // ─── BOOT ───────────────────────────────────────────────────────────
-  document.getElementById('f-tanggal').value = today();
+  // ── BOOT ──
+  document.getElementById('f-tanggal').value=today();
   init();
 </script>
-
-  <!-- MODAL EDIT LAPORAN -->
-  <div id="edit-modal" class="modal-overlay" onclick="if(event.target===this) tutupEditModal()">
-    <div class="modal-content">
-      <div class="modal-header">
-        <div class="modal-title"><i class="ti ti-edit"></i> Edit Laporan Pertanian</div>
-        <button class="btn-close-modal" onclick="tutupEditModal()"><i class="ti ti-x"></i></button>
-      </div>
-      <input type="hidden" id="edit-id" />
-      <div class="form-grid">
-        <div class="field">
-          <label for="edit-tanggal">Tanggal</label>
-          <input type="date" id="edit-tanggal" />
-        </div>
-        <div class="field">
-          <label for="edit-user">Identitas</label>
-          <input type="text" id="edit-user" placeholder="Nama petugas" />
-        </div>
-        <div class="field">
-          <label for="edit-desa">Desa</label>
-          <input type="text" id="edit-desa" placeholder="Nama desa" />
-        </div>
-        <div class="field">
-          <label for="edit-kelompok">Kelompok Tani</label>
-          <input type="text" id="edit-kelompok" placeholder="Nama kelompok" />
-        </div>
-        <div class="field">
-          <label for="edit-jenis">Jenis LTT</label>
-          <select id="edit-jenis">
-            <option>Reguler</option>
-            <option>Oplah Rawa</option>
-            <option>Oplah Non Rawa</option>
-            <option>CSR</option>
-          </select>
-        </div>
-        <div class="field">
-          <label for="edit-kegiatan">Kegiatan</label>
-          <select id="edit-kegiatan">
-            <option>Bera</option>
-            <option>Olah Lahan</option>
-            <option>Tanam</option>
-            <option>Panen</option>
-          </select>
-        </div>
-        <div class="field">
-          <label for="edit-komoditas">Komoditas</label>
-          <select id="edit-komoditas">
-            <option>Padi</option>
-            <option>Jagung</option>
-            <option>Kedelai</option>
-          </select>
-        </div>
-        <div class="field">
-          <label for="edit-luas">Luas (Ha)</label>
-          <input type="number" id="edit-luas" min="0" step="0.1" placeholder="0.0" />
-        </div>
-      </div>
-      <div class="modal-footer">
-        <button class="btn-cancel" onclick="tutupEditModal()">Batal</button>
-        <button class="btn-save-edit" id="btn-update" onclick="updateData()">Simpan Perubahan</button>
-      </div>
-    </div>
-  </div>
-
 </body>
 </html>
