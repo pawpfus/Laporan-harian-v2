@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Laporan Pertanian</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css" />
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -40,7 +40,7 @@
       --r-xl:  18px;
 
       --font-ui:   'Instrument Sans', system-ui, sans-serif;
-      --font-mono: 'DM Mono', 'Courier New', monospace;
+      --font-mono: 'JetBrains Mono', 'Courier New', monospace;
 
       --topbar-h: 60px;
       --nav-h: 58px;
@@ -336,6 +336,7 @@
       font-size: 11px;
       font-weight: 600;
       font-family: var(--font-mono);
+      font-variant-numeric: tabular-nums;
       background: var(--moss-4);
       color: var(--moss);
       padding: 3px 9px;
@@ -570,7 +571,7 @@
       color: var(--ink);
       white-space: nowrap;
     }
-    td.mono { font-family: var(--font-mono); font-size: 13px; }
+    td.mono { font-family: var(--font-mono); font-size: 13px; font-variant-numeric: tabular-nums; }
     tr:last-child td { border-bottom: none; }
     tbody tr:hover td { background: var(--ground); }
 
@@ -700,6 +701,7 @@
       font-size: 28px; font-weight: 700; color: var(--ink);
       line-height: 1; letter-spacing: -0.03em;
       font-family: var(--font-mono);
+      font-variant-numeric: tabular-nums;
     }
 
     /* ── CHART CARD ─────────────────────────────────────── */
@@ -922,6 +924,7 @@
     .calc-input.num {
       text-align: right;
       font-family: var(--font-mono);
+      font-variant-numeric: tabular-nums;
       font-size: 14px;
       padding-right: 36px;
     }
@@ -954,6 +957,7 @@
     .calc-result-val {
       font-size: 16px; font-weight: 700; color: var(--ink-3);
       line-height: 1; font-family: var(--font-mono);
+      font-variant-numeric: tabular-nums;
       transition: color 0.2s;
     }
     .calc-result-val.has-val { color: var(--moss); }
@@ -967,7 +971,7 @@
     }
     .ptb-item { min-width: 0; display: flex; flex-direction: column; gap: 3px; }
     .ptb-label { font-size: 9px; font-weight: 700; letter-spacing: 0.07em; text-transform: uppercase; color: rgba(255,255,255,0.6); }
-    .ptb-val { font-size: 20px; font-weight: 700; color: #fff; font-family: var(--font-mono); line-height: 1; }
+    .ptb-val { font-size: 20px; font-weight: 700; color: #fff; font-family: var(--font-mono); font-variant-numeric: tabular-nums; line-height: 1; }
     .ptb-unit { font-size: 9px; color: rgba(255,255,255,0.5); }
     @media (prefers-color-scheme: dark) {
       .ptb-val { color: #e8ede7; }
@@ -1159,7 +1163,7 @@
       display: flex; flex-direction: column; gap: 2px;
     }
     .aut-linked-stat-label { font-size: 9.5px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--ink-3); }
-    .aut-linked-stat-val { font-size: 14px; font-weight: 700; color: var(--moss); font-family: var(--font-mono); }
+    .aut-linked-stat-val { font-size: 14px; font-weight: 700; color: var(--moss); font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
     @media (max-width: 480px) {
       .aut-linked-summary { grid-template-columns: 1fr 1fr; }
     }
@@ -1732,7 +1736,7 @@
       scales: {
         x: {
           grid: { color: chartGridColor() },
-          ticks: { font: { size: 11, family: 'DM Mono' }, color: chartAxisColor(), callback: v=>v+' Ha' }
+          ticks: { font: { size: 11, family: 'JetBrains Mono' }, color: chartAxisColor(), callback: v=>v+' Ha' }
         },
         y: {
           grid: { display: false },
