@@ -10,6 +10,16 @@
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
+    /* Hide number spinners */
+    input::-webkit-outer-spin-button,
+    input::-webkit-inner-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+    input[type=number] {
+      -moz-appearance: textfield;
+    }
+
     :root {
       /* Palette — Forest Precision */
       --ink:        #1a1f1a;
@@ -926,7 +936,7 @@
       font-family: var(--font-mono);
       font-variant-numeric: tabular-nums;
       font-size: 14px;
-      padding-right: 36px;
+      padding-right: 38px;
     }
     select.calc-input { cursor: pointer; }
     .calc-input-unit {
@@ -1184,12 +1194,12 @@
     @media (max-width: 480px) {
       .sub-tabs { width: 100%; }
       .sub-tab { flex: 1; justify-content: center; }
-      .aut-inputs { grid-template-columns: 1fr 1fr; padding: 6px 9px 9px; gap: 7px; }
+      .aut-inputs { grid-template-columns: 1fr; padding: 6px 9px 9px; gap: 7px; }
       .aut-results { grid-template-columns: 1fr 1fr; }
       .aut-total-bar { grid-template-columns: 1fr 1fr; }
     }
     @media (max-width: 340px) {
-      .aut-inputs, .aut-results, .aut-total-bar { grid-template-columns: 1fr; }
+      .aut-results, .aut-total-bar { grid-template-columns: 1fr; }
     }
 
     /* ── MOBILE ─────────────────────────────────────────── */
@@ -1220,7 +1230,7 @@
         font-size: 9.5px;
       }
       .tab i { font-size: 15px; }
-      .calc-inputs { grid-template-columns: 1fr 1fr; padding: 9px; gap: 8px; }
+      .calc-inputs { grid-template-columns: 1fr; padding: 9px; gap: 8px; }
       .calc-results { grid-template-columns: 1fr 1fr; padding: 8px; gap: 6px; }
       .produksi-total-bar { grid-template-columns: 1fr 1fr; position: sticky; bottom: 60px; z-index: 4; }
       .ptb-val { font-size: 16px; }
