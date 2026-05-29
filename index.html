@@ -1823,19 +1823,32 @@
   }
 
   // ── INIT ──
-  async function init() {
-    initCharts();
-    const url = SUPABASE_URL||localStorage.getItem(LS_URL_KEY)||'';
-    const key = SUPABASE_KEY||localStorage.getItem(LS_KEY_KEY)||'';
-    if (!url||!key) { showOfflinePopup(); return; }
+  async function initSb() {
+    const url = SUPABASE_URL || localStorage.getItem(LS_URL_KEY) || '';
+    const key = SUPABASE_KEY || localStorage.getItem(LS_KEY_KEY) || '';
+    if (!url || !key) return false;
     try {
       const { createClient } = window.supabase;
       sbClient = createClient(url, key);
       const { error } = await sbClient.from('laporan').select('id',{count:'exact',head:true});
       if (error) throw error;
-      setDbStatus(true); hideOfflinePopup();
-      applyTableDatePreset('bulan_ini'); applyRekapDatePreset('bulan_ini');
-    } catch(e) { setDbStatus(false); showOfflinePopup(); }
+      setDbStatus(true);
+      hideOfflinePopup();
+      return true;
+    } catch(e) {
+      setDbStatus(false);
+      return false;
+    }
+  }
+
+  async function init() {
+    initCharts();
+    if (await initSb()) {
+      applyTableDatePreset('bulan_ini');
+      applyRekapDatePreset('bulan_ini');
+    } else {
+      showOfflinePopup();
+    }
   }
 
   function showOfflinePopup() { document.getElementById('offline-popup').classList.add('active'); }
@@ -1843,23 +1856,17 @@
 
   async function retryConnection() {
     const btn = document.getElementById('btn-retry');
+    if (!btn) return;
     btn.disabled=true; btn.innerHTML='<i class="ti ti-loader spin"></i> Menghubungkan…';
-    const url = SUPABASE_URL||localStorage.getItem(LS_URL_KEY)||'';
-    const key = SUPABASE_KEY||localStorage.getItem(LS_KEY_KEY)||'';
-    try {
-      const { createClient } = window.supabase;
-      sbClient = createClient(url, key);
-      const { error } = await sbClient.from('laporan').select('id',{count:'exact',head:true});
-      if (error) throw error;
-      setDbStatus(true); hideOfflinePopup();
+    if (await initSb()) {
       showAlert('Berhasil terhubung ke database!','success');
-      applyTableDatePreset('bulan_ini'); applyRekapDatePreset('bulan_ini');
-      await renderTable(true); await renderRekap();
-    } catch(e) { setDbStatus(false); }
-    finally { btn.disabled=false; btn.innerHTML='<i class="ti ti-refresh"></i> Coba Lagi'; }
+      applyTableDatePreset('bulan_ini');
+      applyRekapDatePreset('bulan_ini');
+      await renderTable(true);
+      await renderRekap();
+    }
+    btn.disabled=false; btn.innerHTML='<i class="ti ti-refresh"></i> Coba Lagi';
   }
-
-  async function connectSupabase() {}
 
   function setDbStatus(ok) {
     document.getElementById('db-dot').className = 'db-dot '+(ok?'ok':'err');
@@ -2737,7 +2744,7 @@
   window.simpanData=simpanData; window.hapusData=hapusData;
   window.exportPDF=exportPDF; window.exportExcel=exportExcel;
   window.toggleDownloadDropdown=toggleDownloadDropdown; window.closeDownloadDropdown=closeDownloadDropdown;
-  window.connectSupabase=connectSupabase; window.retryConnection=retryConnection;
+  window.retryConnection=retryConnection;
   window.setRekapFilter=setRekapFilter; window.handleTableSearchFilter=handleTableSearchFilter;
   window.changePage=changePage; window.goToPage=goToPage;
   window.bukaEditModal=bukaEditModal; window.tutupEditModal=tutupEditModal; window.updateData=updateData;
