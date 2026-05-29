@@ -988,6 +988,206 @@
     /* ── SETUP CARD (hidden) ─────────────────────────────── */
     .setup-card { display: none !important; }
 
+    /* ── PRODUKSI SUB-TABS ──────────────────────────────── */
+    .sub-tabs {
+      display: flex; gap: 3px;
+      background: var(--ground);
+      border: 1px solid var(--rule);
+      border-radius: var(--r-lg);
+      padding: 4px;
+      margin-bottom: 1rem;
+      width: fit-content;
+    }
+    .sub-tab {
+      padding: 7px 14px;
+      font-size: 12px; font-weight: 600; font-family: var(--font-ui);
+      border: none; background: none; cursor: pointer;
+      border-radius: 9px;
+      color: var(--ink-3);
+      transition: color 0.15s, background 0.15s;
+      display: flex; align-items: center; gap: 6px;
+      letter-spacing: -0.01em; white-space: nowrap;
+    }
+    .sub-tab i { font-size: 14px; }
+    .sub-tab:hover { color: var(--ink); background: var(--surface); }
+    .sub-tab.active { background: var(--surface); color: var(--moss); box-shadow: 0 1px 4px rgba(0,0,0,0.08); }
+
+    .sub-panel { display: none; flex-direction: column; gap: 12px; }
+    .sub-panel.active { display: flex; }
+
+    /* ── ANALISIS USAHA TANI ────────────────────────────── */
+    .aut-card {
+      background: var(--surface);
+      border: 1px solid var(--rule);
+      border-radius: var(--r-md);
+      overflow: hidden;
+      transition: box-shadow 0.2s;
+    }
+    .aut-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.06); }
+
+    .aut-section-title {
+      font-size: 10px; font-weight: 700;
+      letter-spacing: 0.07em; text-transform: uppercase;
+      color: var(--ink-3);
+      padding: 10px 12px 6px;
+      display: flex; align-items: center; gap: 6px;
+      border-top: 1px solid var(--rule);
+    }
+    .aut-section-title:first-child { border-top: none; }
+    .aut-section-title i { font-size: 13px; }
+
+    .aut-inputs {
+      padding: 6px 12px 12px;
+      display: grid; grid-template-columns: repeat(2, minmax(0,1fr));
+      gap: 8px;
+    }
+
+    .aut-biaya-wrap { overflow-x: auto; padding: 0 12px 12px; }
+    .aut-biaya-table { width: 100%; min-width: 480px; border-collapse: collapse; }
+    .aut-biaya-table thead th {
+      font-size: 9.5px; font-weight: 700; letter-spacing: .06em;
+      text-transform: uppercase; color: var(--ink-3);
+      padding: 0 6px 6px; text-align: left; white-space: nowrap;
+    }
+    .aut-biaya-table thead th.th-r { text-align: right; }
+    .aut-biaya-table tbody tr { vertical-align: middle; }
+    .aut-biaya-table tbody td { padding: 3px 4px; }
+    .aut-biaya-table tbody td:last-child { padding-right: 0; width: 28px; }
+    .aut-biaya-table col.col-uraian  { width: auto; min-width: 160px; }
+    .aut-biaya-table col.col-jumlah  { width: 90px; }
+    .aut-biaya-table col.col-satuan  { width: 80px; }
+    .aut-biaya-table col.col-harga   { width: 130px; }
+    .aut-biaya-table col.col-total   { width: 110px; }
+    .aut-biaya-table col.col-del     { width: 32px; }
+    .aut-biaya-subtotal {
+      font-size: 10px; font-weight: 700;
+      text-align: right; color: var(--ink-3);
+      padding: 6px 4px 0;
+      font-family: var(--font-mono);
+    }
+    .aut-biaya-subtotal span { color: var(--moss); }
+    .btn-hapus-biaya {
+      width: 28px; height: 28px; flex-shrink: 0;
+      background: none; border: none; cursor: pointer;
+      color: var(--ink-4); border-radius: 5px;
+      display: flex; align-items: center; justify-content: center;
+      transition: all 0.15s;
+    }
+    .btn-hapus-biaya:hover { background: var(--coral-bg); color: var(--coral); }
+    .btn-tambah-biaya {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 6px 10px; margin: 0 12px 12px;
+      font-size: 11px; font-weight: 600; font-family: var(--font-ui);
+      border: 1px dashed var(--rule-2); border-radius: var(--r-sm);
+      background: none; color: var(--ink-3); cursor: pointer;
+      transition: all 0.15s;
+    }
+    .btn-tambah-biaya:hover { background: var(--ground); color: var(--ink); border-color: var(--moss-3); }
+    .btn-tambah-biaya i { font-size: 13px; }
+
+    .aut-results {
+      display: grid; grid-template-columns: repeat(3, minmax(0,1fr));
+      gap: 8px; padding: 10px 12px 12px;
+      border-top: 1px solid var(--rule);
+      background: var(--ground);
+    }
+    .aut-result-item {
+      display: flex; flex-direction: column; gap: 2px;
+      padding: 8px; background: var(--surface);
+      border: 1px solid var(--rule); border-radius: var(--r-sm);
+    }
+    .aut-result-item.highlight { background: var(--moss-4); border-color: var(--moss-3); }
+    .aut-result-item.highlight .calc-result-label { color: var(--moss); }
+    .aut-result-item.highlight .calc-result-val { color: var(--moss); }
+    .aut-result-item.loss { background: var(--coral-bg); border-color: rgba(192,57,43,.15); }
+    .aut-result-item.loss .calc-result-label { color: var(--coral); }
+    .aut-result-item.loss .calc-result-val { color: var(--coral); }
+
+    .aut-empty {
+      text-align: center; padding: 2.5rem 1rem;
+      color: var(--ink-3); font-size: 14px;
+      background: var(--surface);
+      border: 2px dashed var(--rule-2);
+      border-radius: var(--r-md);
+    }
+    .aut-empty i { font-size: 36px; display: block; margin-bottom: 10px; opacity: 0.2; }
+    .aut-empty strong { display: block; font-size: 14px; font-weight: 700; color: var(--ink); margin-bottom: 3px; }
+
+    .aut-total-bar {
+      background: linear-gradient(135deg, var(--moss) 0%, var(--moss-2) 100%);
+      border-radius: var(--r-md); padding: 12px 14px;
+      display: grid; grid-template-columns: repeat(4, minmax(0,1fr));
+      gap: 8px; margin-top: 4px;
+    }
+
+    select.calc-input {
+      appearance: none;
+      padding-right: 28px;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 24 24' fill='none' stroke='%236b7569' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 8px center;
+      background-color: var(--ground);
+    }
+    select.calc-input:focus { background-color: var(--surface); }
+
+    /* ── AUT LINKED STATE ───────────────────────────────── */
+    .aut-linked-badge {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 5px 10px;
+      background: var(--moss-4); color: var(--moss);
+      border: 1px solid var(--moss-3);
+      border-radius: 99px;
+      font-size: 11px; font-weight: 600;
+      margin: 0 12px 12px;
+    }
+    .aut-linked-badge i { font-size: 13px; }
+    .btn-unlink-aut {
+      background: none; border: none; cursor: pointer;
+      color: var(--moss); padding: 0 0 0 4px;
+      font-size: 12px; font-family: var(--font-ui);
+      text-decoration: underline; opacity: 0.7;
+      transition: opacity 0.15s;
+    }
+    .btn-unlink-aut:hover { opacity: 1; }
+    .aut-linked-summary {
+      display: grid; grid-template-columns: repeat(4, minmax(0,1fr));
+      gap: 8px; padding: 8px 12px 12px;
+    }
+    .aut-linked-stat {
+      background: var(--ground); border: 1px solid var(--rule);
+      border-radius: var(--r-sm); padding: 7px 9px;
+      display: flex; flex-direction: column; gap: 2px;
+    }
+    .aut-linked-stat-label { font-size: 9.5px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--ink-3); }
+    .aut-linked-stat-val { font-size: 14px; font-weight: 700; color: var(--moss); font-family: var(--font-mono); }
+    @media (max-width: 480px) {
+      .aut-linked-summary { grid-template-columns: 1fr 1fr; }
+    }
+
+    .aut-picker-opt {
+      display: flex; align-items: center; gap: 10px;
+      width: 100%; padding: 10px 12px;
+      border: 1px solid var(--rule); border-radius: var(--r-md);
+      background: var(--ground); cursor: pointer;
+      font-family: var(--font-ui); text-align: left;
+      transition: all 0.15s;
+    }
+    .aut-picker-opt:hover { background: var(--moss-4); border-color: var(--moss-3); }
+    .aut-picker-opt i { font-size: 16px; color: var(--moss); flex-shrink: 0; }
+    .aut-picker-name { font-size: 13px; font-weight: 600; color: var(--ink); }
+    .aut-picker-sub { font-size: 11px; color: var(--ink-3); margin-left: auto; }
+
+    @media (max-width: 480px) {
+      .sub-tabs { width: 100%; }
+      .sub-tab { flex: 1; justify-content: center; }
+      .aut-inputs { grid-template-columns: 1fr 1fr; padding: 6px 9px 9px; gap: 7px; }
+      .aut-results { grid-template-columns: 1fr 1fr; }
+      .aut-total-bar { grid-template-columns: 1fr 1fr; }
+    }
+    @media (max-width: 340px) {
+      .aut-inputs, .aut-results, .aut-total-bar { grid-template-columns: 1fr; }
+    }
+
     /* ── MOBILE ─────────────────────────────────────────── */
     @media (max-width: 480px) {
       .topbar { padding: 0 1rem; height: 54px; gap: 10px; }
@@ -1317,13 +1517,37 @@
 
   <!-- PANEL PRODUKSI -->
   <div class="panel" id="panel-produksi">
-    <div class="produksi-topbar">
-      <button class="btn-produksi-add" onclick="tambahBarisProduksi()">
-        <i class="ti ti-plus"></i> Tambah Petani
+    <!-- Sub-tabs -->
+    <div class="sub-tabs">
+      <button class="sub-tab active" id="sub-tab-produktivitas" onclick="switchSubTab('produktivitas')">
+        <i class="ti ti-scale"></i> Produktivitas
+      </button>
+      <button class="sub-tab" id="sub-tab-aut" onclick="switchSubTab('aut')">
+        <i class="ti ti-receipt-2"></i> Analisis Usaha Tani
       </button>
     </div>
-    <div class="produksi-cards" id="produksi-cards"></div>
-    <div id="produksi-total-wrap"></div>
+
+    <!-- Sub-panel: Produktivitas -->
+    <div class="sub-panel active" id="sub-panel-produktivitas">
+      <div class="produksi-topbar">
+        <button class="btn-produksi-add" onclick="tambahBarisProduksi()">
+          <i class="ti ti-plus"></i> Tambah Petani
+        </button>
+      </div>
+      <div class="produksi-cards" id="produksi-cards"></div>
+      <div id="produksi-total-wrap"></div>
+    </div>
+
+    <!-- Sub-panel: Analisis Usaha Tani -->
+    <div class="sub-panel" id="sub-panel-aut">
+      <div class="produksi-topbar">
+        <button class="btn-produksi-add" onclick="showAUTPickerOrAdd()">
+          <i class="ti ti-plus"></i> Tambah Petani
+        </button>
+      </div>
+      <div id="aut-cards"></div>
+      <div id="aut-total-wrap"></div>
+    </div>
   </div>
 
 </div>
@@ -1902,7 +2126,7 @@
     });
     if (name==='data')     renderTable(true);
     if (name==='rekap')    updateRekap();
-    if (name==='produksi') renderProduksiTable();
+    if (name==='produksi') { if (activeSubTab==='produktivitas') renderProduksiCards(); else renderAUTCards(); }
   }
 
   // ── DOWNLOAD DROPDOWN ──
@@ -2092,8 +2316,416 @@
 
   function renderProduksiTable() { renderProduksiCards(); }
 
+  // ── SUB-TABS PRODUKSI ──
+  let activeSubTab = 'produktivitas';
+  function switchSubTab(name) {
+    activeSubTab = name;
+    ['produktivitas','aut'].forEach(t => {
+      document.getElementById('sub-tab-'+t)?.classList.toggle('active', t===name);
+      document.getElementById('sub-panel-'+t)?.classList.toggle('active', t===name);
+    });
+    if (name==='produktivitas') renderProduksiCards();
+    if (name==='aut') renderAUTCards();
+  }
+
+  // ── ANALISIS USAHA TANI ──
+  let autRows=[], autIdCounter=0;
+
+  const BIAYA_PRESETS = [
+    'Benih','Pupuk Urea','Pupuk NPK','Pupuk Organik',
+    'Pestisida','Tenaga Kerja Tanam','Tenaga Kerja Panen',
+    'Sewa Lahan','Irigasi','Pengolahan Lahan','Lain-lain'
+  ];
+
+  function tambahAUT(linkedProdId) {
+    const id = ++autIdCounter;
+    let linkedRow = null;
+    if (linkedProdId !== undefined) {
+      linkedRow = produksiRows.find(r => r.id === linkedProdId);
+    }
+    autRows.push({
+      id,
+      linkedProdId: linkedRow ? linkedRow.id : null,
+      nama: linkedRow ? linkedRow.nama : '',
+      desa: linkedRow ? linkedRow.desa : '',
+      komoditas: linkedRow ? linkedRow.komoditas : 'Padi',
+      luas: linkedRow ? linkedRow.luas : '',
+      hargaJual: 5000,
+      biaya: [
+        {id:1, nama:'Benih', jumlah:25, satuan:'kg', harga:15000},
+        {id:2, nama:'Pupuk Urea', jumlah:200, satuan:'kg', harga:2300},
+        {id:3, nama:'Tenaga Kerja Tanam', jumlah:20, satuan:'HOK', harga:80000},
+        {id:4, nama:'Tenaga Kerja Panen', jumlah:10, satuan:'HOK', harga:80000},
+      ],
+      biayaIdCounter: 4
+    });
+    renderAUTCards();
+    if (!linkedRow) {
+      setTimeout(()=>{
+        const el = document.querySelector(`#aut-card-${id} .aut-input-nama`);
+        if (el) el.focus();
+      }, 60);
+    }
+  }
+
+  function showAUTPickerOrAdd() {
+    // If there are produksi rows, show a quick-pick modal; else just add blank
+    const unlinkedProd = produksiRows.filter(pr =>
+      pr.nama && !autRows.find(ar => ar.linkedProdId === pr.id)
+    );
+    if (!unlinkedProd.length) { tambahAUT(); return; }
+    // Build inline picker in a simple confirm-style overlay
+    const existingPicker = document.getElementById('aut-picker-overlay');
+    if (existingPicker) existingPicker.remove();
+    const opts = unlinkedProd.map(pr => `
+      <button class="aut-picker-opt" onclick="tambahAUTFromPicker(${pr.id})">
+        <i class="ti ti-link"></i>
+        <span class="aut-picker-name">${pr.nama||'Tanpa nama'}</span>
+        <span class="aut-picker-sub">${[pr.desa, pr.komoditas, pr.luas?(pr.luas+' Ha'):''].filter(Boolean).join(' · ')}</span>
+      </button>`).join('');
+    const overlay = document.createElement('div');
+    overlay.id = 'aut-picker-overlay';
+    overlay.className = 'modal-overlay active';
+    overlay.innerHTML = `<div class="modal-content" style="max-width:380px">
+      <div class="modal-header">
+        <div class="modal-title"><i class="ti ti-link" style="margin-right:6px"></i>Pilih dari Produktivitas</div>
+        <button class="btn-close-modal" onclick="document.getElementById('aut-picker-overlay').remove()"><i class="ti ti-x"></i></button>
+      </div>
+      <p style="font-size:13px;color:var(--ink-3);margin-bottom:12px">Pilih petani dari tab Produktivitas untuk otomatis mengisi data produksi, atau tambah manual.</p>
+      <div style="display:flex;flex-direction:column;gap:6px;margin-bottom:12px">${opts}</div>
+      <button class="btn-cancel" style="width:100%" onclick="tambahAUT();document.getElementById('aut-picker-overlay').remove()">
+        <i class="ti ti-plus"></i> Tambah Manual (tanpa link)
+      </button>
+    </div>`;
+    overlay.addEventListener('click', e => { if (e.target === overlay) overlay.remove(); });
+    document.body.appendChild(overlay);
+  }
+
+  function tambahAUTFromPicker(prodId) {
+    document.getElementById('aut-picker-overlay')?.remove();
+    tambahAUT(prodId);
+  }
+
+  function unlinkAUT(id) {
+    const row = autRows.find(r => r.id === id);
+    if (!row) return;
+    // Keep current derived values as manual inputs
+    const prodRow = produksiRows.find(r => r.id === row.linkedProdId);
+    if (prodRow) {
+      if (!row.luas && prodRow.luas) row.luas = prodRow.luas;
+    }
+    row.linkedProdId = null;
+    renderAUTCards();
+  }
+
+  function hapusAUT(id) {
+    autRows = autRows.filter(r => r.id !== id);
+    renderAUTCards();
+  }
+
+  function updateAUT(id, field, value) {
+    const row = autRows.find(r => r.id === id);
+    if (!row) return;
+    row[field] = value;
+    refreshAUTCard(id);
+    renderAUTTotal();
+  }
+
+  function tambahBiayaAUT(id) {
+    const row = autRows.find(r => r.id === id);
+    if (!row) return;
+    row.biayaIdCounter = (row.biayaIdCounter||0) + 1;
+    row.biaya.push({ id: row.biayaIdCounter, nama:'', jumlah:'', satuan:'', harga:'' });
+    renderAUTCards();
+  }
+
+  function hapusBiayaAUT(autId, biayaId) {
+    const row = autRows.find(r => r.id === autId);
+    if (!row) return;
+    row.biaya = row.biaya.filter(b => b.id !== biayaId);
+    refreshAUTCard(autId);
+    renderAUTTotal();
+  }
+
+  function updateBiayaAUT(autId, biayaId, field, value) {
+    const row = autRows.find(r => r.id === autId);
+    if (!row) return;
+    const b = row.biaya.find(b => b.id === biayaId);
+    if (!b) return;
+    b[field] = value;
+    refreshAUTCard(autId);
+    renderAUTTotal();
+  }
+
+  function calcAUT(row) {
+    const prodRow = row.linkedProdId ? produksiRows.find(r => r.id === row.linkedProdId) : null;
+    const luas = parseFloat(prodRow ? (prodRow.luas || row.luas) : row.luas) || 0;
+    const hargaJual = parseFloat(row.hargaJual) || 0;
+    const gkp = prodRow ? parseFloat(prodRow.karung||0) * parseFloat(prodRow.beratKarung||0) : 0;
+    const totalBiaya = row.biaya.reduce((s, b) => {
+      return s + (parseFloat(b.jumlah)||0) * (parseFloat(b.harga)||0);
+    }, 0);
+    const totalBiayaPerHa = luas > 0 ? totalBiaya / luas : 0;
+    const penerimaanKotor = gkp * hargaJual;
+    const pendapatanBersih = penerimaanKotor - totalBiaya;
+    const rcRatio = totalBiaya > 0 ? penerimaanKotor / totalBiaya : 0;
+    const bepProduksi = hargaJual > 0 ? totalBiaya / hargaJual : 0; // kg
+    const bepHarga = gkp > 0 ? totalBiaya / gkp : 0; // Rp/kg
+    return { totalBiaya, totalBiayaPerHa, penerimaanKotor, pendapatanBersih, rcRatio, bepProduksi, bepHarga, gkp };
+  }
+
+  function fmtRp(n) {
+    if (!n || isNaN(n)) return '—';
+    return 'Rp ' + Math.round(n).toLocaleString('id-ID');
+  }
+
+  function refreshAUTCard(id) {
+    const row = autRows.find(r => r.id === id);
+    if (!row) return;
+    const {totalBiaya, totalBiayaPerHa, penerimaanKotor, pendapatanBersih, rcRatio, bepProduksi, bepHarga} = calcAUT(row);
+    const isLoss = pendapatanBersih < 0;
+    const sel = s => document.querySelector(`#aut-card-${id} ${s}`);
+    const setVal = (s, v, isRp=false) => {
+      const el = sel(s);
+      if (!el) return;
+      el.textContent = isRp ? fmtRp(v) : fmt(v, 1);
+      el.classList.toggle('has-val', !!v && v !== 0);
+    };
+    // Update name/sub (use linked prod data if linked)
+    const linkedPR = row.linkedProdId ? produksiRows.find(r => r.id === row.linkedProdId) : null;
+    const effN = linkedPR ? linkedPR.nama : row.nama;
+    const effD = linkedPR ? linkedPR.desa : row.desa;
+    const effK = linkedPR ? linkedPR.komoditas : row.komoditas;
+    const effL = linkedPR ? linkedPR.luas : row.luas;
+    const nm = sel('.calc-card-name');
+    const sub = sel('.calc-card-sub');
+    if (nm) { nm.textContent = effN||'Nama petani…'; nm.classList.toggle('calc-card-name-placeholder',!effN); }
+    if (sub) sub.textContent = [effD, effK, effL?(effL+' Ha'):''].filter(Boolean).join(' · ')||'Desa · Komoditas';
+    // Results
+    const resWrap = sel('.aut-results');
+    if (resWrap) {
+      resWrap.innerHTML = `
+        <div class="aut-result-item">
+          <div class="calc-result-label">Total Biaya</div>
+          <div class="calc-result-val has-val" style="font-size:13px">${fmtRp(totalBiaya)}</div>
+          <div class="calc-result-unit">Biaya/Ha: ${fmtRp(totalBiayaPerHa)}</div>
+        </div>
+        <div class="aut-result-item">
+          <div class="calc-result-label">Penerimaan Kotor</div>
+          <div class="calc-result-val has-val" style="font-size:13px">${fmtRp(penerimaanKotor)}</div>
+          <div class="calc-result-unit">GKP ${fmt(parseFloat(calcAUT(row).gkp)/1000,2)} ton × harga</div>
+        </div>
+        <div class="aut-result-item ${isLoss?'loss':'highlight'}">
+          <div class="calc-result-label">Pendapatan Bersih</div>
+          <div class="calc-result-val" style="font-size:13px">${fmtRp(pendapatanBersih)}</div>
+          <div class="calc-result-unit">${isLoss?'⚠ Merugi':'✓ Menguntungkan'}</div>
+        </div>
+        <div class="aut-result-item">
+          <div class="calc-result-label">R/C Ratio</div>
+          <div class="calc-result-val ${rcRatio>=1?'has-val':''}">${rcRatio>0?rcRatio.toFixed(2):'—'}</div>
+          <div class="calc-result-unit">${rcRatio>=1?'Layak':'Tidak layak'}</div>
+        </div>
+        <div class="aut-result-item">
+          <div class="calc-result-label">BEP Produksi</div>
+          <div class="calc-result-val has-val" style="font-size:13px">${bepProduksi>0?fmt(bepProduksi/1000,2)+' ton':'—'}</div>
+          <div class="calc-result-unit">Volume impas</div>
+        </div>
+        <div class="aut-result-item">
+          <div class="calc-result-label">BEP Harga</div>
+          <div class="calc-result-val has-val" style="font-size:13px">${fmtRp(bepHarga)}</div>
+          <div class="calc-result-unit">Harga impas/kg</div>
+        </div>`;
+    }
+    renderAUTTotal();
+  }
+
+  function renderAUTCards() {
+    const container = document.getElementById('aut-cards');
+    if (!container) return;
+    if (!autRows.length) {
+      container.innerHTML = `<div class="aut-empty"><i class="ti ti-receipt-2"></i><strong>Belum ada analisis</strong>Klik "+ Tambah Petani" untuk memulai analisis usaha tani</div>`;
+      renderAUTTotal(); return;
+    }
+    container.innerHTML = autRows.map((row, idx) => {
+      const {totalBiaya, totalBiayaPerHa, penerimaanKotor, pendapatanBersih, rcRatio, bepProduksi, bepHarga, gkp} = calcAUT(row);
+      const isLoss = pendapatanBersih < 0;
+      const komodOpts = ['Padi','Jagung','Kedelai'].map(k=>`<option${k===row.komoditas?' selected':''}>${k}</option>`).join('');
+      const subText = [row.desa, row.komoditas, row.luas?(row.luas+' Ha'):''].filter(Boolean).join(' · ')||'Desa · Komoditas';
+      const biayaRows = row.biaya.map(b => {
+        const subtotal = (parseFloat(b.jumlah)||0) * (parseFloat(b.harga)||0);
+        return `<tr id="biaya-row-${row.id}-${b.id}">
+          <td><input class="calc-input" style="width:100%" value="${b.nama}" placeholder="Contoh: Benih, Pupuk Urea…"
+            oninput="updateBiayaAUT(${row.id},${b.id},'nama',this.value)" /></td>
+          <td><input class="calc-input num" type="number" min="0" style="width:100%" value="${b.jumlah}" placeholder="0"
+            oninput="updateBiayaAUT(${row.id},${b.id},'jumlah',this.value)" /></td>
+          <td><input class="calc-input" style="width:100%" value="${b.satuan}" placeholder="kg / HOK…"
+            oninput="updateBiayaAUT(${row.id},${b.id},'satuan',this.value)" /></td>
+          <td><input class="calc-input num" type="number" min="0" style="width:100%" value="${b.harga}" placeholder="0"
+            oninput="updateBiayaAUT(${row.id},${b.id},'harga',this.value)" /></td>
+          <td style="text-align:right;font-family:var(--font-mono);font-size:12px;color:var(--ink-3);white-space:nowrap;padding-right:6px">
+            ${subtotal>0?('Rp '+Math.round(subtotal).toLocaleString('id-ID')):'—'}</td>
+          <td><button class="btn-hapus-biaya" onclick="hapusBiayaAUT(${row.id},${b.id})" title="Hapus"><i class="ti ti-x"></i></button></td>
+        </tr>`;
+      }).join('');
+
+      // Linked: get prodRow for display
+      const linkedProdRow = row.linkedProdId ? produksiRows.find(r => r.id === row.linkedProdId) : null;
+      const effNama = linkedProdRow ? linkedProdRow.nama : row.nama;
+      const effDesa = linkedProdRow ? linkedProdRow.desa : row.desa;
+      const effKom  = linkedProdRow ? linkedProdRow.komoditas : row.komoditas;
+      const effLuas = linkedProdRow ? linkedProdRow.luas : row.luas;
+      const effGKP  = linkedProdRow ? (parseFloat(linkedProdRow.karung||0)*parseFloat(linkedProdRow.beratKarung||0)) : 0;
+
+      const infoSection = linkedProdRow ? `
+        <div class="aut-linked-badge">
+          <i class="ti ti-link"></i> Data dari Produktivitas
+          <button class="btn-unlink-aut" onclick="unlinkAUT(${row.id})">lepas</button>
+        </div>
+        <div class="aut-linked-summary">
+          <div class="aut-linked-stat"><div class="aut-linked-stat-label">Nama</div><div class="aut-linked-stat-val" style="font-size:12px;overflow:hidden;text-overflow:ellipsis">${effNama||'—'}</div></div>
+          <div class="aut-linked-stat"><div class="aut-linked-stat-label">Desa</div><div class="aut-linked-stat-val" style="font-size:12px">${effDesa||'—'}</div></div>
+          <div class="aut-linked-stat"><div class="aut-linked-stat-label">Luas</div><div class="aut-linked-stat-val">${effLuas||'—'}<span style="font-size:9px;font-weight:400;color:var(--ink-4)"> Ha</span></div></div>
+          <div class="aut-linked-stat"><div class="aut-linked-stat-label">GKP</div><div class="aut-linked-stat-val" style="font-size:12px">${effGKP>0?fmt(effGKP/1000,2)+' ton':'—'}</div></div>
+        </div>
+        <div class="aut-inputs" style="padding-top:0;border-top:1px solid var(--rule);grid-template-columns:1fr">
+          <div class="calc-field">
+            <div class="calc-field-label">Harga Jual GKP</div>
+            <div class="calc-field-control">
+              <input class="calc-input num" type="number" min="0" step="100" value="${row.hargaJual}" placeholder="5000"
+                oninput="updateAUT(${row.id},'hargaJual',this.value)" />
+              <span class="calc-input-unit">Rp/kg</span>
+            </div>
+          </div>
+        </div>` : `
+        <div class="aut-section-title" style="border-top:none"><i class="ti ti-info-circle"></i> Informasi Dasar</div>
+        <div class="aut-inputs">
+          <div class="calc-field calc-field-full">
+            <div class="calc-field-label">Nama Petani / Poktan</div>
+            <input class="calc-input aut-input-nama" value="${row.nama}" placeholder="Nama petani atau kelompok tani…"
+              oninput="updateAUT(${row.id},'nama',this.value)" />
+          </div>
+          <div class="calc-field">
+            <div class="calc-field-label">Desa</div>
+            <input class="calc-input" value="${row.desa}" placeholder="Nama desa…"
+              oninput="updateAUT(${row.id},'desa',this.value)" />
+          </div>
+          <div class="calc-field">
+            <div class="calc-field-label">Komoditas</div>
+            <select class="calc-input" onchange="updateAUT(${row.id},'komoditas',this.value)">${komodOpts}</select>
+          </div>
+          <div class="calc-field">
+            <div class="calc-field-label">Luas Lahan</div>
+            <div class="calc-field-control">
+              <input class="calc-input num" type="number" min="0" step="0.01" value="${row.luas}" placeholder="0,00"
+                oninput="updateAUT(${row.id},'luas',this.value)" />
+              <span class="calc-input-unit">Ha</span>
+            </div>
+          </div>
+          <div class="calc-field">
+            <div class="calc-field-label">Harga Jual GKP</div>
+            <div class="calc-field-control">
+              <input class="calc-input num" type="number" min="0" step="100" value="${row.hargaJual}" placeholder="5000"
+                oninput="updateAUT(${row.id},'hargaJual',this.value)" />
+              <span class="calc-input-unit">Rp/kg</span>
+            </div>
+          </div>
+        </div>`;
+
+      return `<div class="aut-card" id="aut-card-${row.id}">
+        <div class="calc-card-header">
+          <div class="calc-card-num">${idx+1}</div>
+          <div class="calc-card-identity">
+            <div class="calc-card-name${!effNama?' calc-card-name-placeholder':''}">${effNama||'Nama petani…'}</div>
+            <div class="calc-card-sub">${[effDesa, effKom, effLuas?(effLuas+' Ha'):''].filter(Boolean).join(' · ')||'Desa · Komoditas'}</div>
+          </div>
+          <button class="btn-hapus-baris" onclick="hapusAUT(${row.id})" title="Hapus"><i class="ti ti-x"></i></button>
+        </div>
+        ${infoSection}
+
+        <div class="aut-section-title"><i class="ti ti-coins"></i> Rincian Biaya Produksi</div>
+        <div class="aut-biaya-wrap">
+          <table class="aut-biaya-table">
+            <colgroup>
+              <col class="col-uraian"><col class="col-jumlah"><col class="col-satuan">
+              <col class="col-harga"><col class="col-total"><col class="col-del">
+            </colgroup>
+            <thead><tr>
+              <th>Uraian Biaya</th>
+              <th class="th-r">Jumlah</th>
+              <th>Satuan</th>
+              <th class="th-r">Harga / Satuan (Rp)</th>
+              <th class="th-r">Subtotal (Rp)</th>
+              <th></th>
+            </tr></thead>
+            <tbody>${biayaRows}</tbody>
+          </table>
+        </div>
+        <button class="btn-tambah-biaya" onclick="tambahBiayaAUT(${row.id})">
+          <i class="ti ti-plus"></i> Tambah Item Biaya
+        </button>
+
+        <div class="aut-results">
+          <div class="aut-result-item">
+            <div class="calc-result-label">Total Biaya</div>
+            <div class="calc-result-val has-val" style="font-size:13px">${fmtRp(totalBiaya)}</div>
+            <div class="calc-result-unit">Biaya/Ha: ${fmtRp(totalBiayaPerHa)}</div>
+          </div>
+          <div class="aut-result-item">
+            <div class="calc-result-label">Penerimaan Kotor</div>
+            <div class="calc-result-val has-val" style="font-size:13px">${fmtRp(penerimaanKotor)}</div>
+            <div class="calc-result-unit">GKP ${fmt(gkp/1000,2)} ton × harga</div>
+          </div>
+          <div class="aut-result-item ${isLoss?'loss':'highlight'}">
+            <div class="calc-result-label">Pendapatan Bersih</div>
+            <div class="calc-result-val" style="font-size:13px">${fmtRp(pendapatanBersih)}</div>
+            <div class="calc-result-unit">${isLoss?'⚠ Merugi':'✓ Menguntungkan'}</div>
+          </div>
+          <div class="aut-result-item">
+            <div class="calc-result-label">R/C Ratio</div>
+            <div class="calc-result-val ${rcRatio>=1?'has-val':''}">${rcRatio>0?rcRatio.toFixed(2):'—'}</div>
+            <div class="calc-result-unit">${rcRatio>=1?'Layak':'Tidak layak'}</div>
+          </div>
+          <div class="aut-result-item">
+            <div class="calc-result-label">BEP Produksi</div>
+            <div class="calc-result-val has-val" style="font-size:13px">${bepProduksi>0?fmt(bepProduksi/1000,2)+' ton':'—'}</div>
+            <div class="calc-result-unit">Volume impas</div>
+          </div>
+          <div class="aut-result-item">
+            <div class="calc-result-label">BEP Harga</div>
+            <div class="calc-result-val has-val" style="font-size:13px">${fmtRp(bepHarga)}</div>
+            <div class="calc-result-unit">Harga impas/kg</div>
+          </div>
+        </div>
+      </div>`;
+    }).join('');
+    renderAUTTotal();
+  }
+
+  function renderAUTTotal() {
+    const wrap = document.getElementById('aut-total-wrap');
+    if (!wrap) return;
+    if (!autRows.length) { wrap.innerHTML = ''; return; }
+    let totalBiayaAll=0, totalPenerimaanAll=0, totalBersihAll=0;
+    autRows.forEach(row => {
+      const c = calcAUT(row);
+      totalBiayaAll += c.totalBiaya;
+      totalPenerimaanAll += c.penerimaanKotor;
+      totalBersihAll += c.pendapatanBersih;
+    });
+    const rcAll = totalBiayaAll > 0 ? totalPenerimaanAll / totalBiayaAll : 0;
+    wrap.innerHTML = `<div class="aut-total-bar">
+      <div class="ptb-item"><div class="ptb-label">Total Biaya</div><div class="ptb-val" style="font-size:14px">${fmtRp(totalBiayaAll)}</div><div class="ptb-unit">${autRows.length} petani</div></div>
+      <div class="ptb-item"><div class="ptb-label">Total Penerimaan</div><div class="ptb-val" style="font-size:14px">${fmtRp(totalPenerimaanAll)}</div><div class="ptb-unit">GKP × harga</div></div>
+      <div class="ptb-item"><div class="ptb-label">Total Bersih</div><div class="ptb-val" style="font-size:14px">${fmtRp(totalBersihAll)}</div><div class="ptb-unit">${totalBersihAll>=0?'Menguntungkan':'Merugi'}</div></div>
+      <div class="ptb-item"><div class="ptb-label">R/C Ratio</div><div class="ptb-val">${rcAll>0?rcAll.toFixed(2):'—'}</div><div class="ptb-unit">${rcAll>=1?'Layak':'Tidak layak'}</div></div>
+    </div>`;
+  }
+
   // ── EXPOSE ──
-  window.switchTab=switchTab; window.tambahBarisProduksi=tambahBarisProduksi;
+  window.switchTab=switchTab; window.switchSubTab=switchSubTab;
+  window.tambahAUT=tambahAUT; window.showAUTPickerOrAdd=showAUTPickerOrAdd; window.tambahAUTFromPicker=tambahAUTFromPicker; window.unlinkAUT=unlinkAUT; window.hapusAUT=hapusAUT; window.updateAUT=updateAUT;
+  window.tambahBiayaAUT=tambahBiayaAUT; window.hapusBiayaAUT=hapusBiayaAUT; window.updateBiayaAUT=updateBiayaAUT;
+  window.tambahBarisProduksi=tambahBarisProduksi;
   window.hapusBarisProduksi=hapusBarisProduksi; window.updateProduksiRow=updateProduksiRow;
   window.simpanData=simpanData; window.hapusData=hapusData;
   window.exportPDF=exportPDF; window.exportExcel=exportExcel;
