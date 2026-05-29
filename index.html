@@ -2350,7 +2350,7 @@
       desa: linkedRow ? linkedRow.desa : '',
       komoditas: linkedRow ? linkedRow.komoditas : 'Padi',
       luas: linkedRow ? linkedRow.luas : '',
-      hargaJual: 5000,
+      hargaJual: 6500,
       biaya: [
         {id:1, nama:'Benih', jumlah:25, satuan:'kg', harga:15000},
         {id:2, nama:'Pupuk Urea', jumlah:275, satuan:'kg', harga:1800},
@@ -2358,8 +2358,9 @@
         {id:4, nama:'Pestisida', jumlah:1, satuan:'L', harga:150000},
         {id:5, nama:'Tenaga Kerja Tanam', jumlah:20, satuan:'HOK', harga:100000},
         {id:6, nama:'Tenaga Kerja Panen', jumlah:10, satuan:'HOK', harga:100000},
+        {id:7, nama:'Transport', jumlah:1, satuan:'Unit', harga:11000},
       ],
-      biayaIdCounter: 6
+      biayaIdCounter: 7
     });
     renderAUTCards();
     if (!linkedRow) {
