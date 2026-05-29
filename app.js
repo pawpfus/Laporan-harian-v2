@@ -1,9 +1,12 @@
-  let DEFAULT_SB_URL = 'https://penaujinawijzwcimgde.supabase.co';
-  let DEFAULT_SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBlbmF1amluYXdpanp3Y2ltZ2RlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg5NzgzNzcsImV4cCI6MjA5NDU1NDM3N30.FNNGqO7X5wpZ9Ng8qehPagS74uP-GMo8Z2AdzSEU6v4';
+  let SUPABASE_URL = 'https://penaujinawijzwcimgde.supabase.co';
+  let SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBlbmF1amluYXdpanp3Y2ltZ2RlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg5NzgzNzcsImV4cCI6MjA5NDU1NDM3N30.FNNGqO7X5wpZ9Ng8qehPagS74uP-GMo8Z2AdzSEU6v4';
   const LS_URL_KEY = 'sb_url';
   const LS_KEY_KEY = 'sb_key';
-  const LS_PRODUKSI_KEY = 'produksi_data';
+  const LS_PRODUKSI_KEY = 'produksi_data_v2';
   const LS_THEME_KEY = 'app_theme';
+
+  let DEFAULT_SB_URL = 'https://penaujinawijzwcimgde.supabase.co';
+  let DEFAULT_SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBlbmF1amluYXdpanp3Y2ltZ2RlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg5NzgzNzcsImV4cCI6MjA5NDU1NDM3N30.FNNGqO7X5wpZ9Ng8qehPagS74uP-GMo8Z2AdzSEU6v4';
 
   let sbClient = null;
   let cachedData = [];
@@ -232,23 +235,22 @@
     if (root.classList.contains('dark-mode')) {
       root.classList.remove('dark-mode');
       root.classList.add('light-mode');
-      icon.className = 'ti ti-moon';
+      if (icon) icon.className = 'ti ti-moon';
       localStorage.setItem(LS_THEME_KEY, 'light');
     } else if (root.classList.contains('light-mode')) {
       root.classList.remove('light-mode');
       root.classList.add('dark-mode');
-      icon.className = 'ti ti-sun';
+      if (icon) icon.className = 'ti ti-sun';
       localStorage.setItem(LS_THEME_KEY, 'dark');
     } else {
-      // If no class, check system preference
       const isSystemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
       if (isSystemDark) {
         root.classList.add('light-mode');
-        icon.className = 'ti ti-moon';
+        if (icon) icon.className = 'ti ti-moon';
         localStorage.setItem(LS_THEME_KEY, 'light');
       } else {
         root.classList.add('dark-mode');
-        icon.className = 'ti ti-sun';
+        if (icon) icon.className = 'ti ti-sun';
         localStorage.setItem(LS_THEME_KEY, 'dark');
       }
     }
@@ -260,13 +262,13 @@
     const icon = document.getElementById('theme-icon');
     if (savedTheme === 'dark') {
       root.classList.add('dark-mode');
-      icon.className = 'ti ti-sun';
+      if (icon) icon.className = 'ti ti-sun';
     } else if (savedTheme === 'light') {
       root.classList.add('light-mode');
-      icon.className = 'ti ti-moon';
+      if (icon) icon.className = 'ti ti-moon';
     } else {
       const isSystemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-      icon.className = isSystemDark ? 'ti ti-sun' : 'ti ti-moon';
+      if (icon) icon.className = isSystemDark ? 'ti ti-sun' : 'ti ti-moon';
     }
   }
 
@@ -275,8 +277,8 @@
     initTheme();
     initCharts();
     loadProduksiFromLS();
-    const url = localStorage.getItem(LS_URL_KEY)||DEFAULT_SB_URL;
-    const key = localStorage.getItem(LS_KEY_KEY)||DEFAULT_SB_KEY;
+    const url = localStorage.getItem(LS_URL_KEY) || DEFAULT_SB_URL;
+    const key = localStorage.getItem(LS_KEY_KEY) || DEFAULT_SB_KEY;
     if (!url||!key) { showOfflinePopup(); return; }
     try {
       const { createClient } = window.supabase;
@@ -294,8 +296,8 @@
   async function retryConnection() {
     const btn = document.getElementById('btn-retry');
     btn.disabled=true; btn.innerHTML='<i class="ti ti-loader spin"></i> Menghubungkan…';
-    const url = localStorage.getItem(LS_URL_KEY)||DEFAULT_SB_URL;
-    const key = localStorage.getItem(LS_KEY_KEY)||DEFAULT_SB_KEY;
+    const url = localStorage.getItem(LS_URL_KEY) || DEFAULT_SB_URL;
+    const key = localStorage.getItem(LS_KEY_KEY) || DEFAULT_SB_KEY;
     try {
       const { createClient } = window.supabase;
       sbClient = createClient(url, key);
@@ -307,6 +309,78 @@
       await renderTable(true); await renderRekap();
     } catch(e) { setDbStatus(false); }
     finally { btn.disabled=false; btn.innerHTML='<i class="ti ti-refresh"></i> Coba Lagi'; }
+  }
+
+  async function connectSupabase() {}
+
+  function setDbStatus(ok) {
+    document.getElementById('db-dot').className = 'db-dot '+(ok?'ok':'err');
+    document.getElementById('db-label').textContent = ok?'Terhubung':'Terputus';
+  }
+
+  // ── ALERT ──
+  function esc(str) {
+    if (str === undefined || str === null) return '';
+    const div = document.createElement('div');
+    div.textContent = String(str);
+    return div.innerHTML;
+  }
+
+  function showAlert(msg, type='success') {
+    const box=document.getElementById('alert-box');
+    const msgEl=document.getElementById('alert-msg');
+    const icon=document.getElementById('alert-icon');
+    const iconMap={success:'ti ti-circle-check',warning:'ti ti-alert-triangle',error:'ti ti-circle-x'};
+    box.className='alert '+type;
+    msgEl.textContent=msg;
+    icon.className=iconMap[type]||iconMap.success;
+    clearTimeout(box._timer);
+    box._timer=setTimeout(()=>{box.className='alert hidden';},4000);
+  }
+
+  // ── DATA OPS ──
+  let totalCount = 0;
+
+  async function fetchData({ page=1, dateFrom=null, dateTo=null, search='', komoditas='semua', kegiatan='semua' }={}) {
+    if (!sbClient) return [];
+    const from=(page-1)*rowsPerPage, to=from+rowsPerPage-1;
+    let q = sbClient.from('laporan').select('*',{count:'exact'})
+      .order('tanggal',{ascending:false}).order('created_at',{ascending:false}).range(from,to);
+    if (dateFrom) q=q.gte('tanggal',dateFrom);
+    if (dateTo)   q=q.lte('tanggal',dateTo);
+    if (komoditas!=='semua') q=q.eq('komoditas',komoditas);
+    if (kegiatan !=='semua') q=q.eq('kegiatan',kegiatan);
+    const { data, error, count } = await q;
+    if (error) { showAlert('Gagal memuat data: '+error.message,'error'); return []; }
+    let rows = data||[];
+    if (search) {
+      const s=search.toLowerCase();
+      rows=rows.filter(d=>(d.desa||'').toLowerCase().includes(s)||(d.kelompok_tani||'').toLowerCase().includes(s)||(d.user_name||'').toLowerCase().includes(s));
+    }
+    cachedData=rows; totalCount=count||0; return rows;
+  }
+
+  async function fetchAllForExport({ dateFrom=null, dateTo=null, komoditas='semua', kegiatan='semua' }={}) {
+    if (!sbClient) return [];
+    let q = sbClient.from('laporan').select('*').order('tanggal',{ascending:false});
+    if (dateFrom) q=q.gte('tanggal',dateFrom);
+    if (dateTo)   q=q.lte('tanggal',dateTo);
+    if (komoditas!=='semua') q=q.eq('komoditas',komoditas);
+    if (kegiatan !=='semua') q=q.eq('kegiatan',kegiatan);
+    const { data, error } = await q;
+    if (error) { showAlert('Gagal memuat data ekspor: '+error.message,'error'); return []; }
+    return data||[];
+  }
+
+  async function fetchAllForRekap({ dateFrom=null, dateTo=null, jenis='semua' }={}) {
+    if (!sbClient) return [];
+    let q = sbClient.from('laporan').select('*').order('tanggal',{ascending:false});
+    if (dateFrom) q=q.gte('tanggal',dateFrom);
+    if (dateTo)   q=q.lte('tanggal',dateTo);
+    if (jenis!=='semua') q=q.eq('jenis_ltt',jenis);
+    const { data, error } = await q;
+    if (error) { showAlert('Gagal memuat rekap: '+error.message,'error'); return []; }
+    return data||[];
   }
 
   async function connectSupabase(url, key) {
@@ -353,76 +427,6 @@
     } else {
       showAlert('Gagal terhubung. Periksa URL/Key.', 'error');
     }
-  }
-
-  function setDbStatus(ok) {
-    document.getElementById('db-dot').className = 'db-dot '+(ok?'ok':'err');
-    document.getElementById('db-label').textContent = ok?'Terhubung':'Terputus';
-  }
-
-  // ── ALERT ──
-  function esc(str) {
-    if (!str) return '';
-    const div = document.createElement('div');
-    div.textContent = str;
-    return div.innerHTML;
-  }
-
-  function showAlert(msg, type='success') {
-    const box=document.getElementById('alert-box');
-    const msgEl=document.getElementById('alert-msg');
-    const icon=document.getElementById('alert-icon');
-    const iconMap={success:'ti ti-circle-check',warning:'ti ti-alert-triangle',error:'ti ti-circle-x'};
-    box.className='alert '+type;
-    msgEl.textContent=msg;
-    icon.className=iconMap[type]||iconMap.success;
-    clearTimeout(box._timer);
-    box._timer=setTimeout(()=>{box.className='alert hidden';},4000);
-  }
-
-  // ── DATA OPS ──
-  let totalCount = 0;
-
-  async function fetchData({ page=1, dateFrom=null, dateTo=null, search='', komoditas='semua', kegiatan='semua' }={}) {
-    if (!sbClient) return [];
-    const from=(page-1)*rowsPerPage, to=from+rowsPerPage-1;
-    let q = sbClient.from('laporan').select('*',{count:'exact'})
-      .order('tanggal',{ascending:false}).order('created_at',{ascending:false}).range(from,to);
-    if (dateFrom) q=q.gte('tanggal',dateFrom);
-    if (dateTo)   q=q.lte('tanggal',dateTo);
-    if (komoditas!=='semua') q=q.eq('komoditas',komoditas);
-    if (kegiatan !=='semua') q=q.eq('kegiatan',kegiatan);
-    if (search) {
-      const s = `%${search}%`;
-      q = q.or(`desa.ilike.${s},kelompok_tani.ilike.${s},user_name.ilike.${s}`);
-    }
-    const { data, error, count } = await q;
-    if (error) { showAlert('Gagal memuat data: '+error.message,'error'); return []; }
-    let rows = data||[];
-    cachedData=rows; totalCount=count||0; return rows;
-  }
-
-  async function fetchAllForExport({ dateFrom=null, dateTo=null, komoditas='semua', kegiatan='semua' }={}) {
-    if (!sbClient) return [];
-    let q = sbClient.from('laporan').select('*').order('tanggal',{ascending:false});
-    if (dateFrom) q=q.gte('tanggal',dateFrom);
-    if (dateTo)   q=q.lte('tanggal',dateTo);
-    if (komoditas!=='semua') q=q.eq('komoditas',komoditas);
-    if (kegiatan !=='semua') q=q.eq('kegiatan',kegiatan);
-    const { data, error } = await q;
-    if (error) { showAlert('Gagal memuat data ekspor: '+error.message,'error'); return []; }
-    return data||[];
-  }
-
-  async function fetchAllForRekap({ dateFrom=null, dateTo=null, jenis='semua' }={}) {
-    if (!sbClient) return [];
-    let q = sbClient.from('laporan').select('*').order('tanggal',{ascending:false});
-    if (dateFrom) q=q.gte('tanggal',dateFrom);
-    if (dateTo)   q=q.lte('tanggal',dateTo);
-    if (jenis!=='semua') q=q.eq('jenis_ltt',jenis);
-    const { data, error } = await q;
-    if (error) { showAlert('Gagal memuat rekap: '+error.message,'error'); return []; }
-    return data||[];
   }
 
   function resetInputForm() {
@@ -658,7 +662,7 @@
     document.getElementById('btn-download')?.classList.remove('open');
   }
 
-  // ── PRODUKSI ──
+  // ── PRODUKSI & ANALISIS ──
   let produksiRows=[], produksiIdCounter=0;
   const KOMODITAS_LIST=['Padi','Jagung','Kedelai'];
 
@@ -675,7 +679,7 @@
           produksiIdCounter = Math.max(...produksiRows.map(r => r.id));
         }
       } catch (e) {
-        console.error('Gagal memuat data produksi dari localStorage', e);
+        console.error('Gagal memuat data produksi', e);
         produksiRows = [];
       }
     }
@@ -683,7 +687,12 @@
 
   function tambahBarisProduksi() {
     const id=++produksiIdCounter;
-    produksiRows.push({id,nama:'',desa:'',komoditas:'Padi',luas:'',karung:'',beratKarung:'',kadarAir:14});
+    produksiRows.push({
+      id, nama:'', desa:'', komoditas:'Padi', luas:'',
+      karung:'', beratKarung:'', kadarAir:14,
+      biayaBenih:0, biayaPupuk:0, biayaPestisida:0, biayaTenaga:0, biayaLain:0,
+      hargaJual:0
+    });
     saveProduksiToLS();
     renderProduksiCards();
     setTimeout(()=>{
@@ -693,6 +702,7 @@
   }
 
   function hapusBarisProduksi(id) {
+    if (!confirm('Hapus data ini?')) return;
     produksiRows=produksiRows.filter(r=>r.id!==id);
     saveProduksiToLS();
     renderProduksiCards();
@@ -701,21 +711,53 @@
   function updateProduksiRow(id,field,value) {
     const row=produksiRows.find(r=>r.id===id);
     if (!row) return;
-    row[field]=value;
+
+    // Numeric fields handling
+    const numericFields = ['luas','karung','beratKarung','kadarAir','biayaBenih','biayaPupuk','biayaPestisida','biayaTenaga','biayaLain','hargaJual'];
+    if (numericFields.includes(field)) {
+      row[field] = value === '' ? 0 : parseFloat(value);
+    } else {
+      row[field] = value;
+    }
+
     saveProduksiToLS();
+
+    // Update UI headers
     const nm=document.querySelector(`#calc-card-${id} .calc-card-name`);
     const sub=document.querySelector(`#calc-card-${id} .calc-card-sub`);
     if(nm){nm.textContent=row.nama||'Nama petani…';nm.classList.toggle('calc-card-name-placeholder',!row.nama);}
-    if(sub) sub.textContent=[row.desa,row.komoditas].filter(Boolean).join(' · ')||'Desa · Komoditas';
-    const {gkp,gkg,beras,produk}=calcProduksi(row);
-    const setRes=(sel,val,dec)=>{
+    if(sub) {
+      const subText = [row.desa, row.komoditas].filter(Boolean).join(' · ') || 'Desa · Komoditas';
+      sub.textContent = subText;
+    }
+
+    // Refresh calculations
+    const res = calcProduksi(row);
+
+    const setRes=(sel,val,dec,isRp=false)=>{
       const el=document.querySelector(`#calc-card-${id} ${sel}`);
       if(!el) return;
-      el.textContent=val>0?fmt(val,dec):'—';
-      el.classList.toggle('has-val',val>0);
+      if (isRp) {
+        el.textContent = (val !== undefined) ? fmtRp(val) : 'Rp 0';
+      } else {
+        el.textContent = (val > 0) ? fmt(val,dec) : '—';
+      }
+      el.classList.toggle('has-val', val !== 0);
+      if (sel === '.res-profit') {
+        el.classList.toggle('positive', val > 0);
+        el.classList.toggle('negative', val < 0);
+      }
     };
-    setRes('.res-gkp',gkp,1); setRes('.res-gkg',gkg,1);
-    setRes('.res-beras',beras,1); setRes('.res-produk',produk,3);
+
+    setRes('.res-gkp', res.gkp, 1);
+    setRes('.res-gkg', res.gkg, 1);
+    setRes('.res-produk', res.produk, 3);
+
+    setRes('.res-biaya', res.totalBiaya, 0, true);
+    setRes('.res-pendapatan', res.pendapatan, 0, true);
+    setRes('.res-profit', res.profit, 0, true);
+    setRes('.res-rc', res.rc, 2);
+
     renderTotalBar();
   }
 
@@ -724,16 +766,27 @@
     const karung=parseFloat(row.karung)||0;
     const berat=parseFloat(row.beratKarung)||0;
     const ka=parseFloat(row.kadarAir)??14;
+
     const gkp=karung*berat;
     const gkg=ka<100?gkp*(100-ka)/86:0;
     const beras=gkg*0.63;
     const produk=luas>0?(gkp/luas/1000):0;
-    return {gkp,gkg,beras,produk};
+
+    const totalBiaya = (row.biayaBenih||0) + (row.biayaPupuk||0) + (row.biayaPestisida||0) + (row.biayaTenaga||0) + (row.biayaLain||0);
+    const pendapatan = gkp * (row.hargaJual||0);
+    const profit = pendapatan - totalBiaya;
+    const rc = totalBiaya > 0 ? pendapatan / totalBiaya : 0;
+
+    return {gkp, gkg, beras, produk, totalBiaya, pendapatan, profit, rc};
   }
 
   function fmt(n,dec=1) {
-    if(!n||isNaN(n)) return '—';
+    if(n === undefined || n === null || isNaN(n)) return '—';
     return n.toLocaleString('id-ID',{minimumFractionDigits:dec,maximumFractionDigits:dec});
+  }
+
+  function fmtRp(n) {
+    return 'Rp ' + Math.round(n || 0).toLocaleString('id-ID');
   }
 
   function renderProduksiCards() {
@@ -744,87 +797,131 @@
       renderTotalBar(); return;
     }
     container.innerHTML=produksiRows.map((row,idx)=>{
-      const {gkp,gkg,beras,produk}=calcProduksi(row);
+      const res=calcProduksi(row);
       const komodOpts=KOMODITAS_LIST.map(k=>`<option${k===row.komoditas?' selected':''}>${k}</option>`).join('');
       const subText=[row.desa,row.komoditas].filter(Boolean).join(' · ')||'Desa · Komoditas';
-      return `<div class="calc-card" id="calc-card-${row.id}">
+
+      return `
+      <div class="calc-card" id="calc-card-${row.id}">
         <div class="calc-card-header">
           <div class="calc-card-num">${idx+1}</div>
           <div class="calc-card-identity">
-            <div class="calc-card-name${!row.nama?' calc-card-name-placeholder':''}">${row.nama||'Nama petani…'}</div>
-            <div class="calc-card-sub">${subText}</div>
+            <div class="calc-card-name${!row.nama?' calc-card-name-placeholder':''}">${esc(row.nama)||'Nama petani…'}</div>
+            <div class="calc-card-sub">${esc(subText)}</div>
           </div>
           <button class="btn-hapus-baris" onclick="hapusBarisProduksi(${row.id})" title="Hapus"><i class="ti ti-x"></i></button>
         </div>
-        <div class="calc-card-body">
-          <div class="calc-inputs">
-            <div class="calc-field calc-field-full">
-              <div class="calc-field-label">Nama Petani / Poktan</div>
-              <input class="calc-input input-nama" value="${row.nama}" placeholder="Nama petani atau kelompok tani…"
-                oninput="updateProduksiRow(${row.id},'nama',this.value)" />
-            </div>
-            <div class="calc-field">
-              <div class="calc-field-label">Desa</div>
-              <input class="calc-input" value="${row.desa}" placeholder="Nama desa…"
-                oninput="updateProduksiRow(${row.id},'desa',this.value)" />
-            </div>
-            <div class="calc-field">
-              <div class="calc-field-label">Komoditas</div>
-              <select class="calc-input" onchange="updateProduksiRow(${row.id},'komoditas',this.value)">${komodOpts}</select>
-            </div>
-            <div class="calc-field">
-              <div class="calc-field-label">Luas</div>
-              <div class="calc-field-control">
-                <input class="calc-input num" type="number" min="0" step="0.01" value="${row.luas}" placeholder="0,00"
-                  oninput="updateProduksiRow(${row.id},'luas',this.value)" />
-                <span class="calc-input-unit">Ha</span>
+
+        <div class="calc-sections">
+          <!-- SECTION 1: PRODUKSI -->
+          <div class="calc-section">
+            <div class="calc-section-header"><i class="ti ti-plant"></i> Data Produksi</div>
+            <div class="calc-grid">
+              <div class="calc-input-group" style="grid-column: 1 / -1">
+                <label class="calc-field-label">Nama Petani / Kelompok</label>
+                <input class="calc-input input-nama" value="${esc(row.nama)}" placeholder="Nama…" oninput="updateProduksiRow(${row.id},'nama',this.value)" />
+              </div>
+              <div class="calc-input-group">
+                <label class="calc-field-label">Desa</label>
+                <input class="calc-input" value="${esc(row.desa)}" placeholder="Desa…" oninput="updateProduksiRow(${row.id},'desa',this.value)" />
+              </div>
+              <div class="calc-input-group">
+                <label class="calc-field-label">Komoditas</label>
+                <select class="calc-input" onchange="updateProduksiRow(${row.id},'komoditas',this.value)">${komodOpts}</select>
+              </div>
+              <div class="calc-input-group">
+                <label class="calc-field-label">Luas Lahan</label>
+                <div class="calc-field-control">
+                  <input class="calc-input num" type="number" step="0.01" value="${row.luas}" oninput="updateProduksiRow(${row.id},'luas',this.value)" />
+                  <span class="calc-input-unit">Ha</span>
+                </div>
+              </div>
+              <div class="calc-input-group">
+                <label class="calc-field-label">Jml Karung</label>
+                <div class="calc-field-control">
+                  <input class="calc-input num" type="number" value="${row.karung}" oninput="updateProduksiRow(${row.id},'karung',this.value)" />
+                  <span class="calc-input-unit">krg</span>
+                </div>
+              </div>
+              <div class="calc-input-group">
+                <label class="calc-field-label">Berat Rata2</label>
+                <div class="calc-field-control">
+                  <input class="calc-input num" type="number" step="0.1" value="${row.beratKarung}" oninput="updateProduksiRow(${row.id},'beratKarung',this.value)" />
+                  <span class="calc-input-unit">kg</span>
+                </div>
+              </div>
+              <div class="calc-input-group">
+                <label class="calc-field-label">Kadar Air</label>
+                <div class="calc-field-control">
+                  <input class="calc-input num" type="number" step="0.1" value="${row.kadarAir}" oninput="updateProduksiRow(${row.id},'kadarAir',this.value)" />
+                  <span class="calc-input-unit">%</span>
+                </div>
               </div>
             </div>
-            <div class="calc-field">
-              <div class="calc-field-label">Kadar Air</div>
-              <div class="calc-field-control">
-                <input class="calc-input num" type="number" min="0" max="99" step="0.1" value="${row.kadarAir}" placeholder="14"
-                  oninput="updateProduksiRow(${row.id},'kadarAir',this.value)" />
-                <span class="calc-input-unit">%</span>
+
+            <div class="calc-summary-grid">
+              <div class="calc-summary-item">
+                <span class="calc-summary-label">GKP</span>
+                <span class="calc-summary-val res-gkp">${res.gkp > 0 ? fmt(res.gkp) : '—'}</span>
               </div>
-            </div>
-            <div class="calc-field">
-              <div class="calc-field-label">Jumlah Karung</div>
-              <div class="calc-field-control">
-                <input class="calc-input num" type="number" min="0" step="1" value="${row.karung}" placeholder="0"
-                  oninput="updateProduksiRow(${row.id},'karung',this.value)" />
-                <span class="calc-input-unit">krg</span>
+              <div class="calc-summary-item">
+                <span class="calc-summary-label">GKG (14%)</span>
+                <span class="calc-summary-val res-gkg">${res.gkg > 0 ? fmt(res.gkg) : '—'}</span>
               </div>
-            </div>
-            <div class="calc-field">
-              <div class="calc-field-label">Berat Rata-rata</div>
-              <div class="calc-field-control">
-                <input class="calc-input num" type="number" min="0" step="0.1" value="${row.beratKarung}" placeholder="0,0"
-                  oninput="updateProduksiRow(${row.id},'beratKarung',this.value)" />
-                <span class="calc-input-unit">kg</span>
+              <div class="calc-summary-item">
+                <span class="calc-summary-label">Prod (t/Ha)</span>
+                <span class="calc-summary-val res-produk">${res.produk > 0 ? fmt(res.produk, 3) : '—'}</span>
               </div>
             </div>
           </div>
-          <div class="calc-results">
-            <div class="calc-result-item">
-              <div class="calc-result-label">GKP</div>
-              <div class="calc-result-val res-gkp${gkp>0?' has-val':''}">${gkp>0?fmt(gkp):'—'}</div>
-              <div class="calc-result-unit">Gabah Kering Panen</div>
+
+          <!-- SECTION 2: ANALISIS USAHA -->
+          <div class="calc-section">
+            <div class="calc-section-header"><i class="ti ti-calculator"></i> Analisis Usaha Tani</div>
+            <div class="calc-grid">
+              <div class="calc-input-group">
+                <label class="calc-field-label">Benih (Rp)</label>
+                <input class="calc-input num" type="number" value="${row.biayaBenih}" oninput="updateProduksiRow(${row.id},'biayaBenih',this.value)" />
+              </div>
+              <div class="calc-input-group">
+                <label class="calc-field-label">Pupuk (Rp)</label>
+                <input class="calc-input num" type="number" value="${row.biayaPupuk}" oninput="updateProduksiRow(${row.id},'biayaPupuk',this.value)" />
+              </div>
+              <div class="calc-input-group">
+                <label class="calc-field-label">Pestisida (Rp)</label>
+                <input class="calc-input num" type="number" value="${row.biayaPestisida}" oninput="updateProduksiRow(${row.id},'biayaPestisida',this.value)" />
+              </div>
+              <div class="calc-input-group">
+                <label class="calc-field-label">Tenaga Kerja (Rp)</label>
+                <input class="calc-input num" type="number" value="${row.biayaTenaga}" oninput="updateProduksiRow(${row.id},'biayaTenaga',this.value)" />
+              </div>
+              <div class="calc-input-group">
+                <label class="calc-field-label">Lain-lain (Rp)</label>
+                <input class="calc-input num" type="number" value="${row.biayaLain}" oninput="updateProduksiRow(${row.id},'biayaLain',this.value)" />
+              </div>
+              <div class="calc-input-group">
+                <label class="calc-field-label">Harga Jual (Rp/kg)</label>
+                <input class="calc-input num" type="number" value="${row.hargaJual}" oninput="updateProduksiRow(${row.id},'hargaJual',this.value)" />
+              </div>
             </div>
-            <div class="calc-result-item">
-              <div class="calc-result-label">GKG</div>
-              <div class="calc-result-val res-gkg${gkg>0?' has-val':''}">${gkg>0?fmt(gkg):'—'}</div>
-              <div class="calc-result-unit">KA standar 14%</div>
-            </div>
-            <div class="calc-result-item">
-              <div class="calc-result-label">Beras</div>
-              <div class="calc-result-val res-beras${beras>0?' has-val':''}">${beras>0?fmt(beras):'—'}</div>
-              <div class="calc-result-unit">rendemen 63%</div>
-            </div>
-            <div class="calc-result-item">
-              <div class="calc-result-label">Produktivitas</div>
-              <div class="calc-result-val res-produk${produk>0?' has-val':''}">${produk>0?fmt(produk,3):'—'}</div>
-              <div class="calc-result-unit">ton / Ha</div>
+
+            <div class="calc-summary-grid">
+              <div class="calc-summary-item">
+                <span class="calc-summary-label">Total Biaya</span>
+                <span class="calc-summary-val res-biaya">${fmtRp(res.totalBiaya)}</span>
+              </div>
+              <div class="calc-summary-item">
+                <span class="calc-summary-label">Pendapatan</span>
+                <span class="calc-summary-val res-pendapatan">${fmtRp(res.pendapatan)}</span>
+              </div>
+              <div class="calc-summary-item">
+                <span class="calc-summary-label">Keuntungan</span>
+                <span class="calc-summary-val res-profit ${res.profit >= 0 ? 'positive' : 'negative'}">${fmtRp(res.profit)}</span>
+              </div>
+              <div class="calc-summary-item">
+                <span class="calc-summary-label">R/C Ratio</span>
+                <span class="calc-summary-val res-rc">${fmt(res.rc, 2)}</span>
+              </div>
             </div>
           </div>
         </div>
@@ -837,19 +934,23 @@
     const wrap=document.getElementById('produksi-total-wrap');
     if (!wrap) return;
     if (!produksiRows.length) { wrap.innerHTML=''; return; }
-    let totalLuas=0,totalGKP=0,totalGKG=0,totalBeras=0;
+    let totalLuas=0,totalGKP=0,totalBiaya=0,totalPendapatan=0;
     produksiRows.forEach(row=>{
       const c=calcProduksi(row);
       totalLuas+=parseFloat(row.luas)||0;
-      totalGKP+=c.gkp; totalGKG+=c.gkg; totalBeras+=c.beras;
+      totalGKP+=c.gkp;
+      totalBiaya+=c.totalBiaya;
+      totalPendapatan+=c.pendapatan;
     });
-    const totalProduk=totalLuas>0?(totalGKP/totalLuas/1000):0;
-    wrap.innerHTML=`<div class="produksi-total-bar">
+    const totalProfit = totalPendapatan - totalBiaya;
+    const avgRC = totalBiaya > 0 ? totalPendapatan / totalBiaya : 0;
+
+    wrap.innerHTML=`<div class="produksi-total-bar" style="grid-template-columns: repeat(auto-fit, minmax(100px, 1fr))">
       <div class="ptb-item"><div class="ptb-label">Total Luas</div><div class="ptb-val">${fmt(totalLuas,2)}</div><div class="ptb-unit">Hektar</div></div>
       <div class="ptb-item"><div class="ptb-label">Total GKP</div><div class="ptb-val">${fmt(totalGKP)}</div><div class="ptb-unit">kg</div></div>
-      <div class="ptb-item"><div class="ptb-label">Total GKG</div><div class="ptb-val">${fmt(totalGKG)}</div><div class="ptb-unit">kg</div></div>
-      <div class="ptb-item"><div class="ptb-label">Total Beras</div><div class="ptb-val">${fmt(totalBeras)}</div><div class="ptb-unit">kg</div></div>
-      <div class="ptb-item"><div class="ptb-label">Produktivitas Rata-rata</div><div class="ptb-val">${fmt(totalProduk,3)}</div><div class="ptb-unit">ton/Ha</div></div>
+      <div class="ptb-item"><div class="ptb-label">Total Biaya</div><div class="ptb-val">${fmtRp(totalBiaya)}</div></div>
+      <div class="ptb-item"><div class="ptb-label">Total Keuntungan</div><div class="ptb-val">${fmtRp(totalProfit)}</div></div>
+      <div class="ptb-item"><div class="ptb-label">Rerata R/C</div><div class="ptb-val">${fmt(avgRC, 2)}</div></div>
     </div>`;
   }
 
