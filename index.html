@@ -1063,7 +1063,7 @@
       grid-template-columns: 2.8fr 0.7fr 0.5fr 1.3fr 1.5fr 32px;
       gap: 8px;
       align-items: center;
-      padding: 8px;
+      padding: 6px 8px;
       background: var(--ground);
       border-radius: var(--r-md);
       border: 1px solid var(--rule);
@@ -1093,28 +1093,25 @@
     @media (max-width: 768px) {
       .aut-biaya-header { display: none; }
       .aut-biaya-item {
-        grid-template-columns: 1fr 1fr;
+        grid-template-columns: 1fr 0.6fr 1.2fr auto;
         grid-template-areas: 
-          "uraian uraian"
-          "jumlah satuan"
-          "harga harga"
-          "total delete";
-        padding: 12px;
+          "uraian uraian uraian delete"
+          "jumlah satuan harga total";
+        padding: 5px 6px;
+        gap: 4px;
       }
       .aut-biaya-item .field-uraian { grid-area: uraian; }
       .aut-biaya-item .field-jumlah { grid-area: jumlah; }
       .aut-biaya-item .field-satuan { grid-area: satuan; }
       .aut-biaya-item .field-harga  { grid-area: harga; }
-      .aut-biaya-item .field-total  { grid-area: total; display: flex; align-items: center; justify-content: flex-start; }
+      .aut-biaya-item .field-total  { grid-area: total; display: flex; align-items: center; justify-content: flex-end; }
       .aut-biaya-item .field-delete { grid-area: delete; display: flex; justify-content: flex-end; }
 
+      .aut-biaya-item .calc-input { min-height: 28px; padding: 2px 6px; font-size: 11.5px; }
+      .aut-biaya-total-cell { font-size: 10.5px; }
+
       .aut-biaya-item .calc-input-label-mobile {
-        display: block;
-        font-size: 9px;
-        font-weight: 700;
-        text-transform: uppercase;
-        color: var(--ink-3);
-        margin-bottom: 4px;
+        display: none; /* Removed for maximum simplicity as requested */
       }
     }
 
@@ -1242,11 +1239,24 @@
     .aut-picker-sub { font-size: 11px; color: var(--ink-3); margin-left: auto; }
 
     @media (max-width: 480px) {
-      .sub-tabs { width: 100%; }
-      .sub-tab { flex: 1; justify-content: center; }
-      .aut-inputs { grid-template-columns: 1fr 1fr; padding: 6px 9px 9px; gap: 7px; }
-      .aut-results { grid-template-columns: 1fr 1fr; }
-      .aut-total-bar { grid-template-columns: 1fr 1fr; }
+      .sub-tabs { width: 100%; margin-bottom: 0.5rem; }
+      .sub-tab { flex: 1; justify-content: center; padding: 5px 8px; font-size: 11px; }
+      .aut-section-title { padding: 4px 10px 1px; font-size: 8px; }
+      .aut-inputs { grid-template-columns: 1fr 1fr; padding: 2px 10px 6px; gap: 4px; }
+      .aut-results { grid-template-columns: 1fr 1fr; padding: 4px 10px 6px; gap: 4px; }
+      .aut-total-bar { grid-template-columns: 1fr 1fr; padding: 8px 10px; gap: 4px; }
+      .aut-linked-summary { padding: 4px 10px 8px; gap: 4px; }
+      .aut-linked-badge { margin: 0 10px 6px; }
+      .btn-tambah-biaya { margin: 0 10px 8px; padding: 4px 8px; font-size: 10px; }
+      .calc-input { min-height: 30px; padding: 4px 6px; font-size: 12px; }
+      .aut-linked-stat { padding: 4px 6px; }
+      .aut-result-item { padding: 5px; }
+      .calc-result-val { font-size: 13px; }
+      .calc-field-label { font-size: 9px; margin-bottom: 2px; }
+      .calc-card-header { padding: 6px 10px; }
+      .calc-card-num { width: 20px; height: 20px; font-size: 10px; }
+      .calc-card-name { font-size: 13px; }
+      .aut-card { margin-bottom: 8px; }
     }
     @media (max-width: 340px) {
       .aut-inputs, .aut-results, .aut-total-bar { grid-template-columns: 1fr; }
@@ -2629,22 +2639,22 @@
         return `<div class="aut-biaya-item" id="biaya-row-${row.id}-${b.id}">
           <div class="field-uraian">
             <span class="calc-input-label-mobile">Uraian Biaya</span>
-            <input class="calc-input" style="width:100%" value="${b.nama}" placeholder="Uraian biaya…"
+            <input class="calc-input" style="width:100%" value="${b.nama}" placeholder="Uraian…"
               oninput="updateBiayaAUT(${row.id},${b.id},'nama',this.value)" />
           </div>
           <div class="field-jumlah">
             <span class="calc-input-label-mobile">Jumlah</span>
-            <input class="calc-input num" type="number" min="0" style="width:100%" value="${b.jumlah}" placeholder="0"
+            <input class="calc-input num" type="number" min="0" style="width:100%" value="${b.jumlah}" placeholder="Jml"
               oninput="updateBiayaAUT(${row.id},${b.id},'jumlah',this.value)" />
           </div>
           <div class="field-satuan">
             <span class="calc-input-label-mobile">Satuan</span>
-            <input class="calc-input" style="width:100%" value="${b.satuan}" placeholder="Satuan…"
+            <input class="calc-input" style="width:100%" value="${b.satuan}" placeholder="Sat"
               oninput="updateBiayaAUT(${row.id},${b.id},'satuan',this.value)" />
           </div>
           <div class="field-harga">
             <span class="calc-input-label-mobile">Harga / Satuan</span>
-            <input class="calc-input num" type="number" min="0" style="width:100%" value="${b.harga}" placeholder="0"
+            <input class="calc-input num" type="number" min="0" style="width:100%" value="${b.harga}" placeholder="Rp/Sat"
               oninput="updateBiayaAUT(${row.id},${b.id},'harga',this.value)" />
           </div>
           <div class="field-total">
