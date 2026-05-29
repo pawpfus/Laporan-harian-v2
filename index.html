@@ -1056,30 +1056,80 @@
       gap: 8px;
     }
 
-    .aut-biaya-wrap { overflow-x: auto; padding: 0 12px 12px; }
-    .aut-biaya-table { width: 100%; min-width: 480px; border-collapse: collapse; }
-    .aut-biaya-table thead th {
-      font-size: 9.5px; font-weight: 700; letter-spacing: .06em;
-      text-transform: uppercase; color: var(--ink-3);
-      padding: 0 6px 6px; text-align: left; white-space: nowrap;
+    .aut-biaya-wrap { padding: 0 12px 12px; }
+    .aut-biaya-list { display: flex; flex-direction: column; gap: 8px; }
+    .aut-biaya-item {
+      display: grid;
+      grid-template-columns: 2.8fr 0.7fr 0.5fr 1.3fr 1.5fr 32px;
+      gap: 8px;
+      align-items: center;
+      padding: 8px;
+      background: var(--ground);
+      border-radius: var(--r-md);
+      border: 1px solid var(--rule);
     }
-    .aut-biaya-table thead th.th-r { text-align: right; }
-    .aut-biaya-table tbody tr { vertical-align: middle; }
-    .aut-biaya-table tbody td { padding: 3px 4px; }
-    .aut-biaya-table tbody td:last-child { padding-right: 0; width: 28px; }
-    .aut-biaya-table col.col-uraian  { width: auto; min-width: 160px; }
-    .aut-biaya-table col.col-jumlah  { width: 90px; }
-    .aut-biaya-table col.col-satuan  { width: 80px; }
-    .aut-biaya-table col.col-harga   { width: 130px; }
-    .aut-biaya-table col.col-total   { width: 110px; }
-    .aut-biaya-table col.col-del     { width: 32px; }
+    .aut-biaya-header {
+      display: grid;
+      grid-template-columns: 2.8fr 0.7fr 0.5fr 1.3fr 1.5fr 32px;
+      gap: 8px;
+      padding: 0 8px 6px;
+    }
+    .aut-biaya-header span {
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      color: var(--ink-3);
+    }
+    .aut-biaya-total-cell {
+      text-align: right;
+      font-family: var(--font-mono);
+      font-size: 12px;
+      color: var(--moss);
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
+    @media (max-width: 768px) {
+      .aut-biaya-header { display: none; }
+      .aut-biaya-item {
+        grid-template-columns: 1fr 1fr;
+        grid-template-areas: 
+          "uraian uraian"
+          "jumlah satuan"
+          "harga harga"
+          "total delete";
+        padding: 12px;
+      }
+      .aut-biaya-item .field-uraian { grid-area: uraian; }
+      .aut-biaya-item .field-jumlah { grid-area: jumlah; }
+      .aut-biaya-item .field-satuan { grid-area: satuan; }
+      .aut-biaya-item .field-harga  { grid-area: harga; }
+      .aut-biaya-item .field-total  { grid-area: total; display: flex; align-items: center; justify-content: flex-start; }
+      .aut-biaya-item .field-delete { grid-area: delete; display: flex; justify-content: flex-end; }
+
+      .aut-biaya-item .calc-input-label-mobile {
+        display: block;
+        font-size: 9px;
+        font-weight: 700;
+        text-transform: uppercase;
+        color: var(--ink-3);
+        margin-bottom: 4px;
+      }
+    }
+
+    .calc-input-label-mobile { display: none; }
+    .aut-biaya-footer {
+      display: flex;
+      justify-content: flex-end;
+      padding: 8px 8px 0;
+    }
     .aut-biaya-subtotal {
-      font-size: 10px; font-weight: 700;
-      text-align: right; color: var(--ink-3);
-      padding: 6px 4px 0;
+      font-size: 11px; font-weight: 700;
+      color: var(--ink-3);
       font-family: var(--font-mono);
     }
-    .aut-biaya-subtotal span { color: var(--moss); }
+    .aut-biaya-subtotal span { color: var(--moss); font-size: 13px; }
     .btn-hapus-biaya {
       width: 28px; height: 28px; flex-shrink: 0;
       background: none; border: none; cursor: pointer;
@@ -2367,12 +2417,12 @@
       hargaJual: 6500,
       biaya: [
         {id:1, nama:'Benih', jumlah:25, satuan:'kg', harga:15000},
-        {id:2, nama:'Pupuk Urea', jumlah:275, satuan:'kg', harga:3000},
-        {id:3, nama:'Pupuk NPK', jumlah:250, satuan:'kg', harga:3000},
+        {id:2, nama:'Pupuk Urea', jumlah:275, satuan:'kg', harga:1800},
+        {id:3, nama:'Pupuk NPK', jumlah:250, satuan:'kg', harga:1840},
         {id:4, nama:'Pestisida', jumlah:1, satuan:'L', harga:150000},
-        {id:5, nama:'Tenaga Kerja Tanam', jumlah:10, satuan:'HOK', harga:100000},
+        {id:5, nama:'Tenaga Kerja Tanam', jumlah:20, satuan:'HOK', harga:100000},
         {id:6, nama:'Tenaga Kerja Panen', jumlah:10, satuan:'HOK', harga:100000},
-        {id:7, nama:'Transport', jumlah:1, satuan:'Unit', harga:15000},
+        {id:7, nama:'Transport', jumlah:1, satuan:'Unit', harga:11000},
       ],
       biayaIdCounter: 7
     });
@@ -2460,7 +2510,7 @@
     const row = autRows.find(r => r.id === autId);
     if (!row) return;
     row.biaya = row.biaya.filter(b => b.id !== biayaId);
-    refreshAUTCard(autId);
+    renderAUTCards();
     renderAUTTotal();
   }
 
@@ -2508,6 +2558,12 @@
       el.textContent = isRp ? fmtRp(v) : fmt(v, 1);
       el.classList.toggle('has-val', !!v && v !== 0);
     };
+    // Update individual item subtotals
+    row.biaya.forEach(b => {
+      const subtotal = (parseFloat(b.jumlah)||0) * (parseFloat(b.harga)||0);
+      const cell = document.querySelector(`#biaya-row-${row.id}-${b.id} .aut-biaya-total-cell`);
+      if (cell) cell.textContent = subtotal > 0 ? ('Rp ' + Math.round(subtotal).toLocaleString('id-ID')) : '—';
+    });
     // Update name/sub (use linked prod data if linked)
     const linkedPR = row.linkedProdId ? produksiRows.find(r => r.id === row.linkedProdId) : null;
     const effN = linkedPR ? linkedPR.nama : row.nama;
@@ -2568,21 +2624,39 @@
       const isLoss = pendapatanBersih < 0;
       const komodOpts = ['Padi','Jagung','Kedelai'].map(k=>`<option${k===row.komoditas?' selected':''}>${k}</option>`).join('');
       const subText = [row.desa, row.komoditas, row.luas?(row.luas+' Ha'):''].filter(Boolean).join(' · ')||'Desa · Komoditas';
-      const biayaRows = row.biaya.map(b => {
+      const biayaItems = row.biaya.map(b => {
         const subtotal = (parseFloat(b.jumlah)||0) * (parseFloat(b.harga)||0);
-        return `<tr id="biaya-row-${row.id}-${b.id}">
-          <td><input class="calc-input" style="width:100%" value="${b.nama}" placeholder="Contoh: Benih, Pupuk Urea…"
-            oninput="updateBiayaAUT(${row.id},${b.id},'nama',this.value)" /></td>
-          <td><input class="calc-input num" type="number" min="0" style="width:100%" value="${b.jumlah}" placeholder="0"
-            oninput="updateBiayaAUT(${row.id},${b.id},'jumlah',this.value)" /></td>
-          <td><input class="calc-input" style="width:100%" value="${b.satuan}" placeholder="kg / HOK…"
-            oninput="updateBiayaAUT(${row.id},${b.id},'satuan',this.value)" /></td>
-          <td><input class="calc-input num" type="number" min="0" style="width:100%" value="${b.harga}" placeholder="0"
-            oninput="updateBiayaAUT(${row.id},${b.id},'harga',this.value)" /></td>
-          <td style="text-align:right;font-family:var(--font-mono);font-size:12px;color:var(--ink-3);white-space:nowrap;padding-right:6px">
-            ${subtotal>0?('Rp '+Math.round(subtotal).toLocaleString('id-ID')):'—'}</td>
-          <td><button class="btn-hapus-biaya" onclick="hapusBiayaAUT(${row.id},${b.id})" title="Hapus"><i class="ti ti-x"></i></button></td>
-        </tr>`;
+        return `<div class="aut-biaya-item" id="biaya-row-${row.id}-${b.id}">
+          <div class="field-uraian">
+            <span class="calc-input-label-mobile">Uraian Biaya</span>
+            <input class="calc-input" style="width:100%" value="${b.nama}" placeholder="Uraian biaya…"
+              oninput="updateBiayaAUT(${row.id},${b.id},'nama',this.value)" />
+          </div>
+          <div class="field-jumlah">
+            <span class="calc-input-label-mobile">Jumlah</span>
+            <input class="calc-input num" type="number" min="0" style="width:100%" value="${b.jumlah}" placeholder="0"
+              oninput="updateBiayaAUT(${row.id},${b.id},'jumlah',this.value)" />
+          </div>
+          <div class="field-satuan">
+            <span class="calc-input-label-mobile">Satuan</span>
+            <input class="calc-input" style="width:100%" value="${b.satuan}" placeholder="Satuan…"
+              oninput="updateBiayaAUT(${row.id},${b.id},'satuan',this.value)" />
+          </div>
+          <div class="field-harga">
+            <span class="calc-input-label-mobile">Harga / Satuan</span>
+            <input class="calc-input num" type="number" min="0" style="width:100%" value="${b.harga}" placeholder="0"
+              oninput="updateBiayaAUT(${row.id},${b.id},'harga',this.value)" />
+          </div>
+          <div class="field-total">
+            <span class="calc-input-label-mobile">Subtotal</span>
+            <div class="aut-biaya-total-cell">
+              ${subtotal>0?('Rp '+Math.round(subtotal).toLocaleString('id-ID')):'—'}
+            </div>
+          </div>
+          <div class="field-delete">
+            <button class="btn-hapus-biaya" onclick="hapusBiayaAUT(${row.id},${b.id})" title="Hapus"><i class="ti ti-x"></i></button>
+          </div>
+        </div>`;
       }).join('');
 
       // Linked: get prodRow for display
@@ -2661,21 +2735,17 @@
 
         <div class="aut-section-title"><i class="ti ti-coins"></i> Rincian Biaya Produksi</div>
         <div class="aut-biaya-wrap">
-          <table class="aut-biaya-table">
-            <colgroup>
-              <col class="col-uraian"><col class="col-jumlah"><col class="col-satuan">
-              <col class="col-harga"><col class="col-total"><col class="col-del">
-            </colgroup>
-            <thead><tr>
-              <th>Uraian Biaya</th>
-              <th class="th-r">Jumlah</th>
-              <th>Satuan</th>
-              <th class="th-r">Harga / Satuan (Rp)</th>
-              <th class="th-r">Subtotal (Rp)</th>
-              <th></th>
-            </tr></thead>
-            <tbody>${biayaRows}</tbody>
-          </table>
+          <div class="aut-biaya-header">
+            <span>Uraian Biaya</span>
+            <span>Jumlah</span>
+            <span>Satuan</span>
+            <span>Harga / Satuan</span>
+            <span style="text-align:right">Subtotal</span>
+            <span></span>
+          </div>
+          <div class="aut-biaya-list">
+            ${biayaItems}
+          </div>
         </div>
         <button class="btn-tambah-biaya" onclick="tambahBiayaAUT(${row.id})">
           <i class="ti ti-plus"></i> Tambah Item Biaya
