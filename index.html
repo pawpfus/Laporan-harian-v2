@@ -3,7 +3,9 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Aplikasi laporan pertanian — luas tambah tanam harian, rekap komoditas, dan analisis usaha tani." />
   <title>Laporan Pertanian</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23014421'/%3E%3Cpath d='M16 6c-1 4-5 7-8 8 1-4 4-7 8-8zm0 0c1 4 5 7 8 8-1-4-4-7-8-8z' fill='%23fff' stroke='%23fff' stroke-width='.5'/%3E%3Cline x1='16' y1='6' x2='16' y2='26' stroke='%23fff' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css" />
@@ -1382,15 +1384,15 @@
         </div>
         <div class="field">
           <label for="f-user">Identitas</label>
-          <input type="text" id="f-user" placeholder="Nama petani" />
+          <input type="text" id="f-user" placeholder="Nama petani" autocomplete="off" />
         </div>
         <div class="field">
           <label for="f-desa">Desa</label>
-          <input type="text" id="f-desa" placeholder="Nama desa" />
+          <input type="text" id="f-desa" placeholder="Nama desa" autocomplete="off" />
         </div>
         <div class="field">
           <label for="f-kelompok">Kelompok Tani</label>
-          <input type="text" id="f-kelompok" placeholder="Nama kelompok" />
+          <input type="text" id="f-kelompok" placeholder="Nama kelompok" autocomplete="off" />
         </div>
       </div>
       <div class="divider"></div>
@@ -1674,12 +1676,13 @@
 
   let sbClient = null;
   let cachedData = [];
-  let filteredData = [];
+  // filteredData removed — filtering is done server-side via Supabase ilike
   let activeFilter = 'semua';
   let currentPage = 1;
   const rowsPerPage = 10;
   let tableDateFrom = null, tableDateTo = null;
   let rekapDateFrom = null, rekapDateTo = null;
+  let searchDebounceTimer = null;
 
   function getDateRange(preset) {
     const now = new Date();
@@ -1897,10 +1900,12 @@
     initCharts();
     const url = SUPABASE_URL||localStorage.getItem(LS_URL_KEY)||'';
     const key = SUPABASE_KEY||localStorage.getItem(LS_KEY_KEY)||'';
-    if (!url||!key) { showOfflinePopup(); return; }
+    if (!url||!key) { setDbStatus(false); showOfflinePopup(); return; }
+    if (!window.supabase || !window.supabase.createClient) {
+      setDbStatus(false); showOfflinePopup(); return;
+    }
     try {
-      const { createClient } = window.supabase;
-      sbClient = createClient(url, key);
+      sbClient = window.supabase.createClient(url, key);
       const { error } = await sbClient.from('laporan').select('id',{count:'exact',head:true});
       if (error) throw error;
       setDbStatus(true); hideOfflinePopup();
@@ -1917,8 +1922,8 @@
     const url = SUPABASE_URL||localStorage.getItem(LS_URL_KEY)||'';
     const key = SUPABASE_KEY||localStorage.getItem(LS_KEY_KEY)||'';
     try {
-      const { createClient } = window.supabase;
-      sbClient = createClient(url, key);
+      if (!window.supabase || !window.supabase.createClient) throw new Error('Supabase library not loaded');
+      sbClient = window.supabase.createClient(url, key);
       const { error } = await sbClient.from('laporan').select('id',{count:'exact',head:true});
       if (error) throw error;
       setDbStatus(true); hideOfflinePopup();
@@ -1961,14 +1966,13 @@
     if (dateTo)   q=q.lte('tanggal',dateTo);
     if (komoditas!=='semua') q=q.eq('komoditas',komoditas);
     if (kegiatan !=='semua') q=q.eq('kegiatan',kegiatan);
+    // Server-side full-text search across desa, kelompok_tani, user_name
+    if (search) {
+      q = q.or(`desa.ilike.%${search}%,kelompok_tani.ilike.%${search}%,user_name.ilike.%${search}%`);
+    }
     const { data, error, count } = await q;
     if (error) { showAlert('Gagal memuat data: '+error.message,'error'); return []; }
-    let rows = data||[];
-    if (search) {
-      const s=search.toLowerCase();
-      rows=rows.filter(d=>(d.desa||'').toLowerCase().includes(s)||(d.kelompok_tani||'').toLowerCase().includes(s)||(d.user_name||'').toLowerCase().includes(s));
-    }
-    cachedData=rows; totalCount=count||0; return rows;
+    cachedData=data||[]; totalCount=count||0; return cachedData;
   }
 
   async function fetchAllForExport({ dateFrom=null, dateTo=null, komoditas='semua', kegiatan='semua' }={}) {
@@ -2013,6 +2017,7 @@
     document.getElementById('f-desa').value='';
     document.getElementById('f-kelompok').value='';
     document.getElementById('f-luas').value='';
+    clearDraft();
     showAlert('Laporan berhasil disimpan ke database','success');
     await renderTable(true);
   }
@@ -2026,9 +2031,19 @@
   }
 
   // ── TABLE ──
+  function escHtml(s) {
+    if (s == null) return '';
+    return String(s)
+      .replace(/&/g,'&amp;')
+      .replace(/</g,'&lt;')
+      .replace(/>/g,'&gt;')
+      .replace(/"/g,'&quot;')
+      .replace(/'/g,'&#39;');
+  }
+
   function getBadge(k) {
     const map={Padi:'padi',Jagung:'jagung',Kedelai:'kedelai'};
-    return `<span class="badge badge-${map[k]||'padi'}">${k}</span>`;
+    return `<span class="badge badge-${map[k]||'padi'}">${escHtml(k)}</span>`;
   }
 
   async function renderTable(fetchFromServer=true) {
@@ -2054,17 +2069,17 @@
 
     const rows=cachedData.map(d=>`
       <tr>
-        <td class="mono">${d.tanggal}</td>
-        <td>${d.desa}</td>
-        <td>${d.kelompok_tani}</td>
-        <td>${d.jenis_ltt}</td>
-        <td>${d.kegiatan}</td>
+        <td class="mono">${escHtml(d.tanggal)}</td>
+        <td>${escHtml(d.desa)}</td>
+        <td>${escHtml(d.kelompok_tani)}</td>
+        <td>${escHtml(d.jenis_ltt)}</td>
+        <td>${escHtml(d.kegiatan)}</td>
         <td>${getBadge(d.komoditas)}</td>
         <td class="mono" style="text-align:right">${parseFloat(d.luas).toFixed(1)}</td>
-        <td>${d.user_name}</td>
+        <td>${escHtml(d.user_name)}</td>
         <td style="text-align:right;white-space:nowrap">
-          <button class="btn-row-action edit" onclick="bukaEditModal('${d.id}')" title="Edit"><i class="ti ti-edit"></i></button>
-          <button class="btn-row-action trash" onclick="hapusData('${d.id}')" title="Hapus"><i class="ti ti-trash"></i></button>
+          <button class="btn-row-action edit" onclick="bukaEditModal('${escHtml(d.id)}')" title="Edit"><i class="ti ti-edit"></i></button>
+          <button class="btn-row-action trash" onclick="hapusData('${escHtml(d.id)}')" title="Hapus"><i class="ti ti-trash"></i></button>
         </td>
       </tr>`).join('');
 
@@ -2102,7 +2117,11 @@
       </div>${paginationHtml}`;
   }
 
-  function handleTableSearchFilter() { currentPage=1; renderTable(true); }
+  function handleTableSearchFilter() {
+    currentPage = 1;
+    clearTimeout(searchDebounceTimer);
+    searchDebounceTimer = setTimeout(() => renderTable(true), 280);
+  }
   function changePage(offset) { currentPage+=offset; renderTable(true); }
   function goToPage(p) { currentPage=p; renderTable(true); }
 
@@ -2237,7 +2256,12 @@
   function updateProduksiRow(id,field,value) {
     const row=produksiRows.find(r=>r.id===id);
     if (!row) return;
-    row[field]=value;
+    // Normalize numeric fields to float when possible
+    if (['luas','karung','beratKarung','kadarAir'].includes(field)) {
+      row[field] = value; // keep raw string; parseFloat happens in calc
+    } else {
+      row[field] = value;
+    }
     const nm=document.querySelector(`#calc-card-${id} .calc-card-name`);
     const sub=document.querySelector(`#calc-card-${id} .calc-card-sub`);
     if(nm){nm.textContent=row.nama||'Nama petani…';nm.classList.toggle('calc-card-name-placeholder',!row.nama);}
@@ -2246,7 +2270,7 @@
     const setRes=(sel,val,dec)=>{
       const el=document.querySelector(`#calc-card-${id} ${sel}`);
       if(!el) return;
-      el.textContent=val>0?fmt(val,dec):'—';
+      el.textContent=(val!=null&&val>0)?fmt(val,dec):'—';
       el.classList.toggle('has-val',val>0);
     };
     setRes('.res-gkp',gkp,1); setRes('.res-gkg',gkg,1);
@@ -2266,9 +2290,9 @@
     return {gkp,gkg,beras,produk};
   }
 
-  function fmt(n,dec=1) {
-    if(!n||isNaN(n)) return '—';
-    return n.toLocaleString('id-ID',{minimumFractionDigits:dec,maximumFractionDigits:dec});
+  function fmt(n, dec=1) {
+    if (n == null || isNaN(n)) return '—';
+    return Number(n).toLocaleString('id-ID',{minimumFractionDigits:dec,maximumFractionDigits:dec});
   }
 
   function renderProduksiCards() {
@@ -2280,13 +2304,15 @@
     }
     container.innerHTML=produksiRows.map((row,idx)=>{
       const {gkp,gkg,beras,produk}=calcProduksi(row);
-      const komodOpts=KOMODITAS_LIST.map(k=>`<option${k===row.komoditas?' selected':''}>${k}</option>`).join('');
-      const subText=[row.desa,row.komoditas].filter(Boolean).join(' · ')||'Desa · Komoditas';
+      const komodOpts=KOMODITAS_LIST.map(k=>`<option${k===row.komoditas?' selected':''}>${escHtml(k)}</option>`).join('');
+      const subText=[escHtml(row.desa),escHtml(row.komoditas)].filter(Boolean).join(' · ')||'Desa · Komoditas';
+      const namaTxt = escHtml(row.nama)||'Nama petani…';
+      const namaClass = !row.nama ? ' calc-card-name-placeholder' : '';
       return `<div class="calc-card" id="calc-card-${row.id}">
         <div class="calc-card-header">
           <div class="calc-card-num">${idx+1}</div>
           <div class="calc-card-identity">
-            <div class="calc-card-name${!row.nama?' calc-card-name-placeholder':''}">${row.nama||'Nama petani…'}</div>
+            <div class="calc-card-name${namaClass}">${namaTxt}</div>
             <div class="calc-card-sub">${subText}</div>
           </div>
           <button class="btn-hapus-baris" onclick="hapusBarisProduksi(${row.id})" title="Hapus"><i class="ti ti-x"></i></button>
@@ -2295,13 +2321,13 @@
           <div class="calc-inputs">
             <div class="calc-field calc-field-full">
               <div class="calc-field-label">Nama Petani / Poktan</div>
-              <input class="calc-input input-nama" value="${row.nama}" placeholder="Nama petani atau kelompok tani…"
-                oninput="updateProduksiRow(${row.id},'nama',this.value)" />
+              <input class="calc-input input-nama" value="${escHtml(row.nama)}" placeholder="Nama petani atau kelompok tani…"
+                oninput="updateProduksiRow(${row.id},'nama',this.value)" autocomplete="off" />
             </div>
             <div class="calc-field">
               <div class="calc-field-label">Desa</div>
-              <input class="calc-input" value="${row.desa}" placeholder="Nama desa…"
-                oninput="updateProduksiRow(${row.id},'desa',this.value)" />
+              <input class="calc-input" value="${escHtml(row.desa)}" placeholder="Nama desa…"
+                oninput="updateProduksiRow(${row.id},'desa',this.value)" autocomplete="off" />
             </div>
             <div class="calc-field">
               <div class="calc-field-label">Komoditas</div>
@@ -2310,7 +2336,7 @@
             <div class="calc-field">
               <div class="calc-field-label">Luas</div>
               <div class="calc-field-control">
-                <input class="calc-input num" type="number" min="0" step="0.01" value="${row.luas}" placeholder="0,00"
+                <input class="calc-input num" type="number" min="0" step="0.01" value="${escHtml(row.luas)}" placeholder="0,00"
                   oninput="updateProduksiRow(${row.id},'luas',this.value)" />
                 <span class="calc-input-unit">Ha</span>
               </div>
@@ -2318,7 +2344,7 @@
             <div class="calc-field">
               <div class="calc-field-label">Kadar Air</div>
               <div class="calc-field-control">
-                <input class="calc-input num" type="number" min="0" max="99" step="0.1" value="${row.kadarAir}" placeholder="14"
+                <input class="calc-input num" type="number" min="0" max="99" step="0.1" value="${escHtml(row.kadarAir)}" placeholder="14"
                   oninput="updateProduksiRow(${row.id},'kadarAir',this.value)" />
                 <span class="calc-input-unit">%</span>
               </div>
@@ -2326,7 +2352,7 @@
             <div class="calc-field">
               <div class="calc-field-label">Jumlah Karung</div>
               <div class="calc-field-control">
-                <input class="calc-input num" type="number" min="0" step="1" value="${row.karung}" placeholder="0"
+                <input class="calc-input num" type="number" min="0" step="1" value="${escHtml(row.karung)}" placeholder="0"
                   oninput="updateProduksiRow(${row.id},'karung',this.value)" />
                 <span class="calc-input-unit">krg</span>
               </div>
@@ -2334,7 +2360,7 @@
             <div class="calc-field">
               <div class="calc-field-label">Berat Rata-rata</div>
               <div class="calc-field-control">
-                <input class="calc-input num" type="number" min="0" step="0.1" value="${row.beratKarung}" placeholder="0,0"
+                <input class="calc-input num" type="number" min="0" step="0.1" value="${escHtml(row.beratKarung)}" placeholder="0,0"
                   oninput="updateProduksiRow(${row.id},'beratKarung',this.value)" />
                 <span class="calc-input-unit">kg</span>
               </div>
@@ -2424,6 +2450,7 @@
       desa: linkedRow ? linkedRow.desa : '',
       komoditas: linkedRow ? linkedRow.komoditas : 'Padi',
       luas: linkedRow ? linkedRow.luas : '',
+      gkpManual: '',   // used when not linked to a produksi row
       hargaJual: 6500,
       biaya: [
         {id:1, nama:'Benih', jumlah:25, satuan:'kg', harga:15000},
@@ -2486,10 +2513,12 @@
   function unlinkAUT(id) {
     const row = autRows.find(r => r.id === id);
     if (!row) return;
-    // Keep current derived values as manual inputs
     const prodRow = produksiRows.find(r => r.id === row.linkedProdId);
     if (prodRow) {
+      // Preserve values from linked row as manual inputs
       if (!row.luas && prodRow.luas) row.luas = prodRow.luas;
+      const computedGKP = parseFloat(prodRow.karung||0) * parseFloat(prodRow.beratKarung||0);
+      if (!row.gkpManual && computedGKP > 0) row.gkpManual = computedGKP;
     }
     row.linkedProdId = null;
     renderAUTCards();
@@ -2520,8 +2549,7 @@
     const row = autRows.find(r => r.id === autId);
     if (!row) return;
     row.biaya = row.biaya.filter(b => b.id !== biayaId);
-    renderAUTCards();
-    renderAUTTotal();
+    renderAUTCards(); // renderAUTCards calls renderAUTTotal internally
   }
 
   function updateBiayaAUT(autId, biayaId, field, value) {
@@ -2538,7 +2566,10 @@
     const prodRow = row.linkedProdId ? produksiRows.find(r => r.id === row.linkedProdId) : null;
     const luas = parseFloat(prodRow ? (prodRow.luas || row.luas) : row.luas) || 0;
     const hargaJual = parseFloat(row.hargaJual) || 0;
-    const gkp = prodRow ? parseFloat(prodRow.karung||0) * parseFloat(prodRow.beratKarung||0) : 0;
+    // If linked: derive GKP from produksi karung×berat; if manual: use row.gkpManual
+    const gkp = prodRow
+      ? parseFloat(prodRow.karung||0) * parseFloat(prodRow.beratKarung||0)
+      : parseFloat(row.gkpManual||0);
     const totalBiaya = row.biaya.reduce((s, b) => {
       return s + (parseFloat(b.jumlah)||0) * (parseFloat(b.harga)||0);
     }, 0);
@@ -2559,15 +2590,10 @@
   function refreshAUTCard(id) {
     const row = autRows.find(r => r.id === id);
     if (!row) return;
-    const {totalBiaya, totalBiayaPerHa, penerimaanKotor, pendapatanBersih, rcRatio, bepProduksi, bepHarga} = calcAUT(row);
+    const calc = calcAUT(row);
+    const {totalBiaya, totalBiayaPerHa, penerimaanKotor, pendapatanBersih, rcRatio, bepProduksi, bepHarga, gkp} = calc;
     const isLoss = pendapatanBersih < 0;
     const sel = s => document.querySelector(`#aut-card-${id} ${s}`);
-    const setVal = (s, v, isRp=false) => {
-      const el = sel(s);
-      if (!el) return;
-      el.textContent = isRp ? fmtRp(v) : fmt(v, 1);
-      el.classList.toggle('has-val', !!v && v !== 0);
-    };
     // Update individual item subtotals
     row.biaya.forEach(b => {
       const subtotal = (parseFloat(b.jumlah)||0) * (parseFloat(b.harga)||0);
@@ -2596,7 +2622,7 @@
         <div class="aut-result-item">
           <div class="calc-result-label">Penerimaan Kotor</div>
           <div class="calc-result-val has-val" style="font-size:13px">${fmtRp(penerimaanKotor)}</div>
-          <div class="calc-result-unit">GKP ${fmt(parseFloat(calcAUT(row).gkp)/1000,2)} ton × harga</div>
+          <div class="calc-result-unit">GKP ${fmt(gkp/1000,2)} ton × harga</div>
         </div>
         <div class="aut-result-item ${isLoss?'loss':'highlight'}">
           <div class="calc-result-label">Pendapatan Bersih</div>
@@ -2639,22 +2665,22 @@
         return `<div class="aut-biaya-item" id="biaya-row-${row.id}-${b.id}">
           <div class="field-uraian">
             <span class="calc-input-label-mobile">Uraian Biaya</span>
-            <input class="calc-input" style="width:100%" value="${b.nama}" placeholder="Uraian…"
+            <input class="calc-input" style="width:100%" value="${escHtml(b.nama)}" placeholder="Uraian…"
               oninput="updateBiayaAUT(${row.id},${b.id},'nama',this.value)" />
           </div>
           <div class="field-jumlah">
             <span class="calc-input-label-mobile">Jumlah</span>
-            <input class="calc-input num" type="number" min="0" style="width:100%" value="${b.jumlah}" placeholder="Jml"
+            <input class="calc-input num" type="number" min="0" style="width:100%" value="${escHtml(String(b.jumlah))}" placeholder="Jml"
               oninput="updateBiayaAUT(${row.id},${b.id},'jumlah',this.value)" />
           </div>
           <div class="field-satuan">
             <span class="calc-input-label-mobile">Satuan</span>
-            <input class="calc-input" style="width:100%" value="${b.satuan}" placeholder="Sat"
+            <input class="calc-input" style="width:100%" value="${escHtml(b.satuan)}" placeholder="Sat"
               oninput="updateBiayaAUT(${row.id},${b.id},'satuan',this.value)" />
           </div>
           <div class="field-harga">
             <span class="calc-input-label-mobile">Harga / Satuan</span>
-            <input class="calc-input num" type="number" min="0" style="width:100%" value="${b.harga}" placeholder="Rp/Sat"
+            <input class="calc-input num" type="number" min="0" style="width:100%" value="${escHtml(String(b.harga))}" placeholder="Rp/Sat"
               oninput="updateBiayaAUT(${row.id},${b.id},'harga',this.value)" />
           </div>
           <div class="field-total">
@@ -2683,16 +2709,16 @@
           <button class="btn-unlink-aut" onclick="unlinkAUT(${row.id})">lepas</button>
         </div>
         <div class="aut-linked-summary">
-          <div class="aut-linked-stat"><div class="aut-linked-stat-label">Nama</div><div class="aut-linked-stat-val" style="font-size:12px;overflow:hidden;text-overflow:ellipsis">${effNama||'—'}</div></div>
-          <div class="aut-linked-stat"><div class="aut-linked-stat-label">Desa</div><div class="aut-linked-stat-val" style="font-size:12px">${effDesa||'—'}</div></div>
-          <div class="aut-linked-stat"><div class="aut-linked-stat-label">Luas</div><div class="aut-linked-stat-val">${effLuas||'—'}<span style="font-size:9px;font-weight:400;color:var(--ink-4)"> Ha</span></div></div>
+          <div class="aut-linked-stat"><div class="aut-linked-stat-label">Nama</div><div class="aut-linked-stat-val" style="font-size:12px;overflow:hidden;text-overflow:ellipsis">${escHtml(effNama)||'—'}</div></div>
+          <div class="aut-linked-stat"><div class="aut-linked-stat-label">Desa</div><div class="aut-linked-stat-val" style="font-size:12px">${escHtml(effDesa)||'—'}</div></div>
+          <div class="aut-linked-stat"><div class="aut-linked-stat-label">Luas</div><div class="aut-linked-stat-val">${escHtml(String(effLuas||'—'))}${effLuas?'<span style="font-size:9px;font-weight:400;color:var(--ink-4)"> Ha</span>':''}</div></div>
           <div class="aut-linked-stat"><div class="aut-linked-stat-label">GKP</div><div class="aut-linked-stat-val" style="font-size:12px">${effGKP>0?fmt(effGKP/1000,2)+' ton':'—'}</div></div>
         </div>
         <div class="aut-inputs" style="padding-top:0;border-top:1px solid var(--rule);grid-template-columns:1fr">
           <div class="calc-field">
             <div class="calc-field-label">Harga Jual GKP</div>
             <div class="calc-field-control">
-              <input class="calc-input num" type="number" min="0" step="100" value="${row.hargaJual}" placeholder="5000"
+              <input class="calc-input num" type="number" min="0" step="100" value="${escHtml(String(row.hargaJual))}" placeholder="5000"
                 oninput="updateAUT(${row.id},'hargaJual',this.value)" />
               <span class="calc-input-unit">Rp/kg</span>
             </div>
@@ -2702,13 +2728,13 @@
         <div class="aut-inputs">
           <div class="calc-field calc-field-full">
             <div class="calc-field-label">Nama Petani / Poktan</div>
-            <input class="calc-input aut-input-nama" value="${row.nama}" placeholder="Nama petani atau kelompok tani…"
-              oninput="updateAUT(${row.id},'nama',this.value)" />
+            <input class="calc-input aut-input-nama" value="${escHtml(row.nama)}" placeholder="Nama petani atau kelompok tani…"
+              oninput="updateAUT(${row.id},'nama',this.value)" autocomplete="off" />
           </div>
           <div class="calc-field">
             <div class="calc-field-label">Desa</div>
-            <input class="calc-input" value="${row.desa}" placeholder="Nama desa…"
-              oninput="updateAUT(${row.id},'desa',this.value)" />
+            <input class="calc-input" value="${escHtml(row.desa)}" placeholder="Nama desa…"
+              oninput="updateAUT(${row.id},'desa',this.value)" autocomplete="off" />
           </div>
           <div class="calc-field">
             <div class="calc-field-label">Komoditas</div>
@@ -2717,15 +2743,23 @@
           <div class="calc-field">
             <div class="calc-field-label">Luas Lahan</div>
             <div class="calc-field-control">
-              <input class="calc-input num" type="number" min="0" step="0.01" value="${row.luas}" placeholder="0,00"
+              <input class="calc-input num" type="number" min="0" step="0.01" value="${escHtml(String(row.luas))}" placeholder="0,00"
                 oninput="updateAUT(${row.id},'luas',this.value)" />
               <span class="calc-input-unit">Ha</span>
             </div>
           </div>
           <div class="calc-field">
+            <div class="calc-field-label">Produksi GKP (kg)</div>
+            <div class="calc-field-control">
+              <input class="calc-input num" type="number" min="0" step="1" value="${escHtml(String(row.gkpManual||''))}" placeholder="0"
+                oninput="updateAUT(${row.id},'gkpManual',this.value)" />
+              <span class="calc-input-unit">kg</span>
+            </div>
+          </div>
+          <div class="calc-field">
             <div class="calc-field-label">Harga Jual GKP</div>
             <div class="calc-field-control">
-              <input class="calc-input num" type="number" min="0" step="100" value="${row.hargaJual}" placeholder="5000"
+              <input class="calc-input num" type="number" min="0" step="100" value="${escHtml(String(row.hargaJual))}" placeholder="5000"
                 oninput="updateAUT(${row.id},'hargaJual',this.value)" />
               <span class="calc-input-unit">Rp/kg</span>
             </div>
@@ -2736,8 +2770,8 @@
         <div class="calc-card-header">
           <div class="calc-card-num">${idx+1}</div>
           <div class="calc-card-identity">
-            <div class="calc-card-name${!effNama?' calc-card-name-placeholder':''}">${effNama||'Nama petani…'}</div>
-            <div class="calc-card-sub">${[effDesa, effKom, effLuas?(effLuas+' Ha'):''].filter(Boolean).join(' · ')||'Desa · Komoditas'}</div>
+            <div class="calc-card-name${!effNama?' calc-card-name-placeholder':''}">${escHtml(effNama)||'Nama petani…'}</div>
+            <div class="calc-card-sub">${[escHtml(effDesa), escHtml(effKom), effLuas?(escHtml(String(effLuas))+' Ha'):''].filter(Boolean).join(' · ')||'Desa · Komoditas'}</div>
           </div>
           <button class="btn-hapus-baris" onclick="hapusAUT(${row.id})" title="Hapus"><i class="ti ti-x"></i></button>
         </div>
@@ -2818,6 +2852,45 @@
     </div>`;
   }
 
+  // ── FORM DRAFT (persist across tab switches / accidental navigation) ──
+  const DRAFT_KEY = 'laporan_draft';
+  const DRAFT_FIELDS = ['f-user','f-desa','f-kelompok','f-jenis','f-kegiatan','f-komoditas','f-luas','f-tanggal'];
+
+  function saveDraft() {
+    const draft = {};
+    DRAFT_FIELDS.forEach(id => {
+      const el = document.getElementById(id);
+      if (el) draft[id] = el.value;
+    });
+    try { localStorage.setItem(DRAFT_KEY, JSON.stringify(draft)); } catch(e) {}
+  }
+
+  function restoreDraft() {
+    try {
+      const raw = localStorage.getItem(DRAFT_KEY);
+      if (!raw) return;
+      const draft = JSON.parse(raw);
+      DRAFT_FIELDS.forEach(id => {
+        if (draft[id] == null) return;
+        const el = document.getElementById(id);
+        if (el) el.value = draft[id];
+      });
+    } catch(e) {}
+  }
+
+  function clearDraft() {
+    try { localStorage.removeItem(DRAFT_KEY); } catch(e) {}
+  }
+
+  // Attach draft-saving listeners after DOM ready
+  function attachDraftListeners() {
+    DRAFT_FIELDS.forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.addEventListener('input', saveDraft);
+      if (el && el.tagName === 'SELECT') el.addEventListener('change', saveDraft);
+    });
+  }
+
   // ── EXPOSE ──
   window.switchTab=switchTab; window.switchSubTab=switchSubTab;
   window.tambahAUT=tambahAUT; window.showAUTPickerOrAdd=showAUTPickerOrAdd; window.tambahAUTFromPicker=tambahAUTFromPicker; window.unlinkAUT=unlinkAUT; window.hapusAUT=hapusAUT; window.updateAUT=updateAUT;
@@ -2836,8 +2909,13 @@
   window.applyTableCustomRange=applyTableCustomRange; window.applyRekapCustomRange=applyRekapCustomRange;
 
   // ── BOOT ──
-  document.getElementById('f-tanggal').value=today();
-  init();
+  // Use 'load' event so all CDN scripts (supabase, Chart.js) are fully ready
+  window.addEventListener('load', () => {
+    document.getElementById('f-tanggal').value = today();
+    restoreDraft();
+    attachDraftListeners();
+    init();
+  });
 </script>
 </body>
 </html>
