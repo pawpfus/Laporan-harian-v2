@@ -1773,7 +1773,8 @@
   function applyTableCustomRange() {
     const from = document.getElementById('t-date-from')?.value||null;
     const to   = document.getElementById('t-date-to')?.value||null;
-    if (!from||!to) return;
+    if (!from||!to) { showAlert('Pilih tanggal mulai dan tanggal akhir','warning'); return; }
+    if (from > to) { showAlert('Tanggal mulai tidak boleh melebihi tanggal akhir','warning'); return; }
     tableDateFrom=from; tableDateTo=to;
     document.querySelectorAll('#t-waktu-dropdown .btn-waktu-opt').forEach(b=>b.classList.remove('active'));
     updateWaktuLabel('t', from+' — '+to);
@@ -1783,7 +1784,8 @@
   function applyRekapCustomRange() {
     const from = document.getElementById('r-date-from')?.value||null;
     const to   = document.getElementById('r-date-to')?.value||null;
-    if (!from||!to) return;
+    if (!from||!to) { showAlert('Pilih tanggal mulai dan tanggal akhir','warning'); return; }
+    if (from > to) { showAlert('Tanggal mulai tidak boleh melebihi tanggal akhir','warning'); return; }
     rekapDateFrom=from; rekapDateTo=to;
     document.querySelectorAll('#r-waktu-dropdown .btn-waktu-opt').forEach(b=>b.classList.remove('active'));
     updateWaktuLabel('r', from+' — '+to);
@@ -1934,8 +1936,6 @@
     finally { btn.disabled=false; btn.innerHTML='<i class="ti ti-refresh"></i> Coba Lagi'; }
   }
 
-  async function connectSupabase() {}
-
   function setDbStatus(ok) {
     document.getElementById('db-dot').className = 'db-dot '+(ok?'ok':'err');
     document.getElementById('db-label').textContent = ok?'Terhubung':'Terputus';
@@ -2018,7 +2018,9 @@
     document.getElementById('f-kelompok').value='';
     document.getElementById('f-luas').value='';
     clearDraft();
+    document.getElementById('f-tanggal').value = today();
     showAlert('Laporan berhasil disimpan ke database','success');
+    currentPage = 1;
     await renderTable(true);
   }
 
@@ -2027,6 +2029,7 @@
     const { error } = await sbClient.from('laporan').delete().eq('id',id);
     if (error) { showAlert('Gagal menghapus: '+error.message,'error'); return; }
     showAlert('Laporan dihapus','warning');
+    currentPage = 1;
     await renderTable(true); await renderRekap();
   }
 
@@ -2219,7 +2222,10 @@
     });
     if (name==='data')     renderTable(true);
     if (name==='rekap')    updateRekap();
-    if (name==='produksi') { if (activeSubTab==='produktivitas') renderProduksiCards(); else renderAUTCards(); }
+    if (name==='produksi') {
+      if (activeSubTab==='produktivitas') renderProduksiCards();
+      else renderAUTCards();
+    }
   }
 
   // ── DOWNLOAD DROPDOWN ──
@@ -2250,7 +2256,14 @@
 
   function hapusBarisProduksi(id) {
     produksiRows=produksiRows.filter(r=>r.id!==id);
+    // Auto-unlink AUT rows referencing the deleted produksi row
+    autRows.forEach(ar => {
+      if (ar.linkedProdId === id) {
+        ar.linkedProdId = null;
+      }
+    });
     renderProduksiCards();
+    if (activeSubTab === 'aut') renderAUTCards();
   }
 
   function updateProduksiRow(id,field,value) {
@@ -2282,7 +2295,7 @@
     const luas=parseFloat(row.luas)||0;
     const karung=parseFloat(row.karung)||0;
     const berat=parseFloat(row.beratKarung)||0;
-    const ka=parseFloat(row.kadarAir)??14;
+    const ka=parseFloat(row.kadarAir)||14;
     const gkp=karung*berat;
     const gkg=ka<100?gkp*(100-ka)/86:0;
     const beras=gkg*0.63;
@@ -2413,8 +2426,6 @@
       <div class="ptb-item"><div class="ptb-label">Produktivitas Rata-rata</div><div class="ptb-val">${fmt(totalProduk,3)}</div><div class="ptb-unit">ton/Ha</div></div>
     </div>`;
   }
-
-  function renderProduksiTable() { renderProduksiCards(); }
 
   // ── SUB-TABS PRODUKSI ──
   let activeSubTab = 'produktivitas';
@@ -2900,7 +2911,7 @@
   window.simpanData=simpanData; window.hapusData=hapusData;
   window.exportPDF=exportPDF; window.exportExcel=exportExcel;
   window.toggleDownloadDropdown=toggleDownloadDropdown; window.closeDownloadDropdown=closeDownloadDropdown;
-  window.connectSupabase=connectSupabase; window.retryConnection=retryConnection;
+  window.retryConnection=retryConnection;
   window.setRekapFilter=setRekapFilter; window.handleTableSearchFilter=handleTableSearchFilter;
   window.changePage=changePage; window.goToPage=goToPage;
   window.bukaEditModal=bukaEditModal; window.tutupEditModal=tutupEditModal; window.updateData=updateData;
