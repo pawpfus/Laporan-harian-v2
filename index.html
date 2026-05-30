@@ -1669,11 +1669,8 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <script>
-  let SUPABASE_URL = 'https://penaujinawijzwcimgde.supabase.co';
-  let SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBlbmF1amluYXdpanp3Y2ltZ2RlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg5NzgzNzcsImV4cCI6MjA5NDU1NDM3N30.FNNGqO7X5wpZ9Ng8qehPagS74uP-GMo8Z2AdzSEU6v4';
-  const LS_URL_KEY = 'sb_url';
-  const LS_KEY_KEY = 'sb_key';
-
+  const SUPABASE_URL = 'https://penaujinawijzwcimgde.supabase.co';
+  const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBlbmF1amluYXdpanp3Y2ltZ2RlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg5NzgzNzcsImV4cCI6MjA5NDU1NDM3N30.FNNGqO7X5wpZ9Ng8qehPagS74uP-GMo8Z2AdzSEU6v4';
   let sbClient = null;
   let cachedData = [];
   // filteredData removed — filtering is done server-side via Supabase ilike
@@ -1880,7 +1877,6 @@
     if (sel&&sel.value!==filter) sel.value=filter;
     renderRekap();
   }
-  async function updateRekap() { await renderRekap(); }
   async function renderRekap() {
     ['stat-total','stat-luas','stat-desa','stat-kelompok'].forEach(id=>{
       const el=document.getElementById(id);
@@ -1900,8 +1896,8 @@
   // ── INIT ──
   async function init() {
     initCharts();
-    const url = SUPABASE_URL||localStorage.getItem(LS_URL_KEY)||'';
-    const key = SUPABASE_KEY||localStorage.getItem(LS_KEY_KEY)||'';
+    const url = SUPABASE_URL;
+    const key = SUPABASE_KEY;
     if (!url||!key) { setDbStatus(false); showOfflinePopup(); return; }
     if (!window.supabase || !window.supabase.createClient) {
       setDbStatus(false); showOfflinePopup(); return;
@@ -1912,6 +1908,7 @@
       if (error) throw error;
       setDbStatus(true); hideOfflinePopup();
       applyTableDatePreset('bulan_ini'); applyRekapDatePreset('bulan_ini');
+      await renderTable(true); await renderRekap();
     } catch(e) { setDbStatus(false); showOfflinePopup(); }
   }
 
@@ -1921,8 +1918,8 @@
   async function retryConnection() {
     const btn = document.getElementById('btn-retry');
     btn.disabled=true; btn.innerHTML='<i class="ti ti-loader spin"></i> Menghubungkan…';
-    const url = SUPABASE_URL||localStorage.getItem(LS_URL_KEY)||'';
-    const key = SUPABASE_KEY||localStorage.getItem(LS_KEY_KEY)||'';
+    const url = SUPABASE_URL;
+    const key = SUPABASE_KEY;
     try {
       if (!window.supabase || !window.supabase.createClient) throw new Error('Supabase library not loaded');
       sbClient = window.supabase.createClient(url, key);
@@ -1932,7 +1929,7 @@
       showAlert('Berhasil terhubung ke database!','success');
       applyTableDatePreset('bulan_ini'); applyRekapDatePreset('bulan_ini');
       await renderTable(true); await renderRekap();
-    } catch(e) { setDbStatus(false); }
+    } catch(e) { setDbStatus(false); showOfflinePopup(); }
     finally { btn.disabled=false; btn.innerHTML='<i class="ti ti-refresh"></i> Coba Lagi'; }
   }
 
@@ -1961,17 +1958,17 @@
     if (!sbClient) return [];
     const from=(page-1)*rowsPerPage, to=from+rowsPerPage-1;
     let q = sbClient.from('laporan').select('*',{count:'exact'})
-      .order('tanggal',{ascending:false}).order('created_at',{ascending:false}).range(from,to);
+      .order('tanggal',{ascending:false}).order('created_at',{ascending:false});
     if (dateFrom) q=q.gte('tanggal',dateFrom);
     if (dateTo)   q=q.lte('tanggal',dateTo);
     if (komoditas!=='semua') q=q.eq('komoditas',komoditas);
     if (kegiatan !=='semua') q=q.eq('kegiatan',kegiatan);
-    // Server-side full-text search across desa, kelompok_tani, user_name
     if (search) {
       q = q.or(`desa.ilike.%${search}%,kelompok_tani.ilike.%${search}%,user_name.ilike.%${search}%`);
     }
+    q = q.range(from, to);
     const { data, error, count } = await q;
-    if (error) { showAlert('Gagal memuat data: '+error.message,'error'); return []; }
+    if (error) { showAlert('Gagal memuat data: '+error.message,'error'); cachedData=[]; totalCount=0; return []; }
     cachedData=data||[]; totalCount=count||0; return cachedData;
   }
 
@@ -2006,6 +2003,7 @@
     const user=document.getElementById('f-user').value.trim();
     const luas=parseFloat(document.getElementById('f-luas').value)||0;
     if (!desa||!kelompok||!user||!tanggal) { showAlert('Semua data wajib diisi','warning'); return; }
+    if (luas <= 0) { showAlert('Luas harus lebih dari 0','warning'); return; }
     const btn=document.getElementById('btn-simpan');
     btn.disabled=true; btn.innerHTML='<i class="ti ti-loader spin"></i> Menyimpan…';
     const row={tanggal,desa,kelompok_tani:kelompok,jenis_ltt:document.getElementById('f-jenis').value,
@@ -2021,7 +2019,7 @@
     document.getElementById('f-tanggal').value = today();
     showAlert('Laporan berhasil disimpan ke database','success');
     currentPage = 1;
-    await renderTable(true);
+    await renderTable(true); await renderRekap();
   }
 
   async function hapusData(id) {
@@ -2051,7 +2049,7 @@
 
   async function renderTable(fetchFromServer=true) {
     const container=document.getElementById('table-container');
-    const searchTerm=(document.getElementById('t-search')?.value||'').toLowerCase().trim();
+    const searchTerm=(document.getElementById('t-search')?.value||'').trim();
     const filterKomoditas=document.getElementById('t-filter-komoditas')?.value||'semua';
     const filterKegiatan=document.getElementById('t-filter-kegiatan')?.value||'semua';
 
@@ -2063,7 +2061,11 @@
     document.getElementById('data-count').textContent=totalCount+' laporan';
 
     if (!cachedData.length) {
-      container.innerHTML=`<div class="empty-state"><i class="ti ti-inbox"></i>Tidak ada data yang cocok</div>`;
+      const hasFilters = (document.getElementById('t-search')?.value||'').trim() ||
+        (document.getElementById('t-filter-komoditas')?.value||'semua') !== 'semua' ||
+        (document.getElementById('t-filter-kegiatan')?.value||'semua') !== 'semua' ||
+        tableDateFrom;
+      container.innerHTML=`<div class="empty-state"><i class="ti ti-inbox"></i>${hasFilters ? 'Tidak ada data yang cocok dengan filter' : 'Belum ada data laporan'}</div>`;
       return;
     }
 
@@ -2154,6 +2156,7 @@
     const user=document.getElementById('edit-user').value.trim();
     const luas=parseFloat(document.getElementById('edit-luas').value)||0;
     if (!desa||!kelompok||!user||!tanggal) { showAlert('Semua data wajib diisi','warning'); return; }
+    if (luas <= 0) { showAlert('Luas harus lebih dari 0','warning'); return; }
     const btn=document.getElementById('btn-update');
     btn.disabled=true; btn.innerHTML='<i class="ti ti-loader spin"></i> Menyimpan…';
     const row={tanggal,desa,kelompok_tani:kelompok,jenis_ltt:document.getElementById('edit-jenis').value,
@@ -2212,7 +2215,11 @@
     showAlert('File Excel berhasil diunduh','success');
   }
 
-  function today() { return new Date().toISOString().split('T')[0]; }
+  function today() {
+    const d = new Date();
+    const pad = n => String(n).padStart(2,'0');
+    return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+  }
 
   // ── TABS ──
   function switchTab(name) {
@@ -2221,7 +2228,7 @@
       document.getElementById('tab-'+t).className='tab'+(t===name?' active':'');
     });
     if (name==='data')     renderTable(true);
-    if (name==='rekap')    updateRekap();
+    if (name==='rekap')    renderRekap();
     if (name==='produksi') {
       if (activeSubTab==='produktivitas') renderProduksiCards();
       else renderAUTCards();
@@ -2289,6 +2296,10 @@
     setRes('.res-gkp',gkp,1); setRes('.res-gkg',gkg,1);
     setRes('.res-beras',beras,1); setRes('.res-produk',produk,3);
     renderTotalBar();
+    // Refresh any AUT cards linked to this produksi row so their GKP/results stay in sync
+    autRows.forEach(ar => {
+      if (ar.linkedProdId === id) refreshAUTCard(ar.id);
+    });
   }
 
   function calcProduksi(row) {
@@ -2442,12 +2453,6 @@
   // ── ANALISIS USAHA TANI ──
   let autRows=[], autIdCounter=0;
 
-  const BIAYA_PRESETS = [
-    'Benih','Pupuk Urea','Pupuk NPK','Pupuk Organik',
-    'Pestisida','Tenaga Kerja Tanam','Tenaga Kerja Panen',
-    'Sewa Lahan','Irigasi','Pengolahan Lahan','Lain-lain'
-  ];
-
   function tambahAUT(linkedProdId) {
     const id = ++autIdCounter;
     let linkedRow = null;
@@ -2495,8 +2500,8 @@
     const opts = unlinkedProd.map(pr => `
       <button class="aut-picker-opt" onclick="tambahAUTFromPicker(${pr.id})">
         <i class="ti ti-link"></i>
-        <span class="aut-picker-name">${pr.nama||'Tanpa nama'}</span>
-        <span class="aut-picker-sub">${[pr.desa, pr.komoditas, pr.luas?(pr.luas+' Ha'):''].filter(Boolean).join(' · ')}</span>
+        <span class="aut-picker-name">${escHtml(pr.nama)||'Tanpa nama'}</span>
+        <span class="aut-picker-sub">${escHtml([pr.desa, pr.komoditas, pr.luas?(pr.luas+' Ha'):''].filter(Boolean).join(' · '))}</span>
       </button>`).join('');
     const overlay = document.createElement('div');
     overlay.id = 'aut-picker-overlay';
@@ -2560,7 +2565,11 @@
     const row = autRows.find(r => r.id === autId);
     if (!row) return;
     row.biaya = row.biaya.filter(b => b.id !== biayaId);
-    renderAUTCards(); // renderAUTCards calls renderAUTTotal internally
+    // Remove the deleted row from DOM directly, then refresh calculations
+    const el = document.getElementById(`biaya-row-${autId}-${biayaId}`);
+    if (el) el.remove();
+    refreshAUTCard(autId);
+    renderAUTTotal();
   }
 
   function updateBiayaAUT(autId, biayaId, field, value) {
@@ -2594,7 +2603,7 @@
   }
 
   function fmtRp(n) {
-    if (!n || isNaN(n)) return '—';
+    if (n == null || isNaN(n)) return '—';
     return 'Rp ' + Math.round(n).toLocaleString('id-ID');
   }
 
@@ -2669,9 +2678,8 @@
     container.innerHTML = autRows.map((row, idx) => {
       const {totalBiaya, totalBiayaPerHa, penerimaanKotor, pendapatanBersih, rcRatio, bepProduksi, bepHarga, gkp} = calcAUT(row);
       const isLoss = pendapatanBersih < 0;
-      const komodOpts = ['Padi','Jagung','Kedelai'].map(k=>`<option${k===row.komoditas?' selected':''}>${k}</option>`).join('');
-      const subText = [row.desa, row.komoditas, row.luas?(row.luas+' Ha'):''].filter(Boolean).join(' · ')||'Desa · Komoditas';
-      const biayaItems = row.biaya.map(b => {
+      const komodOpts = ['Padi','Jagung','Kedelai'].map(k=>`<option${k===row.komoditas?' selected':''}>${escHtml(k)}</option>`).join('');
+    const biayaItems = row.biaya.map(b => {
         const subtotal = (parseFloat(b.jumlah)||0) * (parseFloat(b.harga)||0);
         return `<div class="aut-biaya-item" id="biaya-row-${row.id}-${b.id}">
           <div class="field-uraian">
