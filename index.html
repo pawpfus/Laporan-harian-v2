@@ -1070,13 +1070,13 @@
     /* ── ANALISIS USAHA TANI ────────────────────────────── */
     .aut-card {
       background: var(--surface);
-      border: none;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.03);
-      border-radius: var(--r-md);
+      border: 1px solid var(--ground-2);
+      box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+      border-radius: var(--r-lg);
       overflow: hidden;
-      transition: box-shadow 0.2s;
+      transition: box-shadow 0.2s, border-color 0.2s;
     }
-    .aut-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.06); }
+    .aut-card:hover { box-shadow: 0 6px 24px rgba(0,0,0,0.08); border-color: var(--rule); }
 
     .aut-section-title {
       font-size: 10px; font-weight: 700;
