@@ -198,7 +198,7 @@
     /* ── TABS / BOTTOM NAV ─────────────────────────────── */
     .tabs {
       display: flex;
-      gap: 4px;
+      gap: 2px;
       background: var(--surface);
       border: 1px solid var(--rule);
       border-radius: var(--r-xl);
@@ -208,30 +208,36 @@
 
     .tab {
       flex: 1;
-      padding: 10px 8px;
+      padding: 9px 8px;
       font-size: 13px;
-      font-weight: 600;
+      font-weight: 500;
       font-family: var(--font-ui);
       border: none;
       background: none;
       cursor: pointer;
       border-radius: 11px;
-      color: var(--ink-3);
-      transition: color 0.15s, background 0.15s;
+      color: var(--ink-4);
+      transition: color 0.18s;
       display: flex;
       align-items: center;
       justify-content: center;
       gap: 7px;
       letter-spacing: -0.01em;
     }
-    .tab i { font-size: 16px; }
-    .tab:hover { color: var(--ink); background: var(--ground); }
-    .tab.active {
-      background: var(--moss);
-      color: #fff;
+    .tab i {
+      font-size: 17px;
+      transition: color 0.18s, transform 0.18s;
     }
+    .tab:hover { color: var(--ink-2); }
+    .tab:hover i { transform: scale(1.08); }
+    .tab.active {
+      color: var(--moss);
+      font-weight: 700;
+      background: none;
+    }
+    .tab.active i { color: var(--moss); }
     @media (prefers-color-scheme: dark) {
-      .tab.active { color: #e8ede7; }
+      .tab.active { color: var(--moss); }
     }
 
     .panel { display: none; animation: panelIn 0.2s ease; }
@@ -1281,17 +1287,24 @@
         bottom: max(8px, env(safe-area-inset-bottom));
         z-index: 900;
         display: grid; grid-template-columns: repeat(4, 1fr);
-        gap: 3px; padding: 4px; margin-bottom: 0;
-        border-radius: 16px;
-        box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+        gap: 0; padding: 6px 4px;
+        margin-bottom: 0;
+        border-radius: 20px;
+        box-shadow: 0 8px 32px rgba(0,0,0,0.13);
       }
       .tab {
-        min-height: 46px; padding: 5px 2px;
-        border-radius: 12px;
-        flex-direction: column; gap: 2px;
-        font-size: 9.5px;
+        min-height: 50px; padding: 6px 2px;
+        border-radius: 14px;
+        flex-direction: column; gap: 3px;
+        font-size: 10px;
+        font-weight: 500;
+        color: var(--ink-4);
+        transition: color 0.18s;
+        background: none;
       }
-      .tab i { font-size: 15px; }
+      .tab i { font-size: 22px; transition: color 0.18s, transform 0.15s; }
+      .tab.active { color: var(--moss); font-weight: 700; background: none; }
+      .tab.active i { color: var(--moss); transform: scale(1.1); }
       .calc-inputs { grid-template-columns: 1fr 1fr; padding: 9px; gap: 8px; }
       .calc-results { grid-template-columns: 1fr 1fr; padding: 8px; gap: 6px; }
       .produksi-total-bar { grid-template-columns: 1fr 1fr; position: sticky; bottom: 60px; z-index: 4; }
