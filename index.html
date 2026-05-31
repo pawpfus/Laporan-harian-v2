@@ -2837,6 +2837,7 @@
       renderAUTTotal(); return;
     }
     container.innerHTML = autRows.map((row, idx) => {
+      const komodOpts=KOMODITAS_LIST.map(k=>'<option' + (k===row.komoditas?' selected':'') + '>' + escHtml(k) + '</option>').join('');
       const {totalBiaya, totalBiayaPerHa, penerimaanKotor, pendapatanBersih, rcRatio, bepProduksi, bepHarga, gkp} = calcAUT(row);
       const isLoss = pendapatanBersih < 0;
 
