@@ -185,6 +185,8 @@
       margin-bottom: 1.25rem;
       border: 1px solid transparent;
       animation: alertIn 0.25s ease;
+      position: relative;
+      z-index: 100;
     }
     @keyframes alertIn {
       from { opacity:0; transform: translateY(-6px); }
@@ -242,8 +244,8 @@
       .tab.active { color: var(--moss); }
     }
 
-    .panel { display: none; animation: panelIn 0.2s ease; }
-    .panel.active { display: block; }
+    .panel { display: none; }
+    .panel.active { display: block; animation: panelIn 0.2s ease; }
     @keyframes panelIn {
       from { opacity: 0; transform: translateY(4px); }
       to   { opacity: 1; transform: none; }
@@ -1309,7 +1311,7 @@
       .tab.active i { color: var(--moss); transform: scale(1.1); }
       .calc-inputs { grid-template-columns: 1fr 1fr; padding: 9px; gap: 8px; }
       .calc-results { grid-template-columns: 1fr 1fr; padding: 8px; gap: 6px; }
-      .produksi-total-bar { grid-template-columns: 1fr 1fr; position: sticky; bottom: 60px; z-index: 4; }
+      .produksi-total-bar { grid-template-columns: 1fr 1fr; position: sticky; bottom: 70px; z-index: 10; }
       .ptb-val { font-size: 16px; }
       .filter-toolbar {
         display: grid;
@@ -1742,7 +1744,7 @@
     const span = document.getElementById(prefix+'-waktu-label');
     const btn  = document.getElementById(prefix+'-btn-waktu');
     if (span) span.textContent = label;
-    if (btn) btn.classList.toggle('has-filter', label !== 'Semua Waktu');
+    if (btn) btn.classList.toggle('has-filter', label !== PRESET_LABELS['semua']);
   }
 
   function setActiveWaktuOpt(prefix, preset) {
@@ -2038,6 +2040,7 @@
   }
 
   async function hapusData(id) {
+    if (!sbClient) { showAlert('Belum terhubung ke database','warning'); return; }
     if (!confirm('Hapus laporan ini?')) return;
     const { error } = await sbClient.from('laporan').delete().eq('id',id);
     if (error) { showAlert('Gagal menghapus: '+error.message,'error'); return; }
@@ -2189,9 +2192,9 @@
     const filterKomoditas=document.getElementById('t-filter-komoditas')?.value||'semua';
     const filterKegiatan=document.getElementById('t-filter-kegiatan')?.value||'semua';
     const all=await fetchAllForExport({ dateFrom:tableDateFrom, dateTo:tableDateTo, komoditas:filterKomoditas, kegiatan:filterKegiatan });
-    return all.map(d=>({ Tanggal:d.tanggal, Desa:d.desa, 'Kelompok Tani':d.kelompok_tani,
-      'Jenis LTT':d.jenis_ltt, Kegiatan:d.kegiatan, Komoditas:d.komoditas,
-      'Luas (Ha)':parseFloat(d.luas), User:d.user_name }));
+    return all.map(d=>({ Tanggal:d.tanggal||'', Desa:d.desa||'', 'Kelompok Tani':d.kelompok_tani||'',
+      'Jenis LTT':d.jenis_ltt||'', Kegiatan:d.kegiatan||'', Komoditas:d.komoditas||'',
+      'Luas (Ha)':parseFloat(d.luas)||0, User:d.user_name||'' }));
   }
 
   async function exportPDF() {
@@ -2572,8 +2575,48 @@
     const row = autRows.find(r => r.id === id);
     if (!row) return;
     row.biayaIdCounter = (row.biayaIdCounter||0) + 1;
-    row.biaya.push({ id: row.biayaIdCounter, nama:'', jumlah:'', satuan:'', harga:'' });
-    renderAUTCards();
+    const b = { id: row.biayaIdCounter, nama:'', jumlah:'', satuan:'', harga:'' };
+    row.biaya.push(b);
+    // Surgically append new row to DOM instead of full re-render (preserves focus)
+    const list = document.querySelector(`#aut-card-${id} .aut-biaya-list`);
+    if (list) {
+      const div = document.createElement('div');
+      div.className = 'aut-biaya-item';
+      div.id = `biaya-row-${id}-${b.id}`;
+      div.innerHTML = `
+        <div class="field-uraian">
+          <span class="calc-input-label-mobile">Uraian Biaya</span>
+          <input class="calc-input" style="width:100%" value="" placeholder="Uraian…"
+            oninput="updateBiayaAUT(${id},${b.id},'nama',this.value)" />
+        </div>
+        <div class="field-jumlah">
+          <span class="calc-input-label-mobile">Jumlah</span>
+          <input class="calc-input num" type="number" min="0" style="width:100%" value="" placeholder="Jml"
+            oninput="updateBiayaAUT(${id},${b.id},'jumlah',this.value)" />
+        </div>
+        <div class="field-satuan">
+          <span class="calc-input-label-mobile">Satuan</span>
+          <input class="calc-input" style="width:100%" value="" placeholder="Sat"
+            oninput="updateBiayaAUT(${id},${b.id},'satuan',this.value)" />
+        </div>
+        <div class="field-harga">
+          <span class="calc-input-label-mobile">Harga / Satuan</span>
+          <input class="calc-input num" type="number" min="0" style="width:100%" value="" placeholder="Rp/Sat"
+            oninput="updateBiayaAUT(${id},${b.id},'harga',this.value)" />
+        </div>
+        <div class="field-total">
+          <span class="calc-input-label-mobile">Subtotal</span>
+          <div class="aut-biaya-total-cell">—</div>
+        </div>
+        <div class="field-delete">
+          <button class="btn-hapus-biaya" onclick="hapusBiayaAUT(${id},${b.id})" title="Hapus"><i class="ti ti-x"></i></button>
+        </div>`;
+      list.appendChild(div);
+      // Focus the new uraian input
+      setTimeout(() => div.querySelector('input')?.focus(), 30);
+    } else {
+      renderAUTCards();
+    }
   }
 
   function hapusBiayaAUT(autId, biayaId) {
