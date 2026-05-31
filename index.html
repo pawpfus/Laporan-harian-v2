@@ -24,7 +24,8 @@
     }
 
     :root {
-      /* Palette — Forest Precision */
+      /* === Section: Reset/Variables === */
+    /* Palette — Forest Precision */
       --ink:        #1a1f1a;
       --ink-2:      #3a4039;
       --ink-3:      #6b7569;
@@ -59,8 +60,7 @@
       --nav-h: 58px;
     }
 
-    @media (prefers-color-scheme: dark) {
-      :root {
+    :root[data-theme="dark"] {
         --ink:      #e8ede7;
         --ink-2:    #c5ccc4;
         --ink-3:    #8a9489;
@@ -97,6 +97,7 @@
       font-size: 14px;
     }
 
+    /* === Section: Layout === */
     /* ── TOPBAR ─────────────────────────────────────────── */
     .topbar {
       height: var(--topbar-h);
@@ -173,6 +174,7 @@
       padding: 1.5rem 1.25rem 6rem;
     }
 
+    /* === Section: Features === */
     /* ── ALERT ─────────────────────────────────────────── */
     .alert {
       display: flex;
@@ -253,6 +255,7 @@
     #panel-produksi { display: none; flex-direction: column; gap: 12px; }
     #panel-produksi.active { display: flex; }
 
+    /* === Section: Components === */
     /* ── CARD ──────────────────────────────────────────── */
     .card {
       background: var(--surface);
@@ -598,6 +601,7 @@
     tr:last-child td { border-bottom: none; }
     tbody tr:hover td { background: var(--ground); }
 
+    /* === Section: Utilities === */
     /* ── BADGES ─────────────────────────────────────────── */
     .badge {
       display: inline-flex; align-items: center;
@@ -1275,6 +1279,7 @@
       .aut-inputs, .aut-results, .aut-total-bar { grid-template-columns: 1fr; }
     }
 
+    /* === Section: Responsive === */
     /* ── MOBILE ─────────────────────────────────────────── */
     @media (max-width: 480px) {
       .topbar { padding: 0 1rem; height: 54px; gap: 10px; }
@@ -1336,6 +1341,20 @@
       .stats-grid { grid-template-columns: 1fr 1fr; }
       .stat-val { font-size: 22px; }
     }
+
+    /* Theme Toggle */
+    .theme-toggle {
+      background: var(--ground);
+      border: 1px solid var(--rule);
+      width: 34px; height: 34px;
+      border-radius: var(--r-md);
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; color: var(--ink-3);
+      transition: all 0.15s;
+    }
+    .theme-toggle:hover { background: var(--rule); color: var(--ink); }
+    .theme-toggle i { font-size: 18px; }
+
     @media (max-width: 340px) {
       .calc-inputs, .calc-results, .produksi-total-bar { grid-template-columns: 1fr; }
       .stats-grid { grid-template-columns: 1fr; }
@@ -1355,6 +1374,9 @@
     <div class="db-dot" id="db-dot"></div>
     <span id="db-label">Menghubungkan…</span>
   </div>
+  <button class="theme-toggle" onclick="toggleTheme()" title="Ganti Tema">
+    <i class="ti ti-moon" id="theme-icon"></i>
+  </button>
 </div>
 
 <div class="shell">
@@ -1687,6 +1709,14 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <script>
+  (function() {
+    const saved = localStorage.getItem('app_theme');
+    if (saved === 'dark' || (!saved && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+      document.documentElement.setAttribute('data-theme', 'dark');
+    }
+  })();
+
+  // === Section: Config ===
   const SUPABASE_URL = 'https://penaujinawijzwcimgde.supabase.co';
   const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBlbmF1amluYXdpanp3Y2ltZ2RlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg5NzgzNzcsImV4cCI6MjA5NDU1NDM3N30.FNNGqO7X5wpZ9Ng8qehPagS74uP-GMo8Z2AdzSEU6v4';
   let sbClient = null;
@@ -1698,6 +1728,17 @@
   let tableDateFrom = null, tableDateTo = null;
   let rekapDateFrom = null, rekapDateTo = null;
   let searchDebounceTimer = null;
+
+  // === Section: Utilities ===
+  function setStorage(key, data) {
+    try { localStorage.setItem(key, JSON.stringify(data)); } catch(e) {}
+  }
+  function getStorage(key, fallback = null) {
+    try {
+      const raw = localStorage.getItem(key);
+      return raw ? JSON.parse(raw) : fallback;
+    } catch(e) { return fallback; }
+  }
 
   function getDateRange(preset) {
     const now = new Date();
@@ -1895,6 +1936,7 @@
     if (sel&&sel.value!==filter) sel.value=filter;
     renderRekap();
   }
+  // === Section: Rekap ===
   async function renderRekap() {
     ['stat-total','stat-luas','stat-desa','stat-kelompok'].forEach(id=>{
       const el=document.getElementById(id);
@@ -1912,6 +1954,7 @@
   }
 
   // ── INIT ──
+  // === Section: Core/DB ===
   async function init() {
     initCharts();
     const url = SUPABASE_URL;
@@ -1974,6 +2017,7 @@
   // ── DATA OPS ──
   let totalCount = 0;
 
+  // === Section: Data Ops ===
   async function fetchData({ page=1, dateFrom=null, dateTo=null, search='', komoditas='semua', kegiatan='semua' }={}) {
     if (!sbClient) return [];
     const from=(page-1)*rowsPerPage, to=from+rowsPerPage-1;
@@ -2204,6 +2248,37 @@
       'Luas (Ha)':parseFloat(d.luas)||0, User:d.user_name||'' }));
   }
 
+  // === Section: UI Core ===
+  function setTheme(theme) {
+    const html = document.documentElement;
+    const icon = document.getElementById('theme-icon');
+    if (theme === 'dark') {
+      html.setAttribute('data-theme', 'dark');
+      if (icon) icon.className = 'ti ti-sun';
+    } else {
+      html.removeAttribute('data-theme');
+      if (icon) icon.className = 'ti ti-moon';
+    }
+    localStorage.setItem('app_theme', theme);
+  }
+
+  function initTheme() {
+    const saved = localStorage.getItem('app_theme');
+    if (saved) {
+      setTheme(saved);
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+      setTheme('dark');
+    }
+  }
+
+  function toggleTheme() {
+    const html = document.documentElement;
+    const current = html.getAttribute('data-theme');
+    const target = current === 'dark' ? 'light' : 'dark';
+    setTheme(target);
+  }
+
+  // === Section: Reports ===
   async function exportPDF() {
     showAlert('Menyiapkan data ekspor…','success');
     const rows=await getExportRows();
@@ -2276,9 +2351,20 @@
   let produksiRows=[], produksiIdCounter=0;
   const KOMODITAS_LIST=['Padi','Jagung','Kedelai'];
 
+  function saveProduksiData() {
+    setStorage('produksi_data', produksiRows);
+    localStorage.setItem('produksi_id_counter', produksiIdCounter);
+  }
+
+  function loadProduksiData() {
+    produksiRows = getStorage('produksi_data', []);
+    produksiIdCounter = parseInt(localStorage.getItem('produksi_id_counter') || 0);
+  }
+
   function tambahBarisProduksi() {
     const id=++produksiIdCounter;
     produksiRows.push({id,nama:'',desa:'',komoditas:'Padi',luas:'',karung:'',beratKarung:'',kadarAir:14});
+    saveProduksiData();
     renderProduksiCards();
     setTimeout(()=>{
       const el=document.querySelector(`#calc-card-${id} .input-nama`);
@@ -2287,6 +2373,7 @@
   }
 
   function hapusBarisProduksi(id) {
+    if (!confirm('Hapus data petani ini?')) return;
     produksiRows=produksiRows.filter(r=>r.id!==id);
     // Auto-unlink AUT rows referencing the deleted produksi row
     autRows.forEach(ar => {
@@ -2294,8 +2381,23 @@
         ar.linkedProdId = null;
       }
     });
+    saveProduksiData();
+    saveAUTData();
     renderProduksiCards();
     if (activeSubTab === 'aut') renderAUTCards();
+  }
+
+  function duplikatBarisProduksi(id) {
+    const row = produksiRows.find(r => r.id === id);
+    if (!row) return;
+    const newId = ++produksiIdCounter;
+    const clone = JSON.parse(JSON.stringify(row));
+    clone.id = newId;
+    clone.nama = (clone.nama ? clone.nama + ' (Copy)' : '');
+    produksiRows.push(clone);
+    saveProduksiData();
+    renderProduksiCards();
+    showAlert('Data petani diduplikasi','success');
   }
 
   function updateProduksiRow(id,field,value) {
@@ -2307,6 +2409,7 @@
     } else {
       row[field] = value;
     }
+    saveProduksiData();
     const nm=document.querySelector(`#calc-card-${id} .calc-card-name`);
     const sub=document.querySelector(`#calc-card-${id} .calc-card-sub`);
     if(nm){nm.textContent=row.nama||'Nama petani…';nm.classList.toggle('calc-card-name-placeholder',!row.nama);}
@@ -2344,6 +2447,7 @@
     return Number(n).toLocaleString('id-ID',{minimumFractionDigits:dec,maximumFractionDigits:dec});
   }
 
+  // === Section: Produksi ===
   function renderProduksiCards() {
     const container=document.getElementById('produksi-cards');
     if (!container) return;
@@ -2364,7 +2468,8 @@
             <div class="calc-card-name${namaClass}">${namaTxt}</div>
             <div class="calc-card-sub">${subText}</div>
           </div>
-          <button class="btn-hapus-baris" onclick="hapusBarisProduksi(${row.id})" title="Hapus"><i class="ti ti-x"></i></button>
+          <button class="btn-hapus-baris" style="margin-left: auto" onclick="duplikatBarisProduksi(${row.id})" title="Duplikat"><i class="ti ti-copy"></i></button>
+          <button class="btn-hapus-baris" onclick="hapusBarisProduksi(${row.id})" title="Hapus"><i class="ti ti-trash"></i></button>
         </div>
         <div class="calc-card-body">
           <div class="calc-inputs">
@@ -2478,6 +2583,16 @@
   // ── ANALISIS USAHA TANI ──
   let autRows=[], autIdCounter=0;
 
+  function saveAUTData() {
+    setStorage('aut_data', autRows);
+    localStorage.setItem('aut_id_counter', autIdCounter);
+  }
+
+  function loadAUTData() {
+    autRows = getStorage('aut_data', []);
+    autIdCounter = parseInt(localStorage.getItem('aut_id_counter') || 0);
+  }
+
   function tambahAUT(linkedProdId) {
     const id = ++autIdCounter;
     let linkedRow = null;
@@ -2504,6 +2619,7 @@
       ],
       biayaIdCounter: 7
     });
+    saveAUTData();
     renderAUTCards();
     if (!linkedRow) {
       setTimeout(()=>{
@@ -2562,11 +2678,14 @@
       if (!row.gkpManual && computedGKP > 0) row.gkpManual = String(computedGKP);
     }
     row.linkedProdId = null;
+    saveAUTData();
     renderAUTCards();
   }
 
   function hapusAUT(id) {
+    if (!confirm('Hapus analisis ini?')) return;
     autRows = autRows.filter(r => r.id !== id);
+    saveAUTData();
     renderAUTCards();
   }
 
@@ -2574,6 +2693,7 @@
     const row = autRows.find(r => r.id === id);
     if (!row) return;
     row[field] = value;
+    saveAUTData();
     refreshAUTCard(id);
     renderAUTTotal();
   }
@@ -2584,6 +2704,7 @@
     row.biayaIdCounter = (row.biayaIdCounter||0) + 1;
     const b = { id: row.biayaIdCounter, nama:'', jumlah:'', satuan:'', harga:'' };
     row.biaya.push(b);
+    saveAUTData();
     // Surgically append new row to DOM instead of full re-render (preserves focus)
     const list = document.querySelector(`#aut-card-${id} .aut-biaya-list`);
     if (list) {
@@ -2630,6 +2751,7 @@
     const row = autRows.find(r => r.id === autId);
     if (!row) return;
     row.biaya = row.biaya.filter(b => b.id !== biayaId);
+    saveAUTData();
     // Remove the deleted row from DOM directly, then refresh calculations
     const el = document.getElementById(`biaya-row-${autId}-${biayaId}`);
     if (el) el.remove();
@@ -2643,6 +2765,7 @@
     const b = row.biaya.find(b => b.id === biayaId);
     if (!b) return;
     b[field] = value;
+    saveAUTData();
     refreshAUTCard(autId);
     renderAUTTotal();
   }
@@ -2733,6 +2856,7 @@
     renderAUTTotal();
   }
 
+  // === Section: AUT ===
   function renderAUTCards() {
     const container = document.getElementById('aut-cards');
     if (!container) return;
@@ -2992,11 +3116,15 @@
   window.toggleWaktuDropdown=toggleWaktuDropdown;
   window.applyTableCustomRange=applyTableCustomRange; window.applyRekapCustomRange=applyRekapCustomRange;
 
+  // ── UI Core ──
+  // === Section: Boot ===
   // ── BOOT ──
   // Use 'load' event so all CDN scripts (supabase, Chart.js) are fully ready
   window.addEventListener('load', () => {
     document.getElementById('f-tanggal').value = today();
     restoreDraft();
+    loadProduksiData();
+    loadAUTData();
     attachDraftListeners();
     init();
   });
