@@ -1774,6 +1774,20 @@
   function fmtRp(n) {
     if (n == null || isNaN(n)) return '—';
     return 'Rp ' + Math.round(n).toLocaleString('id-ID');
+  async function renderRekap() {
+    ['stat-total','stat-luas','stat-desa','stat-kelompok'].forEach(id=>{
+      const el=document.getElementById(id);
+      if(el) el.innerHTML='<i class="ti ti-loader spin" style="font-size:16px"></i>';
+    });
+    const data = await fetchAllForRekap({ dateFrom:rekapDateFrom, dateTo:rekapDateTo, jenis:activeFilter });
+    const totalLuas     = data.reduce((s,d)=>s+parseFloat(d.luas||0),0);
+    const totalDesa     = new Set(data.map(d=>d.desa)).size;
+    const totalKelompok = new Set(data.map(d=>d.kelompok_tani)).size;
+    document.getElementById('stat-total').textContent    = data.length;
+    document.getElementById('stat-luas').textContent     = totalLuas.toFixed(1);
+    document.getElementById('stat-desa').textContent     = totalDesa;
+    document.getElementById('stat-kelompok').textContent = totalKelompok;
+    updateCharts(data);
   }
 
   // === Section: Core/DB ===
@@ -2109,10 +2123,6 @@
 
   async function renderTable(fetchFromServer=true) {
     const container=document.getElementById('table-container');
-    if (!sbClient) {
-      container.innerHTML=`<div class="empty-state"><i class="ti ti-inbox"></i>Belum terhubung ke database</div>`;
-      return;
-    }
     const searchTerm=(document.getElementById('t-search')?.value||'').trim();
     const filterKomoditas=document.getElementById('t-filter-komoditas')?.value||'semua';
     const filterKegiatan=document.getElementById('t-filter-kegiatan')?.value||'semua';
@@ -2196,11 +2206,7 @@
     currentPage = Math.min(Math.max(1, currentPage + offset), totalPages);
     renderTable(true);
   }
-  function goToPage(p) {
-    const totalPages = Math.max(1, Math.ceil(totalCount / rowsPerPage));
-    currentPage = Math.min(Math.max(1, p), totalPages);
-    renderTable(true);
-  }
+  function goToPage(p) { currentPage=p; renderTable(true); }
 
   // ── EXPORT ──
   async function getExportRows() {
@@ -2387,7 +2393,12 @@
   function updateProduksiRow(id,field,value) {
     const row=produksiRows.find(r=>r.id===id);
     if (!row) return;
-    row[field] = value; // keep raw string; parseFloat happens in calc
+    // Normalize numeric fields to float when possible
+    if (['luas','karung','beratKarung','kadarAir'].includes(field)) {
+      row[field] = value; // keep raw string; parseFloat happens in calc
+    } else {
+      row[field] = value;
+    }
     const nm=document.querySelector(`#calc-card-${id} .calc-card-name`);
     const sub=document.querySelector(`#calc-card-${id} .calc-card-sub`);
     if(nm){nm.textContent=row.nama||'Nama petani…';nm.classList.toggle('calc-card-name-placeholder',!row.nama);}
@@ -2819,8 +2830,8 @@
       const komodOpts=KOMODITAS_LIST.map(k=>'<option' + (k===row.komoditas?' selected':'') + '>' + escHtml(k) + '</option>').join('');
       const {totalBiaya, totalBiayaPerHa, penerimaanKotor, pendapatanBersih, rcRatio, bepProduksi, bepHarga, gkp} = calcAUT(row);
       const isLoss = pendapatanBersih < 0;
-
-      const biayaItems = row.biaya.map(b => {
+      const komodOpts = ['Padi','Jagung','Kedelai'].map(k=>`<option${k===row.komoditas?' selected':''}>${escHtml(k)}</option>`).join('');
+    const biayaItems = row.biaya.map(b => {
         const subtotal = (parseFloat(b.jumlah)||0) * (parseFloat(b.harga)||0);
         return `<div class="aut-biaya-item" id="biaya-row-${row.id}-${b.id}">
           <div class="field-uraian">
@@ -3012,6 +3023,44 @@
     </div>`;
   }
 
+  // ── FORM DRAFT (persist across tab switches / accidental navigation) ──
+  const DRAFT_KEY = 'laporan_draft';
+  const DRAFT_FIELDS = ['f-user','f-desa','f-kelompok','f-jenis','f-kegiatan','f-komoditas','f-luas','f-tanggal'];
+
+  function saveDraft() {
+    const draft = {};
+    DRAFT_FIELDS.forEach(id => {
+      const el = document.getElementById(id);
+      if (el) draft[id] = el.value;
+    });
+    try { localStorage.setItem(DRAFT_KEY, JSON.stringify(draft)); } catch(e) {}
+  }
+
+  function restoreDraft() {
+    try {
+      const raw = localStorage.getItem(DRAFT_KEY);
+      if (!raw) return;
+      const draft = JSON.parse(raw);
+      DRAFT_FIELDS.forEach(id => {
+        if (draft[id] == null) return;
+        const el = document.getElementById(id);
+        if (el) el.value = draft[id];
+      });
+    } catch(e) {}
+  }
+
+  function clearDraft() {
+    try { localStorage.removeItem(DRAFT_KEY); } catch(e) {}
+  }
+
+  // Attach draft-saving listeners after DOM ready
+  function attachDraftListeners() {
+    DRAFT_FIELDS.forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.addEventListener('input', saveDraft);
+      if (el && el.tagName === 'SELECT') el.addEventListener('change', saveDraft);
+    });
+  }
 
   // === Section: Boot ===
   // ── EXPOSE ──
