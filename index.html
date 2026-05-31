@@ -1915,7 +1915,7 @@
   function updateCharts(data) {
     const kom={}, keg={};
     data.forEach(d => {
-      const luas = parseFloat(d.luas||0);
+      const luas = Math.max(0, parseFloat(d.luas||0));
       kom[d.komoditas] = (kom[d.komoditas]||0) + luas;
       keg[d.kegiatan]  = (keg[d.kegiatan]||0)  + luas;
     });
@@ -1955,7 +1955,7 @@
       if(el) el.innerHTML='<i class="ti ti-loader spin" style="font-size:16px"></i>';
     });
     const data = await fetchAllForRekap({ dateFrom:rekapDateFrom, dateTo:rekapDateTo, jenis:activeFilter });
-    const totalLuas     = data.reduce((s,d)=>s+parseFloat(d.luas||0),0);
+    const totalLuas     = data.reduce((s,d)=>s+Math.max(0, parseFloat(d.luas||0)),0);
     const totalDesa     = new Set(data.map(d=>d.desa)).size;
     const totalKelompok = new Set(data.map(d=>d.kelompok_tani)).size;
     document.getElementById('stat-total').textContent    = data.length;
@@ -2338,7 +2338,7 @@
   }
 
   // ── TABS ──
-  function switchTab(name) {
+  async function switchTab(name) {
     ['input','data','rekap','produksi'].forEach(t=>{
       const panel = document.getElementById('panel-'+t);
       const tab = document.getElementById('tab-'+t);
@@ -2352,8 +2352,8 @@
       }
       tab.className = 'tab' + (t === name ? ' active' : '');
     });
-    if (name==='data')     renderTable(true);
-    if (name==='rekap')    renderRekap();
+    if (name==='data')     await renderTable(true);
+    if (name==='rekap')    await renderRekap();
     if (name==='produksi') {
       if (activeSubTab==='produktivitas') renderProduksiCards();
       else renderAUTCards();
@@ -2452,10 +2452,10 @@
   }
 
   function calcProduksi(row) {
-    const luas=parseFloat(row.luas)||0;
-    const karung=parseFloat(row.karung)||0;
-    const berat=parseFloat(row.beratKarung)||0;
-    const ka=parseFloat(row.kadarAir)||14;
+    const luas=Math.max(0, parseFloat(row.luas)||0);
+    const karung=Math.max(0, parseFloat(row.karung)||0);
+    const berat=Math.max(0, parseFloat(row.beratKarung)||0);
+    const ka=Math.max(0, parseFloat(row.kadarAir)||14);
     const gkp=karung*berat;
     const gkg=ka<100?gkp*(100-ka)/86:0;
     const beras=gkg*0.63;
@@ -2575,7 +2575,7 @@
     let totalLuas=0,totalGKP=0,totalGKG=0,totalBeras=0;
     produksiRows.forEach(row=>{
       const c=calcProduksi(row);
-      totalLuas+=parseFloat(row.luas)||0;
+      totalLuas+=Math.max(0, parseFloat(row.luas)||0);
       totalGKP+=c.gkp; totalGKG+=c.gkg; totalBeras+=c.beras;
     });
     const totalProduk=totalLuas>0?(totalGKP/totalLuas/1000):0;
@@ -2797,14 +2797,14 @@
 
   function calcAUT(row) {
     const prodRow = row.linkedProdId ? produksiRows.find(r => r.id === row.linkedProdId) : null;
-    const luas = parseFloat(prodRow ? (prodRow.luas || row.luas) : row.luas) || 0;
-    const hargaJual = parseFloat(row.hargaJual) || 0;
+    const luas = Math.max(0, parseFloat(prodRow ? (prodRow.luas || row.luas) : row.luas) || 0);
+    const hargaJual = Math.max(0, parseFloat(row.hargaJual) || 0);
     // If linked: derive GKP from produksi karung×berat; if manual: use row.gkpManual
-    const gkp = prodRow
-      ? parseFloat(prodRow.karung||0) * parseFloat(prodRow.beratKarung||0)
-      : parseFloat(row.gkpManual||0);
+    const gkp = Math.max(0, prodRow
+      ? Math.max(0, parseFloat(prodRow.karung||0)) * Math.max(0, parseFloat(prodRow.beratKarung||0))
+      : parseFloat(row.gkpManual||0));
     const totalBiaya = row.biaya.reduce((s, b) => {
-      return s + (parseFloat(b.jumlah)||0) * (parseFloat(b.harga)||0);
+      return s + Math.max(0, parseFloat(b.jumlah)||0) * Math.max(0, parseFloat(b.harga)||0);
     }, 0);
     const totalBiayaPerHa = luas > 0 ? totalBiaya / luas : 0;
     const penerimaanKotor = gkp * hargaJual;
@@ -2877,7 +2877,6 @@
           <div class="calc-result-val has-val" style="font-size:13px">${bepHarga>=0?fmtRp(bepHarga):'—'}</div>
           <div class="calc-result-unit">Harga impas/kg</div>
         </div>`;
-      resWrap.innerHTML += '</div>';
     }
     renderAUTTotal();
   }
@@ -2935,7 +2934,7 @@
       const effDesa = linkedProdRow ? linkedProdRow.desa : row.desa;
       const effKom  = linkedProdRow ? linkedProdRow.komoditas : row.komoditas;
       const effLuas = linkedProdRow ? linkedProdRow.luas : row.luas;
-      const effGKP  = linkedProdRow ? (parseFloat(linkedProdRow.karung||0)*parseFloat(linkedProdRow.beratKarung||0)) : 0;
+      const effGKP  = linkedProdRow ? (Math.max(0, parseFloat(linkedProdRow.karung||0)) * Math.max(0, parseFloat(linkedProdRow.beratKarung||0))) : 0;
 
       const infoSection = linkedProdRow ? `
         <div class="aut-linked-badge">
