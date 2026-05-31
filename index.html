@@ -2340,8 +2340,17 @@
   // ── TABS ──
   function switchTab(name) {
     ['input','data','rekap','produksi'].forEach(t=>{
-      document.getElementById('panel-'+t).className='panel'+(t===name?' active':'');
-      document.getElementById('tab-'+t).className='tab'+(t===name?' active':'');
+      const panel = document.getElementById('panel-'+t);
+      const tab = document.getElementById('tab-'+t);
+      if (t === name) {
+        panel.className = 'panel active';
+        if (t === 'produksi') panel.style.display = 'flex';
+        else panel.style.display = '';
+      } else {
+        panel.className = 'panel';
+        panel.style.display = '';
+      }
+      tab.className = 'tab' + (t === name ? ' active' : '');
     });
     if (name==='data')     renderTable(true);
     if (name==='rekap')    renderRekap();
@@ -2369,12 +2378,12 @@
 
   function saveProduksiData() {
     setStorage('produksi_data', produksiRows);
-    localStorage.setItem('produksi_id_counter', produksiIdCounter);
+    setStorage('produksi_id_counter', produksiIdCounter);
   }
 
   function loadProduksiData() {
     produksiRows = getStorage('produksi_data', []);
-    produksiIdCounter = parseInt(getStorage('produksi_id_counter', 0));
+    produksiIdCounter = parseInt(getStorage('produksi_id_counter', 0)) || 0;
   }
 
   function tambahBarisProduksi() {
@@ -2430,8 +2439,8 @@
     const setRes=(sel,val,dec)=>{
       const el=document.querySelector(`#calc-card-${id} ${sel}`);
       if(!el) return;
-      el.textContent=(val!=null&&val>=0)?fmt(val,dec):'—';
-      el.classList.toggle('has-val',val>=0);
+      el.textContent=(val!=null&&val>0)?fmt(val,dec):'—';
+      el.classList.toggle('has-val',val>0);
     };
     setRes('.res-gkp',gkp,1); setRes('.res-gkg',gkg,1);
     setRes('.res-beras',beras,1); setRes('.res-produk',produk,3);
@@ -2534,22 +2543,22 @@
           <div class="calc-results">
             <div class="calc-result-item">
               <div class="calc-result-label">GKP</div>
-              <div class="calc-result-val res-gkp${gkp>=0?' has-val':''}">${gkp>=0?fmt(gkp):'—'}</div>
+              <div class="calc-result-val res-gkp${gkp>0?' has-val':''}">${gkp>0?fmt(gkp):'—'}</div>
               <div class="calc-result-unit">Gabah Kering Panen</div>
             </div>
             <div class="calc-result-item">
               <div class="calc-result-label">GKG</div>
-              <div class="calc-result-val res-gkg${gkg>=0?' has-val':''}">${gkg>=0?fmt(gkg):'—'}</div>
+              <div class="calc-result-val res-gkg${gkg>0?' has-val':''}">${gkg>0?fmt(gkg):'—'}</div>
               <div class="calc-result-unit">KA standar 14%</div>
             </div>
             <div class="calc-result-item">
               <div class="calc-result-label">Beras</div>
-              <div class="calc-result-val res-beras${beras>=0?' has-val':''}">${beras>=0?fmt(beras):'—'}</div>
+              <div class="calc-result-val res-beras${beras>0?' has-val':''}">${beras>0?fmt(beras):'—'}</div>
               <div class="calc-result-unit">rendemen 63%</div>
             </div>
             <div class="calc-result-item">
               <div class="calc-result-label">Produktivitas</div>
-              <div class="calc-result-val res-produk${produk>=0?' has-val':''}">${produk>=0?fmt(produk,3):'—'}</div>
+              <div class="calc-result-val res-produk${produk>0?' has-val':''}">${produk>0?fmt(produk,3):'—'}</div>
               <div class="calc-result-unit">ton / Ha</div>
             </div>
           </div>
@@ -2596,12 +2605,12 @@
 
   function saveAUTData() {
     setStorage('aut_data', autRows);
-    localStorage.setItem('aut_id_counter', autIdCounter);
+    setStorage('aut_id_counter', autIdCounter);
   }
 
   function loadAUTData() {
     autRows = getStorage('aut_data', []);
-    autIdCounter = parseInt(getStorage('aut_id_counter', 0));
+    autIdCounter = parseInt(getStorage('aut_id_counter', 0)) || 0;
   }
 
   function tambahAUT(linkedProdId) {
@@ -2868,6 +2877,7 @@
           <div class="calc-result-val has-val" style="font-size:13px">${bepHarga>=0?fmtRp(bepHarga):'—'}</div>
           <div class="calc-result-unit">Harga impas/kg</div>
         </div>`;
+      resWrap.innerHTML += '</div>';
     }
     renderAUTTotal();
   }
