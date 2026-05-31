@@ -771,43 +771,44 @@
 
     /* ── OFFLINE POPUP ─────────────────────────────────── */
     .offline-popup {
-      position: fixed; inset: 0;
-      background: rgba(0,0,0,0.5);
-      backdrop-filter: blur(8px);
-      display: flex; align-items: center; justify-content: center;
-      z-index: 2000; padding: 1rem;
-      opacity: 0; pointer-events: none;
-      transition: opacity 0.25s;
-    }
-    .offline-popup.active { opacity: 1; pointer-events: auto; }
-    .offline-box {
+      position: fixed;
+      top: calc(var(--topbar-h) + 12px);
+      left: 50%;
+      transform: translateX(-50%) translateY(-20px);
       background: var(--surface);
-      border: 1px solid var(--rule);
-      border-radius: var(--r-xl);
-      padding: 2.5rem 2rem;
-      max-width: 340px; width: 100%;
-      text-align: center;
-      box-shadow: 0 20px 48px rgba(0,0,0,0.2);
-      transform: translateY(16px) scale(0.97);
-      transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1);
+      border: 1px solid var(--coral);
+      border-radius: var(--r-lg);
+      padding: 12px 16px;
+      display: flex; align-items: center; gap: 14px;
+      z-index: 2000;
+      width: calc(100% - 32px);
+      max-width: 400px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+      opacity: 0; pointer-events: none;
+      transition: all 0.3s cubic-bezier(0.34,1.56,0.64,1);
+    }
+    .offline-popup.active { opacity: 1; pointer-events: auto; transform: translateX(-50%) translateY(0); }
+    .offline-box {
+      display: flex; align-items: center; gap: 12px; width: 100%;
     }
     .offline-popup.active .offline-box { transform: none; }
     .offline-icon {
-      width: 56px; height: 56px;
+      width: 32px; height: 32px;
       border-radius: 50%;
       background: var(--coral-bg);
       display: flex; align-items: center; justify-content: center;
-      margin: 0 auto 1rem;
-      font-size: 26px; color: var(--coral);
+      font-size: 18px; color: var(--coral);
+      flex-shrink: 0;
     }
-    .offline-title { font-size: 17px; font-weight: 700; margin-bottom: 7px; }
-    .offline-desc  { font-size: 13px; color: var(--ink-3); line-height: 1.6; margin-bottom: 1.5rem; }
+    .offline-content { flex: 1; }
+    .offline-title { font-size: 14px; font-weight: 700; margin-bottom: 1px; }
+    .offline-desc  { font-size: 12px; color: var(--ink-3); line-height: 1.4; }
     .btn-retry {
-      display: inline-flex; align-items: center; gap: 7px;
-      padding: 10px 22px;
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 6px 12px;
       background: var(--moss); color: #fff;
-      border: none; border-radius: var(--r-md);
-      font-size: 13px; font-weight: 600; font-family: var(--font-ui);
+      border: none; border-radius: var(--r-sm);
+      font-size: 12px; font-weight: 600; font-family: var(--font-ui);
       cursor: pointer; transition: background 0.15s;
     }
     .btn-retry:hover { background: var(--moss-2); }
@@ -1413,11 +1414,14 @@
   <div id="offline-popup" class="offline-popup">
     <div class="offline-box">
       <div class="offline-icon"><i class="ti ti-wifi-off"></i></div>
-      <div class="offline-title">Koneksi Terputus</div>
-      <div class="offline-desc">Tidak dapat terhubung ke database.<br>Periksa koneksi internet Anda lalu coba lagi.</div>
+      <div class="offline-content">
+        <div class="offline-title">Offline</div>
+        <div class="offline-desc">Gagal terhubung ke database.</div>
+      </div>
       <button class="btn-retry" id="btn-retry" onclick="retryConnection()">
-        <i class="ti ti-refresh"></i> Coba Lagi
+        <i class="ti ti-refresh"></i>
       </button>
+      <button class="btn-close-modal" style="padding:4px" onclick="hideOfflinePopup()"><i class="ti ti-x"></i></button>
     </div>
   </div>
 
@@ -1987,12 +1991,12 @@
   async function init() {
     initCharts();
     sbClient = initSb();
+    applyTableDatePreset('bulan_ini'); applyRekapDatePreset('bulan_ini');
     if (!sbClient) { setDbStatus(false); showOfflinePopup(); return; }
     try {
       const { error } = await sbClient.from('laporan').select('id',{count:'exact',head:true});
       if (error) throw error;
       setDbStatus(true); hideOfflinePopup();
-      applyTableDatePreset('bulan_ini'); applyRekapDatePreset('bulan_ini');
       await renderTable(true); await renderRekap();
     } catch(e) { setDbStatus(false); showOfflinePopup(); }
   }
@@ -2000,25 +2004,44 @@
   function showOfflinePopup() { document.getElementById('offline-popup').classList.add('active'); }
   function hideOfflinePopup() { document.getElementById('offline-popup').classList.remove('active'); }
 
-  async function retryConnection() {
+  async function retryConnection(silent = false) {
     const btn = document.getElementById('btn-retry');
-    btn.disabled=true; btn.innerHTML='<i class="ti ti-loader spin"></i> Menghubungkan…';
+    if (!silent) {
+      btn.disabled=true; btn.innerHTML='<i class="ti ti-loader spin"></i>';
+    }
+    setDbStatus(false, true); // set to retrying
     try {
       sbClient = initSb();
       if (!sbClient) throw new Error('Supabase client failed to initialize');
       const { error } = await sbClient.from('laporan').select('id',{count:'exact',head:true});
       if (error) throw error;
       setDbStatus(true); hideOfflinePopup();
-      showAlert('Berhasil terhubung ke database!','success');
-      applyTableDatePreset('bulan_ini'); applyRekapDatePreset('bulan_ini');
-      await renderTable(true); await renderRekap();
-    } catch(e) { setDbStatus(false); showOfflinePopup(); }
-    finally { btn.disabled=false; btn.innerHTML='<i class="ti ti-refresh"></i> Coba Lagi'; }
+      if (!silent) showAlert('Berhasil terhubung ke database!','success');
+      if (document.getElementById('panel-data').classList.contains('active')) renderTable(true);
+      if (document.getElementById('panel-rekap').classList.contains('active')) renderRekap();
+    } catch(e) {
+      setDbStatus(false);
+      if (!silent) showOfflinePopup();
+    }
+    finally {
+      if (!silent) {
+        btn.disabled=false; btn.innerHTML='<i class="ti ti-refresh"></i>';
+      }
+    }
   }
 
-  function setDbStatus(ok) {
-    document.getElementById('db-dot').className = 'db-dot '+(ok?'ok':'err');
-    document.getElementById('db-label').textContent = ok?'Terhubung':'Terputus';
+  function setDbStatus(ok, retrying = false) {
+    const dot = document.getElementById('db-dot');
+    const lbl = document.getElementById('db-label');
+    if (retrying) {
+      dot.className = 'db-dot';
+      dot.style.background = 'var(--amber)';
+      lbl.textContent = 'Menghubungkan…';
+    } else {
+      dot.className = 'db-dot '+(ok?'ok':'err');
+      dot.style.background = '';
+      lbl.textContent = ok?'Terhubung':'Terputus';
+    }
   }
 
   // ── ALERT ──
@@ -2362,8 +2385,14 @@
       }
       tab.className = 'tab' + (t === name ? ' active' : '');
     });
-    if (name==='data')     await renderTable(true);
-    if (name==='rekap')    await renderRekap();
+    if (name==='data') {
+      if (!sbClient || document.getElementById('db-dot').classList.contains('err')) retryConnection(true);
+      await renderTable(true);
+    }
+    if (name==='rekap') {
+      if (!sbClient || document.getElementById('db-dot').classList.contains('err')) retryConnection(true);
+      await renderRekap();
+    }
     if (name==='produksi') {
       if (activeSubTab==='produktivitas') renderProduksiCards();
       else renderAUTCards();
