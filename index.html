@@ -83,7 +83,6 @@
         --teal:     #3dd4bc;
         --teal-bg:  #081f1d;
       }
-    }
 
     html { scroll-behavior: smooth; }
 
@@ -1968,16 +1967,18 @@
 
   // ── INIT ──
   // === Section: Core/DB ===
+  function initSb() {
+    const url = getStorage('sb_url', SUPABASE_URL);
+    const key = getStorage('sb_key', SUPABASE_KEY);
+    if (!url || !key || !window.supabase || !window.supabase.createClient) return null;
+    return window.supabase.createClient(url, key);
+  }
+
   async function init() {
     initCharts();
-    const url = SUPABASE_URL;
-    const key = SUPABASE_KEY;
-    if (!url||!key) { setDbStatus(false); showOfflinePopup(); return; }
-    if (!window.supabase || !window.supabase.createClient) {
-      setDbStatus(false); showOfflinePopup(); return;
-    }
+    sbClient = initSb();
+    if (!sbClient) { setDbStatus(false); showOfflinePopup(); return; }
     try {
-      sbClient = window.supabase.createClient(url, key);
       const { error } = await sbClient.from('laporan').select('id',{count:'exact',head:true});
       if (error) throw error;
       setDbStatus(true); hideOfflinePopup();
@@ -1992,11 +1993,9 @@
   async function retryConnection() {
     const btn = document.getElementById('btn-retry');
     btn.disabled=true; btn.innerHTML='<i class="ti ti-loader spin"></i> Menghubungkan…';
-    const url = SUPABASE_URL;
-    const key = SUPABASE_KEY;
     try {
-      if (!window.supabase || !window.supabase.createClient) throw new Error('Supabase library not loaded');
-      sbClient = window.supabase.createClient(url, key);
+      sbClient = initSb();
+      if (!sbClient) throw new Error('Supabase client failed to initialize');
       const { error } = await sbClient.from('laporan').select('id',{count:'exact',head:true});
       if (error) throw error;
       setDbStatus(true); hideOfflinePopup();
@@ -2866,7 +2865,7 @@
     container.innerHTML = autRows.map((row, idx) => {
       const {totalBiaya, totalBiayaPerHa, penerimaanKotor, pendapatanBersih, rcRatio, bepProduksi, bepHarga, gkp} = calcAUT(row);
       const isLoss = pendapatanBersih < 0;
-      const komodOpts = ['Padi','Jagung','Kedelai'].map(k=>`<option${k===row.komoditas?' selected':''}>${escHtml(k)}</option>`).join('');
+      const komodOpts = KOMODITAS_LIST.map(k=>`<option${k===row.komoditas?' selected':''}>${escHtml(k)}</option>`).join('');
     const biayaItems = row.biaya.map(b => {
         const subtotal = (parseFloat(b.jumlah)||0) * (parseFloat(b.harga)||0);
         return `<div class="aut-biaya-item" id="biaya-row-${row.id}-${b.id}">
@@ -3069,20 +3068,16 @@
       const el = document.getElementById(id);
       if (el) draft[id] = el.value;
     });
-    try { localStorage.setItem(DRAFT_KEY, JSON.stringify(draft)); } catch(e) {}
+    setStorage(DRAFT_KEY, draft);
   }
 
   function restoreDraft() {
-    try {
-      const raw = localStorage.getItem(DRAFT_KEY);
-      if (!raw) return;
-      const draft = JSON.parse(raw);
-      DRAFT_FIELDS.forEach(id => {
-        if (draft[id] == null) return;
-        const el = document.getElementById(id);
-        if (el) el.value = draft[id];
-      });
-    } catch(e) {}
+    const draft = getStorage(DRAFT_KEY, {});
+    DRAFT_FIELDS.forEach(id => {
+      if (draft[id] == null) return;
+      const el = document.getElementById(id);
+      if (el) el.value = draft[id];
+    });
   }
 
   function clearDraft() {
