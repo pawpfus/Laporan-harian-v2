@@ -12,7 +12,6 @@
   <style>
     /* === Section: Reset/Variables === */
 
-
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     button, a { -webkit-tap-highlight-color: transparent; }
 
@@ -99,7 +98,6 @@
       -webkit-font-smoothing: antialiased;
       font-size: 14px;
     }
-
 
 
     /* === Section: Layout === */
@@ -233,7 +231,6 @@
     }
     #panel-produksi { display: none; flex-direction: column; gap: 12px; }
     #panel-produksi.active { display: flex; }
-
 
 
     /* === Section: Components === */
@@ -452,7 +449,6 @@
     }
     .btn-save-edit:hover { background: var(--moss-2); }
     @media (prefers-color-scheme: dark) { .btn-save-edit { color: #e8ede7; } }
-
 
 
     /* === Section: Features === */
@@ -1272,7 +1268,6 @@
     }
 
 
-
     /* === Section: Utilities === */
     /* ── EMPTY / LOADING ───────────────────────────────── */
     .empty-state {
@@ -1289,7 +1284,6 @@
 
     /* ── SETUP CARD (hidden) ─────────────────────────────── */
     .setup-card { display: none !important; }
-
 
 
     /* === Section: Responsive === */
@@ -1359,7 +1353,6 @@
       .stats-grid { grid-template-columns: 1fr; }
       .tab { font-size: 8.5px; }
     }
-
 
   </style>
 </head>
@@ -1709,7 +1702,6 @@
 <script>
   // === Section: Config ===
 
-
   const SUPABASE_URL = 'https://penaujinawijzwcimgde.supabase.co';
   const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBlbmF1amluYXdpanp3Y2ltZ2RlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg5NzgzNzcsImV4cCI6MjA5NDU1NDM3N30.FNNGqO7X5wpZ9Ng8qehPagS74uP-GMo8Z2AdzSEU6v4';
   let sbClient = null;
@@ -1723,6 +1715,12 @@
   let searchDebounceTimer = null;
 
 
+  const PRESET_LABELS = { hari_ini:'Hari Ini', minggu_ini:'Minggu Ini', bulan_ini:'Bulan Ini', semua:'Semua Waktu' };
+
+
+
+
+
 
 
 
@@ -1732,6 +1730,25 @@
 
 
   // === Section: Utilities ===
+  function getDateRange(preset) {
+    const now = new Date();
+    const pad = n => String(n).padStart(2,'0');
+    const fmt = d => `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+    const todayStr = fmt(now);
+    if (preset === 'hari_ini') return { from: todayStr, to: todayStr };
+    if (preset === 'minggu_ini') {
+      const day = now.getDay();
+      const mon = new Date(now); mon.setDate(now.getDate() - (day===0?6:day-1));
+      const sun = new Date(mon); sun.setDate(mon.getDate()+6);
+      return { from: fmt(mon), to: fmt(sun) };
+    }
+    if (preset === 'bulan_ini') {
+      const from = `${now.getFullYear()}-${pad(now.getMonth()+1)}-01`;
+      const last = new Date(now.getFullYear(), now.getMonth()+1, 0);
+      return { from, to: fmt(last) };
+    }
+    return { from: null, to: null };
+  }
   function escHtml(s) {
     if (s == null) return '';
     return String(s)
@@ -1758,26 +1775,6 @@
     if (n == null || isNaN(n)) return '—';
     return 'Rp ' + Math.round(n).toLocaleString('id-ID');
   }
-  function getDateRange(preset) {
-    const now = new Date();
-    const pad = n => String(n).padStart(2,'0');
-    const fmt = d => `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
-    const todayStr = fmt(now);
-    if (preset === 'hari_ini') return { from: todayStr, to: todayStr };
-    if (preset === 'minggu_ini') {
-      const day = now.getDay();
-      const mon = new Date(now); mon.setDate(now.getDate() - (day===0?6:day-1));
-      const sun = new Date(mon); sun.setDate(mon.getDate()+6);
-      return { from: fmt(mon), to: fmt(sun) };
-    }
-    if (preset === 'bulan_ini') {
-      const from = `${now.getFullYear()}-${pad(now.getMonth()+1)}-01`;
-      const last = new Date(now.getFullYear(), now.getMonth()+1, 0);
-      return { from, to: fmt(last) };
-    }
-    return { from: null, to: null };
-  }
-  const PRESET_LABELS = { hari_ini:'Hari Ini', minggu_ini:'Minggu Ini', bulan_ini:'Bulan Ini', semua:'Semua Waktu' };
 
   // === Section: Core/DB ===
   // ── INIT ──
@@ -1824,7 +1821,6 @@
     document.getElementById('db-dot').className = 'db-dot '+(ok?'ok':'err');
     document.getElementById('db-label').textContent = ok?'Terhubung':'Terputus';
   }
-
 
 
   // === Section: Data Ops ===
@@ -1910,95 +1906,7 @@
   }
 
 
-
   // === Section: UI Core ===
-
-  function toggleWaktuDropdown(prefix) {
-    const dd = document.getElementById(prefix+'-waktu-dropdown');
-    const btn = document.getElementById(prefix+'-btn-waktu');
-    const isOpen = dd.classList.contains('open');
-    document.querySelectorAll('.waktu-dropdown').forEach(d=>d.classList.remove('open'));
-    document.querySelectorAll('.btn-waktu').forEach(b=>b.classList.remove('open'));
-    if (!isOpen) { dd.classList.add('open'); btn.classList.add('open'); }
-  }
-
-  function closeAllWaktuDropdowns() {
-    document.querySelectorAll('.waktu-dropdown').forEach(d=>d.classList.remove('open'));
-    document.querySelectorAll('.btn-waktu').forEach(b=>b.classList.remove('open'));
-  }
-
-  document.addEventListener('click', e => {
-    if (!e.target.closest('.waktu-wrap') && !e.target.closest('#download-wrap')) {
-      closeAllWaktuDropdowns(); closeDownloadDropdown();
-    }
-  });
-
-  function updateWaktuLabel(prefix, label) {
-    const span = document.getElementById(prefix+'-waktu-label');
-    const btn  = document.getElementById(prefix+'-btn-waktu');
-    if (span) span.textContent = label;
-    if (btn) btn.classList.toggle('has-filter', label !== PRESET_LABELS['semua']);
-  }
-
-  function setActiveWaktuOpt(prefix, preset) {
-    document.querySelectorAll('#'+prefix+'-waktu-dropdown .btn-waktu-opt').forEach(b=>b.classList.remove('active'));
-    const match = [...document.querySelectorAll('#'+prefix+'-waktu-dropdown .btn-waktu-opt')]
-      .find(b=>b.getAttribute('onclick')?.includes("'"+preset+"','"+prefix+"'"));
-    if (match) match.classList.add('active');
-  }
-
-  function applyTableDatePreset(preset) {
-    const r = getDateRange(preset);
-    tableDateFrom = r.from; tableDateTo = r.to;
-    const fi = document.getElementById('t-date-from');
-    const ti = document.getElementById('t-date-to');
-    if (fi) fi.value = r.from||''; if (ti) ti.value = r.to||'';
-  }
-
-  function applyRekapDatePreset(preset) {
-    const r = getDateRange(preset);
-    rekapDateFrom = r.from; rekapDateTo = r.to;
-    const fi = document.getElementById('r-date-from');
-    const ti = document.getElementById('r-date-to');
-    if (fi) fi.value = r.from||''; if (ti) ti.value = r.to||'';
-  }
-
-  function setTableDatePreset(preset) {
-    applyTableDatePreset(preset);
-    setActiveWaktuOpt('t', preset);
-    updateWaktuLabel('t', PRESET_LABELS[preset]||preset);
-    closeAllWaktuDropdowns(); currentPage=1; renderTable(true);
-  }
-
-  function setRekapDatePreset(preset) {
-    applyRekapDatePreset(preset);
-    setActiveWaktuOpt('r', preset);
-    updateWaktuLabel('r', PRESET_LABELS[preset]||preset);
-    closeAllWaktuDropdowns(); renderRekap();
-  }
-
-  function applyTableCustomRange() {
-    const from = document.getElementById('t-date-from')?.value||null;
-    const to   = document.getElementById('t-date-to')?.value||null;
-    if (!from||!to) { showAlert('Pilih tanggal mulai dan tanggal akhir','warning'); return; }
-    if (from > to) { showAlert('Tanggal mulai tidak boleh melebihi tanggal akhir','warning'); return; }
-    tableDateFrom=from; tableDateTo=to;
-    document.querySelectorAll('#t-waktu-dropdown .btn-waktu-opt').forEach(b=>b.classList.remove('active'));
-    updateWaktuLabel('t', from+' — '+to);
-    closeAllWaktuDropdowns(); currentPage=1; renderTable(true);
-  }
-
-  function applyRekapCustomRange() {
-    const from = document.getElementById('r-date-from')?.value||null;
-    const to   = document.getElementById('r-date-to')?.value||null;
-    if (!from||!to) { showAlert('Pilih tanggal mulai dan tanggal akhir','warning'); return; }
-    if (from > to) { showAlert('Tanggal mulai tidak boleh melebihi tanggal akhir','warning'); return; }
-    rekapDateFrom=from; rekapDateTo=to;
-    document.querySelectorAll('#r-waktu-dropdown .btn-waktu-opt').forEach(b=>b.classList.remove('active'));
-    updateWaktuLabel('r', from+' — '+to);
-    closeAllWaktuDropdowns(); renderRekap();
-  }
-
   // ── ALERT ──
   function showAlert(msg, type='success') {
     const box=document.getElementById('alert-box');
@@ -2119,7 +2027,81 @@
     });
   }
 
-
+  function toggleWaktuDropdown(prefix) {
+    const dd = document.getElementById(prefix+'-waktu-dropdown');
+    const btn = document.getElementById(prefix+'-btn-waktu');
+    const isOpen = dd.classList.contains('open');
+    document.querySelectorAll('.waktu-dropdown').forEach(d=>d.classList.remove('open'));
+    document.querySelectorAll('.btn-waktu').forEach(b=>b.classList.remove('open'));
+    if (!isOpen) { dd.classList.add('open'); btn.classList.add('open'); }
+  }
+  function closeAllWaktuDropdowns() {
+    document.querySelectorAll('.waktu-dropdown').forEach(d=>d.classList.remove('open'));
+    document.querySelectorAll('.btn-waktu').forEach(b=>b.classList.remove('open'));
+  }
+  document.addEventListener('click', e => {
+    if (!e.target.closest('.waktu-wrap') && !e.target.closest('#download-wrap')) {
+      closeAllWaktuDropdowns(); closeDownloadDropdown();
+    }
+  });
+  function updateWaktuLabel(prefix, label) {
+    const span = document.getElementById(prefix+'-waktu-label');
+    const btn  = document.getElementById(prefix+'-btn-waktu');
+    if (span) span.textContent = label;
+    if (btn) btn.classList.toggle('has-filter', label !== PRESET_LABELS['semua']);
+  }
+  function setActiveWaktuOpt(prefix, preset) {
+    document.querySelectorAll('#'+prefix+'-waktu-dropdown .btn-waktu-opt').forEach(b=>b.classList.remove('active'));
+    const match = [...document.querySelectorAll('#'+prefix+'-waktu-dropdown .btn-waktu-opt')]
+      .find(b=>b.getAttribute('onclick')?.includes("'"+preset+"','"+prefix+"'"));
+    if (match) match.classList.add('active');
+  }
+  function applyTableDatePreset(preset) {
+    const r = getDateRange(preset);
+    tableDateFrom = r.from; tableDateTo = r.to;
+    const fi = document.getElementById('t-date-from');
+    const ti = document.getElementById('t-date-to');
+    if (fi) fi.value = r.from||''; if (ti) ti.value = r.to||'';
+  }
+  function applyRekapDatePreset(preset) {
+    const r = getDateRange(preset);
+    rekapDateFrom = r.from; rekapDateTo = r.to;
+    const fi = document.getElementById('r-date-from');
+    const ti = document.getElementById('r-date-to');
+    if (fi) fi.value = r.from||''; if (ti) ti.value = r.to||'';
+  }
+  function setTableDatePreset(preset) {
+    applyTableDatePreset(preset);
+    setActiveWaktuOpt('t', preset);
+    updateWaktuLabel('t', PRESET_LABELS[preset]||preset);
+    closeAllWaktuDropdowns(); currentPage=1; renderTable(true);
+  }
+  function setRekapDatePreset(preset) {
+    applyRekapDatePreset(preset);
+    setActiveWaktuOpt('r', preset);
+    updateWaktuLabel('r', PRESET_LABELS[preset]||preset);
+    closeAllWaktuDropdowns(); renderRekap();
+  }
+  function applyTableCustomRange() {
+    const from = document.getElementById('t-date-from')?.value||null;
+    const to   = document.getElementById('t-date-to')?.value||null;
+    if (!from||!to) { showAlert('Pilih tanggal mulai dan tanggal akhir','warning'); return; }
+    if (from > to) { showAlert('Tanggal mulai tidak boleh melebihi tanggal akhir','warning'); return; }
+    tableDateFrom=from; tableDateTo=to;
+    document.querySelectorAll('#t-waktu-dropdown .btn-waktu-opt').forEach(b=>b.classList.remove('active'));
+    updateWaktuLabel('t', from+' — '+to);
+    closeAllWaktuDropdowns(); currentPage=1; renderTable(true);
+  }
+  function applyRekapCustomRange() {
+    const from = document.getElementById('r-date-from')?.value||null;
+    const to   = document.getElementById('r-date-to')?.value||null;
+    if (!from||!to) { showAlert('Pilih tanggal mulai dan tanggal akhir','warning'); return; }
+    if (from > to) { showAlert('Tanggal mulai tidak boleh melebihi tanggal akhir','warning'); return; }
+    rekapDateFrom=from; rekapDateTo=to;
+    document.querySelectorAll('#r-waktu-dropdown .btn-waktu-opt').forEach(b=>b.classList.remove('active'));
+    updateWaktuLabel('r', from+' — '+to);
+    closeAllWaktuDropdowns(); renderRekap();
+  }
 
   // === Section: Reports ===
   // ── TABLE ──
@@ -2268,7 +2250,6 @@
 
 
 
-
   // === Section: Rekap ===
   // ── CHART ──
   let chartK = null, chartG = null;
@@ -2374,7 +2355,6 @@
     document.getElementById('stat-kelompok').textContent = totalKelompok;
     updateCharts(data);
   }
-
 
 
   // === Section: Produksi ===
@@ -2571,7 +2551,6 @@
     if (name==='produktivitas') renderProduksiCards();
     if (name==='aut') renderAUTCards();
   }
-
 
 
   // === Section: AUT ===
@@ -3034,7 +3013,6 @@
   }
 
 
-
   // === Section: Boot ===
   // ── EXPOSE ──
   window.switchTab=switchTab; window.switchSubTab=switchSubTab;
@@ -3061,7 +3039,6 @@
     attachDraftListeners();
     init();
   });
-
 
 </script>
 </body>
