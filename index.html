@@ -2048,13 +2048,16 @@
     cachedData=data||[]; totalCount=count||0; return cachedData;
   }
 
-  async function fetchAllForExport({ dateFrom=null, dateTo=null, komoditas='semua', kegiatan='semua' }={}) {
+  async function fetchAllForExport({ dateFrom=null, dateTo=null, search='', komoditas='semua', kegiatan='semua' }={}) {
     if (!sbClient) return [];
     let q = sbClient.from('laporan').select('*').order('tanggal',{ascending:false});
     if (dateFrom) q=q.gte('tanggal',dateFrom);
     if (dateTo)   q=q.lte('tanggal',dateTo);
     if (komoditas!=='semua') q=q.eq('komoditas',komoditas);
     if (kegiatan !=='semua') q=q.eq('kegiatan',kegiatan);
+    if (search) {
+      q = q.or(`desa.ilike.%${search}%,kelompok_tani.ilike.%${search}%,user_name.ilike.%${search}%`);
+    }
     const { data, error } = await q;
     if (error) { showAlert('Gagal memuat data ekspor: '+error.message,'error'); return []; }
     return data||[];
@@ -2252,9 +2255,10 @@
 
   // ── EXPORT ──
   async function getExportRows() {
+    const searchTerm=(document.getElementById('t-search')?.value||'').trim();
     const filterKomoditas=document.getElementById('t-filter-komoditas')?.value||'semua';
     const filterKegiatan=document.getElementById('t-filter-kegiatan')?.value||'semua';
-    const all=await fetchAllForExport({ dateFrom:tableDateFrom, dateTo:tableDateTo, komoditas:filterKomoditas, kegiatan:filterKegiatan });
+    const all=await fetchAllForExport({ dateFrom:tableDateFrom, dateTo:tableDateTo, search:searchTerm, komoditas:filterKomoditas, kegiatan:filterKegiatan });
     return all.map(d=>({ Tanggal:d.tanggal||'', Desa:d.desa||'', 'Kelompok Tani':d.kelompok_tani||'',
       'Jenis LTT':d.jenis_ltt||'', Kegiatan:d.kegiatan||'', Komoditas:d.komoditas||'',
       'Luas (Ha)':parseFloat(d.luas)||0, User:d.user_name||'' }));
@@ -2375,7 +2379,7 @@
 
   function tambahBarisProduksi() {
     const id=++produksiIdCounter;
-    produksiRows.push({id,nama:'',desa:'',komoditas:'Padi',luas:'',karung:'',beratKarung:'',kadarAir:14});
+    produksiRows.push({id,nama:'',desa:'',komoditas:KOMODITAS_LIST[0],luas:'',karung:'',beratKarung:'',kadarAir:14});
     saveProduksiData();
     renderProduksiCards();
     setTimeout(()=>{
@@ -2386,10 +2390,19 @@
 
   function hapusBarisProduksi(id) {
     if (!confirm('Hapus data petani ini?')) return;
+    const prodRow = produksiRows.find(r => r.id === id);
     produksiRows=produksiRows.filter(r=>r.id!==id);
     // Auto-unlink AUT rows referencing the deleted produksi row
     autRows.forEach(ar => {
-      if (ar.linkedProdId === id) {
+      if (ar.linkedProdId === id && prodRow) {
+        if (!ar.nama) ar.nama = prodRow.nama;
+        if (!ar.desa) ar.desa = prodRow.desa;
+        if (!ar.komoditas) ar.komoditas = prodRow.komoditas;
+        if (!ar.luas) ar.luas = prodRow.luas;
+        if (!ar.gkpManual) {
+          const gkp = (parseFloat(prodRow.karung)||0) * (parseFloat(prodRow.beratKarung)||0);
+          if (gkp > 0) ar.gkpManual = String(gkp);
+        }
         ar.linkedProdId = null;
       }
     });
@@ -2417,8 +2430,8 @@
     const setRes=(sel,val,dec)=>{
       const el=document.querySelector(`#calc-card-${id} ${sel}`);
       if(!el) return;
-      el.textContent=(val!=null&&val>0)?fmt(val,dec):'—';
-      el.classList.toggle('has-val',val>0);
+      el.textContent=(val!=null&&val>=0)?fmt(val,dec):'—';
+      el.classList.toggle('has-val',val>=0);
     };
     setRes('.res-gkp',gkp,1); setRes('.res-gkg',gkg,1);
     setRes('.res-beras',beras,1); setRes('.res-produk',produk,3);
@@ -2521,22 +2534,22 @@
           <div class="calc-results">
             <div class="calc-result-item">
               <div class="calc-result-label">GKP</div>
-              <div class="calc-result-val res-gkp${gkp>0?' has-val':''}">${gkp>0?fmt(gkp):'—'}</div>
+              <div class="calc-result-val res-gkp${gkp>=0?' has-val':''}">${gkp>=0?fmt(gkp):'—'}</div>
               <div class="calc-result-unit">Gabah Kering Panen</div>
             </div>
             <div class="calc-result-item">
               <div class="calc-result-label">GKG</div>
-              <div class="calc-result-val res-gkg${gkg>0?' has-val':''}">${gkg>0?fmt(gkg):'—'}</div>
+              <div class="calc-result-val res-gkg${gkg>=0?' has-val':''}">${gkg>=0?fmt(gkg):'—'}</div>
               <div class="calc-result-unit">KA standar 14%</div>
             </div>
             <div class="calc-result-item">
               <div class="calc-result-label">Beras</div>
-              <div class="calc-result-val res-beras${beras>0?' has-val':''}">${beras>0?fmt(beras):'—'}</div>
+              <div class="calc-result-val res-beras${beras>=0?' has-val':''}">${beras>=0?fmt(beras):'—'}</div>
               <div class="calc-result-unit">rendemen 63%</div>
             </div>
             <div class="calc-result-item">
               <div class="calc-result-label">Produktivitas</div>
-              <div class="calc-result-val res-produk${produk>0?' has-val':''}">${produk>0?fmt(produk,3):'—'}</div>
+              <div class="calc-result-val res-produk${produk>=0?' has-val':''}">${produk>=0?fmt(produk,3):'—'}</div>
               <div class="calc-result-unit">ton / Ha</div>
             </div>
           </div>
@@ -2602,7 +2615,7 @@
       linkedProdId: linkedRow ? linkedRow.id : null,
       nama: linkedRow ? linkedRow.nama : '',
       desa: linkedRow ? linkedRow.desa : '',
-      komoditas: linkedRow ? linkedRow.komoditas : 'Padi',
+      komoditas: linkedRow ? linkedRow.komoditas : KOMODITAS_LIST[0],
       luas: linkedRow ? linkedRow.luas : '',
       gkpManual: '',   // used when not linked to a produksi row
       hargaJual: 6500,
@@ -2671,9 +2684,14 @@
     const prodRow = produksiRows.find(r => r.id === row.linkedProdId);
     if (prodRow) {
       // Preserve values from linked row as manual inputs
-      if (!row.luas && prodRow.luas) row.luas = prodRow.luas;
-      const computedGKP = parseFloat(prodRow.karung||0) * parseFloat(prodRow.beratKarung||0);
-      if (!row.gkpManual && computedGKP > 0) row.gkpManual = String(computedGKP);
+      if (!row.nama) row.nama = prodRow.nama;
+      if (!row.desa) row.desa = prodRow.desa;
+      if (!row.komoditas) row.komoditas = prodRow.komoditas;
+      if (!row.luas) row.luas = prodRow.luas;
+      if (!row.gkpManual) {
+        const gkp = (parseFloat(prodRow.karung)||0) * (parseFloat(prodRow.beratKarung)||0);
+        if (gkp > 0) row.gkpManual = String(gkp);
+      }
     }
     row.linkedProdId = null;
     saveAUTData();
@@ -2837,17 +2855,17 @@
         </div>
         <div class="aut-result-item">
           <div class="calc-result-label">R/C Ratio</div>
-          <div class="calc-result-val ${rcRatio>=1?'has-val':''}">${rcRatio>0?rcRatio.toFixed(2):'—'}</div>
+          <div class="calc-result-val ${rcRatio>=0?'has-val':''}">${rcRatio>=0?rcRatio.toFixed(2):'—'}</div>
           <div class="calc-result-unit">${rcRatio>=1?'Layak':'Tidak layak'}</div>
         </div>
         <div class="aut-result-item">
           <div class="calc-result-label">BEP Produksi</div>
-          <div class="calc-result-val has-val" style="font-size:13px">${bepProduksi>0?fmt(bepProduksi/1000,2)+' ton':'—'}</div>
+          <div class="calc-result-val has-val" style="font-size:13px">${bepProduksi>=0?fmt(bepProduksi/1000,2)+' ton':'—'}</div>
           <div class="calc-result-unit">Volume impas</div>
         </div>
         <div class="aut-result-item">
           <div class="calc-result-label">BEP Harga</div>
-          <div class="calc-result-val has-val" style="font-size:13px">${fmtRp(bepHarga)}</div>
+          <div class="calc-result-val has-val" style="font-size:13px">${bepHarga>=0?fmtRp(bepHarga):'—'}</div>
           <div class="calc-result-unit">Harga impas/kg</div>
         </div>`;
     }
@@ -3019,17 +3037,17 @@
           </div>
           <div class="aut-result-item">
             <div class="calc-result-label">R/C Ratio</div>
-            <div class="calc-result-val ${rcRatio>=1?'has-val':''}">${rcRatio>0?rcRatio.toFixed(2):'—'}</div>
+            <div class="calc-result-val ${rcRatio>=0?'has-val':''}">${rcRatio>=0?rcRatio.toFixed(2):'—'}</div>
             <div class="calc-result-unit">${rcRatio>=1?'Layak':'Tidak layak'}</div>
           </div>
           <div class="aut-result-item">
             <div class="calc-result-label">BEP Produksi</div>
-            <div class="calc-result-val has-val" style="font-size:13px">${bepProduksi>0?fmt(bepProduksi/1000,2)+' ton':'—'}</div>
+          <div class="calc-result-val has-val" style="font-size:13px">${bepProduksi>=0?fmt(bepProduksi/1000,2)+' ton':'—'}</div>
             <div class="calc-result-unit">Volume impas</div>
           </div>
           <div class="aut-result-item">
             <div class="calc-result-label">BEP Harga</div>
-            <div class="calc-result-val has-val" style="font-size:13px">${fmtRp(bepHarga)}</div>
+          <div class="calc-result-val has-val" style="font-size:13px">${bepHarga>=0?fmtRp(bepHarga):'—'}</div>
             <div class="calc-result-unit">Harga impas/kg</div>
           </div>
         </div>
@@ -3054,7 +3072,7 @@
       <div class="ptb-item"><div class="ptb-label">Total Biaya</div><div class="ptb-val" style="font-size:14px">${fmtRp(totalBiayaAll)}</div><div class="ptb-unit">${autRows.length} petani</div></div>
       <div class="ptb-item"><div class="ptb-label">Total Penerimaan</div><div class="ptb-val" style="font-size:14px">${fmtRp(totalPenerimaanAll)}</div><div class="ptb-unit">GKP × harga</div></div>
       <div class="ptb-item"><div class="ptb-label">Total Bersih</div><div class="ptb-val" style="font-size:14px">${fmtRp(totalBersihAll)}</div><div class="ptb-unit">${totalBersihAll>=0?'Menguntungkan':'Merugi'}</div></div>
-      <div class="ptb-item"><div class="ptb-label">R/C Ratio</div><div class="ptb-val">${rcAll>0?rcAll.toFixed(2):'—'}</div><div class="ptb-unit">${rcAll>=1?'Layak':'Tidak layak'}</div></div>
+      <div class="ptb-item"><div class="ptb-label">R/C Ratio</div><div class="ptb-val">${rcAll>=0?rcAll.toFixed(2):'—'}</div><div class="ptb-unit">${rcAll>=1?'Layak':'Tidak layak'}</div></div>
     </div>`;
   }
 
