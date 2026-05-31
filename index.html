@@ -2358,7 +2358,7 @@
 
   function loadProduksiData() {
     produksiRows = getStorage('produksi_data', []);
-    produksiIdCounter = parseInt(localStorage.getItem('produksi_id_counter') || 0);
+    produksiIdCounter = parseInt(getStorage('produksi_id_counter', 0));
   }
 
   function tambahBarisProduksi() {
@@ -2385,19 +2385,6 @@
     saveAUTData();
     renderProduksiCards();
     if (activeSubTab === 'aut') renderAUTCards();
-  }
-
-  function duplikatBarisProduksi(id) {
-    const row = produksiRows.find(r => r.id === id);
-    if (!row) return;
-    const newId = ++produksiIdCounter;
-    const clone = JSON.parse(JSON.stringify(row));
-    clone.id = newId;
-    clone.nama = (clone.nama ? clone.nama + ' (Copy)' : '');
-    produksiRows.push(clone);
-    saveProduksiData();
-    renderProduksiCards();
-    showAlert('Data petani diduplikasi','success');
   }
 
   function updateProduksiRow(id,field,value) {
@@ -2468,8 +2455,7 @@
             <div class="calc-card-name${namaClass}">${namaTxt}</div>
             <div class="calc-card-sub">${subText}</div>
           </div>
-          <button class="btn-hapus-baris" style="margin-left: auto" onclick="duplikatBarisProduksi(${row.id})" title="Duplikat"><i class="ti ti-copy"></i></button>
-          <button class="btn-hapus-baris" onclick="hapusBarisProduksi(${row.id})" title="Hapus"><i class="ti ti-trash"></i></button>
+          <button class="btn-hapus-baris" style="margin-left: auto" onclick="hapusBarisProduksi(${row.id})" title="Hapus"><i class="ti ti-trash"></i></button>
         </div>
         <div class="calc-card-body">
           <div class="calc-inputs">
@@ -2590,7 +2576,7 @@
 
   function loadAUTData() {
     autRows = getStorage('aut_data', []);
-    autIdCounter = parseInt(localStorage.getItem('aut_id_counter') || 0);
+    autIdCounter = parseInt(getStorage('aut_id_counter', 0));
   }
 
   function tambahAUT(linkedProdId) {
@@ -2934,7 +2920,7 @@
         </div>` : `
         <div class="aut-section-title" style="border-top:none"><i class="ti ti-info-circle"></i> Informasi Dasar</div>
         <div class="aut-inputs">
-          <div class="calc-field calc-field-full">
+          <div class="calc-field">
             <div class="calc-field-label">Nama Petani / Poktan</div>
             <input class="calc-input aut-input-nama" value="${escHtml(row.nama)}" placeholder="Nama petani atau kelompok tani…"
               oninput="updateAUT(${row.id},'nama',this.value)" autocomplete="off" />
@@ -2981,7 +2967,7 @@
             <div class="calc-card-name${!effNama?' calc-card-name-placeholder':''}">${escHtml(effNama)||'Nama petani…'}</div>
             <div class="calc-card-sub">${[escHtml(effDesa), escHtml(effKom), effLuas?(escHtml(String(effLuas))+' Ha'):''].filter(Boolean).join(' · ')||'Desa · Komoditas'}</div>
           </div>
-          <button class="btn-hapus-baris" onclick="hapusAUT(${row.id})" title="Hapus"><i class="ti ti-x"></i></button>
+        <button class="btn-hapus-baris" style="margin-left:auto" onclick="hapusAUT(${row.id})" title="Hapus"><i class="ti ti-trash"></i></button>
         </div>
         ${infoSection}
 
@@ -3121,10 +3107,13 @@
   // ── BOOT ──
   // Use 'load' event so all CDN scripts (supabase, Chart.js) are fully ready
   window.addEventListener('load', () => {
+    initTheme(); // Sync icon state
     document.getElementById('f-tanggal').value = today();
     restoreDraft();
     loadProduksiData();
     loadAUTData();
+    renderProduksiCards();
+    renderAUTCards();
     attachDraftListeners();
     init();
   });
