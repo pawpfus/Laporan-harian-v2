@@ -108,7 +108,7 @@
       gap: 12px;
       position: sticky;
       top: 0;
-      z-index: 200;
+      z-index: 400;
     }
 
     .topbar-logo {
@@ -385,6 +385,7 @@
     .btn-download.open .chevron { transform: rotate(180deg); }
 
     @keyframes dropIn { from { opacity:0; transform:translateY(-5px); } to { opacity:1; transform:none; } }
+    @keyframes dropUp { from { opacity:0; transform:translateY(5px); } to { opacity:1; transform:none; } }
 
     .download-dropdown {
       display: none;
@@ -395,7 +396,7 @@
       padding: 5px;
       box-shadow: 0 8px 24px rgba(0,0,0,0.12);
       z-index: 300; min-width: 150px;
-      animation: dropIn 0.15s ease;
+      animation: dropUp 0.15s ease;
     }
     .download-dropdown.open { display: block; }
     .btn-dl-option {
@@ -1750,7 +1751,7 @@
   function setActiveWaktuOpt(prefix, preset) {
     document.querySelectorAll('#'+prefix+'-waktu-dropdown .btn-waktu-opt').forEach(b=>b.classList.remove('active'));
     const match = [...document.querySelectorAll('#'+prefix+'-waktu-dropdown .btn-waktu-opt')]
-      .find(b=>b.getAttribute('onclick')?.includes("'"+preset+"'"));
+      .find(b=>b.getAttribute('onclick')?.includes("'"+preset+"','"+prefix+"'"));
     if (match) match.classList.add('active');
   }
 
@@ -1895,6 +1896,7 @@
     renderRekap();
   }
   async function renderRekap() {
+    if (!sbClient) return;
     ['stat-total','stat-luas','stat-desa','stat-kelompok'].forEach(id=>{
       const el=document.getElementById(id);
       if(el) el.innerHTML='<i class="ti ti-loader spin" style="font-size:16px"></i>';
@@ -1961,6 +1963,8 @@
     const msgEl=document.getElementById('alert-msg');
     const icon=document.getElementById('alert-icon');
     const iconMap={success:'ti ti-circle-check',warning:'ti ti-alert-triangle',error:'ti ti-circle-x'};
+    box.className='alert hidden'; // reset first to allow animation restart
+    void box.offsetWidth;         // force reflow
     box.className='alert '+type;
     msgEl.textContent=msg;
     icon.className=iconMap[type]||iconMap.success;
@@ -2067,6 +2071,10 @@
 
   async function renderTable(fetchFromServer=true) {
     const container=document.getElementById('table-container');
+    if (!sbClient) {
+      container.innerHTML=`<div class="empty-state"><i class="ti ti-inbox"></i>Belum terhubung ke database</div>`;
+      return;
+    }
     const searchTerm=(document.getElementById('t-search')?.value||'').trim();
     const filterKomoditas=document.getElementById('t-filter-komoditas')?.value||'semua';
     const filterKegiatan=document.getElementById('t-filter-kegiatan')?.value||'semua';
@@ -2145,8 +2153,16 @@
     clearTimeout(searchDebounceTimer);
     searchDebounceTimer = setTimeout(() => renderTable(true), 280);
   }
-  function changePage(offset) { currentPage+=offset; renderTable(true); }
-  function goToPage(p) { currentPage=p; renderTable(true); }
+  function changePage(offset) {
+    const totalPages = Math.max(1, Math.ceil(totalCount / rowsPerPage));
+    currentPage = Math.min(Math.max(1, currentPage + offset), totalPages);
+    renderTable(true);
+  }
+  function goToPage(p) {
+    const totalPages = Math.max(1, Math.ceil(totalCount / rowsPerPage));
+    currentPage = Math.min(Math.max(1, p), totalPages);
+    renderTable(true);
+  }
 
   // ── EDIT MODAL ──
   function bukaEditModal(id) {
@@ -2294,12 +2310,7 @@
   function updateProduksiRow(id,field,value) {
     const row=produksiRows.find(r=>r.id===id);
     if (!row) return;
-    // Normalize numeric fields to float when possible
-    if (['luas','karung','beratKarung','kadarAir'].includes(field)) {
-      row[field] = value; // keep raw string; parseFloat happens in calc
-    } else {
-      row[field] = value;
-    }
+    row[field] = value; // keep raw string; parseFloat happens in calc
     const nm=document.querySelector(`#calc-card-${id} .calc-card-name`);
     const sub=document.querySelector(`#calc-card-${id} .calc-card-sub`);
     if(nm){nm.textContent=row.nama||'Nama petani…';nm.classList.toggle('calc-card-name-placeholder',!row.nama);}
@@ -2552,7 +2563,7 @@
       // Preserve values from linked row as manual inputs
       if (!row.luas && prodRow.luas) row.luas = prodRow.luas;
       const computedGKP = parseFloat(prodRow.karung||0) * parseFloat(prodRow.beratKarung||0);
-      if (!row.gkpManual && computedGKP > 0) row.gkpManual = computedGKP;
+      if (!row.gkpManual && computedGKP > 0) row.gkpManual = String(computedGKP);
     }
     row.linkedProdId = null;
     renderAUTCards();
@@ -2736,8 +2747,8 @@
     container.innerHTML = autRows.map((row, idx) => {
       const {totalBiaya, totalBiayaPerHa, penerimaanKotor, pendapatanBersih, rcRatio, bepProduksi, bepHarga, gkp} = calcAUT(row);
       const isLoss = pendapatanBersih < 0;
-      const komodOpts = ['Padi','Jagung','Kedelai'].map(k=>`<option${k===row.komoditas?' selected':''}>${escHtml(k)}</option>`).join('');
-    const biayaItems = row.biaya.map(b => {
+
+      const biayaItems = row.biaya.map(b => {
         const subtotal = (parseFloat(b.jumlah)||0) * (parseFloat(b.harga)||0);
         return `<div class="aut-biaya-item" id="biaya-row-${row.id}-${b.id}">
           <div class="field-uraian">
@@ -2963,8 +2974,9 @@
   function attachDraftListeners() {
     DRAFT_FIELDS.forEach(id => {
       const el = document.getElementById(id);
-      if (el) el.addEventListener('input', saveDraft);
-      if (el && el.tagName === 'SELECT') el.addEventListener('change', saveDraft);
+      if (!el) return;
+      el.addEventListener('input', saveDraft);
+      if (el.tagName === 'SELECT') el.addEventListener('change', saveDraft);
     });
   }
 
