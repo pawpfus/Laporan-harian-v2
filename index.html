@@ -2111,9 +2111,10 @@
     const desa=document.getElementById('f-desa').value.trim();
     const kelompok=document.getElementById('f-kelompok').value.trim();
     const user=document.getElementById('f-user').value.trim();
-    const luas=parseFloat(document.getElementById('f-luas').value)||0;
+    const luasRaw=document.getElementById('f-luas').value;
+    const luas=luasRaw===''?null:parseFloat(luasRaw);
     if (!desa||!kelompok||!user||!tanggal) { showAlert('Semua data wajib diisi','warning'); return; }
-    if (luas <= 0) { showAlert('Luas harus lebih dari 0','warning'); return; }
+    if (luas===null||isNaN(luas)||luas<0) { showAlert('Luas harus diisi (minimal 0)','warning'); return; }
     const btn=document.getElementById('btn-simpan');
     btn.disabled=true; btn.innerHTML='<i class="ti ti-loader spin"></i> Menyimpan…';
     const row={tanggal,desa,kelompok_tani:kelompok,jenis_ltt:document.getElementById('f-jenis').value,
@@ -2269,9 +2270,10 @@
     const desa=document.getElementById('edit-desa').value.trim();
     const kelompok=document.getElementById('edit-kelompok').value.trim();
     const user=document.getElementById('edit-user').value.trim();
-    const luas=parseFloat(document.getElementById('edit-luas').value)||0;
+    const luasRaw=document.getElementById('edit-luas').value;
+    const luas=luasRaw===''?null:parseFloat(luasRaw);
     if (!desa||!kelompok||!user||!tanggal) { showAlert('Semua data wajib diisi','warning'); return; }
-    if (luas <= 0) { showAlert('Luas harus lebih dari 0','warning'); return; }
+    if (luas===null||isNaN(luas)||luas<0) { showAlert('Luas harus diisi (minimal 0)','warning'); return; }
     const btn=document.getElementById('btn-update');
     btn.disabled=true; btn.innerHTML='<i class="ti ti-loader spin"></i> Menyimpan…';
     const row={tanggal,desa,kelompok_tani:kelompok,jenis_ltt:document.getElementById('edit-jenis').value,
