@@ -1113,6 +1113,144 @@
     .sub-panel { display: none; flex-direction: column; gap: 12px; }
     .sub-panel.active { display: flex; }
 
+    /* ── VARIETAS ───────────────────────────────────────── */
+    .varietas-topbar {
+      display: flex; align-items: center; justify-content: space-between;
+      flex-wrap: wrap; gap: 10px; margin-bottom: 1rem;
+    }
+    .varietas-head {
+      display: flex; align-items: center; gap: 8px;
+      font-size: 14px; font-weight: 700; color: var(--ink);
+    }
+    .varietas-head > i { color: var(--moss); font-size: 18px; }
+    .varietas-count {
+      font-size: 11px; font-weight: 600; font-family: var(--font-mono);
+      color: var(--moss); background: var(--moss-4);
+      padding: 2px 9px; border-radius: 99px;
+    }
+    .varietas-search {
+      position: relative; display: flex; align-items: center;
+      min-width: 240px; flex: 1; max-width: 340px;
+    }
+    .varietas-search i {
+      position: absolute; left: 12px; font-size: 15px; color: var(--ink-3); pointer-events: none;
+    }
+    .varietas-search input {
+      width: 100%; height: 38px; padding: 0 12px 0 34px;
+      font-family: var(--font-ui); font-size: 13px;
+      border: 1px solid var(--rule); border-radius: var(--r-md);
+      background: var(--ground); color: var(--ink); outline: none;
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+    .varietas-search input:focus { border-color: var(--moss); box-shadow: 0 0 0 3px rgba(45,92,46,0.1); }
+    .varietas-grid {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
+      gap: 12px;
+    }
+    .var-card {
+      background: var(--surface); border: 1px solid var(--rule);
+      border-radius: var(--r-lg); padding: 14px 15px;
+      display: flex; flex-direction: column; gap: 11px;
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+    .var-card:hover { border-color: var(--moss-3); box-shadow: var(--shadow-md); }
+    .var-card-top { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+    .var-name { font-size: 14.5px; font-weight: 700; color: var(--ink); letter-spacing: -0.01em; }
+    .var-badge {
+      font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em;
+      color: var(--moss); background: var(--moss-4); border: 1px solid var(--moss-3);
+      padding: 2px 8px; border-radius: 99px; flex-shrink: 0;
+    }
+    .var-potensi {
+      background: var(--moss-4); border-radius: var(--r-md);
+      padding: 10px 12px;
+    }
+    .var-potensi-main { display: flex; align-items: baseline; gap: 5px; }
+    .var-potensi-num {
+      font-family: var(--font-mono); font-weight: 700; font-size: 26px;
+      line-height: 1; color: var(--moss); font-variant-numeric: tabular-nums;
+    }
+    .var-potensi-unit { font-size: 12px; font-weight: 600; color: var(--moss); }
+    .var-potensi-sub { font-size: 11.5px; color: var(--ink-3); margin-top: 4px; }
+    .var-potensi-sub b { color: var(--ink-2); font-family: var(--font-mono); }
+    .var-meta-row {
+      display: flex; align-items: center; gap: 6px;
+      font-size: 12.5px; color: var(--ink-3);
+    }
+    .var-meta-row i { font-size: 15px; color: var(--ink-3); }
+    .var-meta-row b { color: var(--ink); margin-left: auto; font-family: var(--font-mono); }
+    .var-section { display: flex; flex-direction: column; gap: 6px; }
+    .var-section-label {
+      font-size: 10px; font-weight: 700; letter-spacing: 0.06em;
+      text-transform: uppercase; color: var(--ink-4);
+    }
+    .var-chips { display: flex; flex-wrap: wrap; gap: 5px; }
+    .var-chip {
+      font-size: 11.5px; font-weight: 500; line-height: 1.3;
+      padding: 3px 9px; border-radius: var(--r-sm);
+      background: var(--ground-2); color: var(--ink-2); border: 1px solid var(--rule);
+    }
+    .var-chip.ok { background: var(--moss-4); color: var(--moss); border-color: var(--moss-3); }
+    .varietas-note {
+      display: flex; align-items: flex-start; gap: 8px;
+      margin-top: 1rem; padding: 11px 13px;
+      background: var(--ground); border: 1px solid var(--rule); border-radius: var(--r-md);
+      font-size: 11.5px; color: var(--ink-3); line-height: 1.5;
+    }
+    .varietas-note i { color: var(--ink-3); font-size: 15px; flex-shrink: 0; margin-top: 1px; }
+    .varietas-empty {
+      grid-column: 1 / -1; text-align: center; padding: 2.5rem 1rem;
+      color: var(--ink-3); font-size: 13px;
+    }
+    .varietas-empty i { font-size: 20px; display: block; margin-bottom: 6px; }
+    .varietas-empty > div { margin-top: 12px; }
+    .varietas-actions { margin-bottom: 12px; }
+    .varietas-actions:empty { display: none; }
+    .var-edit {
+      flex-shrink: 0; width: 28px; height: 28px;
+      display: flex; align-items: center; justify-content: center;
+      border: 1px solid var(--rule); border-radius: var(--r-sm);
+      background: var(--ground); color: var(--ink-3);
+      cursor: pointer; transition: all 0.15s;
+    }
+    .var-edit:hover { background: var(--moss-4); color: var(--moss); border-color: var(--moss-3); }
+    .var-edit i { font-size: 15px; }
+    .btn-seed {
+      display: inline-flex; align-items: center; gap: 7px;
+      padding: 9px 16px; border: none; border-radius: var(--r-md);
+      background: var(--moss); color: #fff;
+      font-family: var(--font-ui); font-weight: 600; font-size: 13px;
+      cursor: pointer; transition: background 0.15s;
+    }
+    .btn-seed:hover { background: var(--moss-2); }
+    .btn-seed:disabled { opacity: 0.6; cursor: default; }
+    @media (prefers-color-scheme: dark) { .btn-seed { color: #e8ede7; } }
+    .varietas-setup {
+      grid-column: 1 / -1; text-align: center;
+      border: 1px dashed var(--rule-2); border-radius: var(--r-lg);
+      padding: 1.75rem 1.25rem; color: var(--ink-3);
+    }
+    .varietas-setup > i { font-size: 30px; color: var(--moss); display: block; margin-bottom: 10px; }
+    .vs-title { font-size: 14px; font-weight: 700; color: var(--ink); margin-bottom: 4px; }
+    .vs-title code { font-family: var(--font-mono); font-size: 13px; color: var(--moss); }
+    .vs-desc { font-size: 12.5px; margin-bottom: 12px; }
+    .vs-sql {
+      text-align: left; white-space: pre; overflow-x: auto;
+      background: var(--ground); border: 1px solid var(--rule); border-radius: var(--r-md);
+      padding: 12px 14px; margin: 0 auto 12px; max-width: 560px;
+      font-family: var(--font-mono); font-size: 11.5px; line-height: 1.5; color: var(--ink-2);
+    }
+    .btn-hapus-varietas {
+      margin-right: auto;
+      display: inline-flex; align-items: center; gap: 5px;
+      padding: 9px 14px; border: 1px solid var(--rule);
+      border-radius: var(--r-md); background: var(--coral-bg); color: var(--coral);
+      font-family: var(--font-ui); font-weight: 600; font-size: 13px; cursor: pointer;
+      transition: filter 0.15s;
+    }
+    .btn-hapus-varietas:hover { filter: brightness(0.97); }
+    .field-hint { font-weight: 400; color: var(--ink-4); font-size: 11px; }
+
     /* ── ANALISIS USAHA TANI ────────────────────────────── */
     .aut-card {
       background: var(--surface);
@@ -1363,7 +1501,7 @@
         left: 8px; right: 8px;
         bottom: max(8px, env(safe-area-inset-bottom));
         z-index: 900;
-        display: grid; grid-template-columns: repeat(4, 1fr);
+        display: grid; grid-template-columns: repeat(5, 1fr);
         gap: 0; padding: 6px 4px;
         margin-bottom: 0;
         border-radius: 20px;
@@ -1475,6 +1613,9 @@
     </button>
     <button class="tab" onclick="switchTab('produksi')" id="tab-produksi" role="tab">
       <i class="ti ti-scale"></i> Produksi
+    </button>
+    <button class="tab" onclick="switchTab('varietas')" id="tab-varietas" role="tab">
+      <i class="ti ti-seeding"></i> Varietas
     </button>
   </div>
 
@@ -1730,6 +1871,26 @@
     </div>
   </div>
 
+  <!-- PANEL VARIETAS -->
+  <div class="panel" id="panel-varietas">
+    <div class="varietas-topbar">
+      <div class="varietas-head">
+        <i class="ti ti-seeding"></i> Katalog Varietas Padi
+        <span class="varietas-count" id="varietas-count">0 varietas</span>
+      </div>
+      <div class="varietas-search">
+        <i class="ti ti-search"></i>
+        <input type="text" id="varietas-search-input" placeholder="Cari varietas atau keunggulan…" oninput="filterVarietas(this.value)" />
+      </div>
+    </div>
+    <div class="varietas-actions" id="varietas-actions"></div>
+    <div class="varietas-grid" id="varietas-grid"></div>
+    <div class="varietas-note">
+      <i class="ti ti-info-circle"></i>
+      <span>Potensi &amp; rata-rata hasil mengacu pada Deskripsi Varietas (Balitbangtan/BSIP, Kementan). Hasil aktual bergantung lokasi, musim, dan pengelolaan.</span>
+    </div>
+  </div>
+
 </div>
 
 <!-- MODAL EDIT -->
@@ -1763,6 +1924,28 @@
     <div class="modal-footer">
       <button class="btn-cancel" onclick="tutupEditModal()">Batal</button>
       <button class="btn-save-edit" id="btn-update" onclick="updateData()">Simpan Perubahan</button>
+    </div>
+  </div>
+</div>
+
+<div id="varietas-modal" class="modal-overlay" onclick="if(event.target===this) tutupVarietasModal()">
+  <div class="modal-content">
+    <div class="modal-header">
+      <div class="modal-title" id="varietas-modal-title"><i class="ti ti-seeding" style="margin-right:6px"></i>Tambah Varietas</div>
+      <button class="btn-close-modal" onclick="tutupVarietasModal()"><i class="ti ti-x"></i></button>
+    </div>
+    <div class="form-grid">
+      <div class="field" style="grid-column:1/-1"><label for="v-nama">Nama Varietas</label><input type="text" id="v-nama" placeholder="mis. Inpari 32 HDB" /></div>
+      <div class="field"><label for="v-potensi">Potensi Hasil (ton/ha)</label><input type="number" id="v-potensi" min="0" step="0.1" placeholder="8.4" /></div>
+      <div class="field"><label for="v-rata">Rata-rata Hasil (ton/ha)</label><input type="number" id="v-rata" min="0" step="0.1" placeholder="6.3" /></div>
+      <div class="field" style="grid-column:1/-1"><label for="v-umur">Umur Panen</label><input type="text" id="v-umur" placeholder="mis. 120 hari" /></div>
+      <div class="field" style="grid-column:1/-1"><label for="v-keunggulan">Keunggulan <span class="field-hint">— pisahkan dengan koma</span></label><input type="text" id="v-keunggulan" placeholder="Tahan HDB, Nasi pulen" /></div>
+      <div class="field" style="grid-column:1/-1"><label for="v-ketahanan">Ketahanan <span class="field-hint">— pisahkan dengan koma</span></label><input type="text" id="v-ketahanan" placeholder="Wereng coklat, Blas" /></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-hapus-varietas" id="btn-hapus-varietas" onclick="hapusVarietas()" style="display:none"><i class="ti ti-trash"></i> Hapus</button>
+      <button class="btn-cancel" onclick="tutupVarietasModal()">Batal</button>
+      <button class="btn-save-edit" id="btn-simpan-varietas" onclick="simpanVarietas()">Simpan</button>
     </div>
   </div>
 </div>
@@ -2451,7 +2634,7 @@
 
   // ── TABS ──
   async function switchTab(name) {
-    ['input','data','rekap','produksi'].forEach(t=>{
+    ['input','data','rekap','produksi','varietas'].forEach(t=>{
       const panel = document.getElementById('panel-'+t);
       const tab = document.getElementById('tab-'+t);
       if (t === name) {
@@ -2470,6 +2653,239 @@
       if (activeSubTab==='produktivitas') renderProduksiCards();
       else renderAUTCards();
     }
+    if (name==='varietas') renderVarietas();
+  }
+
+  // ── VARIETAS (katalog padi, tersimpan di tabel Supabase `varietas`) ──
+  // Daftar awal dipakai untuk tombol "Isi katalog awal" & fallback saat offline.
+  // Angka mengacu pada Deskripsi Varietas Padi (Balitbangtan/BSIP, Kementan).
+  const VARIETAS_SEED = [
+    { komoditas:'Padi', nama:'Inpari 32 HDB', potensi:8.4, rata:6.3, umur:'120 hari',
+      keunggulan:['Tahan hawar daun bakteri','Nasi pulen','Anakan banyak'], ketahanan:['HDB patotipe III','Agak tahan blas'] },
+    { komoditas:'Padi', nama:'Inpari 42 Agritan GSR', potensi:10.6, rata:7.1, umur:'112 hari',
+      keunggulan:['Potensi hasil sangat tinggi','Responsif pemupukan'], ketahanan:['Tahan HDB','Agak rentan wereng coklat'] },
+    { komoditas:'Padi', nama:'Inpari 43 Agritan GSR', potensi:9.0, rata:6.0, umur:'111 hari',
+      keunggulan:['Hemat air (GSR)','Nasi pulen'], ketahanan:['Tahan HDB','Agak tahan blas'] },
+    { komoditas:'Padi', nama:'Inpari 30 Ciherang Sub1', potensi:9.6, rata:7.2, umur:'111 hari',
+      keunggulan:['Toleran rendaman ±15 hari','Cocok rawan banjir'], ketahanan:['Tahan HDB strain III'] },
+    { komoditas:'Padi', nama:'Inpari 33', potensi:9.8, rata:6.6, umur:'107 hari',
+      keunggulan:['Umur genjah','Hasil tinggi'], ketahanan:['Tahan wereng coklat biotipe 1,2,3'] },
+    { komoditas:'Padi', nama:'Inpari IR Nutri Zinc', potensi:9.98, rata:6.2, umur:'115 hari',
+      keunggulan:['Kaya zinc (gizi)','Nasi pulen'], ketahanan:['Agak tahan HDB','Agak tahan blas'] },
+    { komoditas:'Padi', nama:'Cakrabuana Agritan', potensi:9.6, rata:6.0, umur:'105 hari',
+      keunggulan:['Umur sangat genjah','Adaptasi luas'], ketahanan:['Agak tahan HDB'] },
+    { komoditas:'Padi', nama:'Ciherang', potensi:8.5, rata:6.0, umur:'116–125 hari',
+      keunggulan:['Nasi pulen','Adaptasi sangat luas'], ketahanan:['Wereng coklat biotipe 2 & 3 (mulai rentan)'] },
+    { komoditas:'Padi', nama:'Mekongga', potensi:8.4, rata:6.0, umur:'116–125 hari',
+      keunggulan:['Malai panjang','Nasi pulen'], ketahanan:['Agak tahan wereng coklat'] },
+    { komoditas:'Padi', nama:'Cigeulis', potensi:8.0, rata:5.0, umur:'115–125 hari',
+      keunggulan:['Nasi pulen','Adaptif dataran rendah'], ketahanan:['Agak tahan HDB & blas'] },
+    { komoditas:'Padi', nama:'IR64', potensi:6.0, rata:5.0, umur:'110–120 hari',
+      keunggulan:['Legendaris','Nasi pulen'], ketahanan:['Kini rentan wereng & HDB'] },
+    { komoditas:'Padi', nama:'Inpari 24 Gabusan', potensi:7.7, rata:6.0, umur:'117 hari',
+      keunggulan:['Cocok sawah tadah hujan'], ketahanan:['Agak tahan HDB'] },
+    { komoditas:'Padi', nama:'Situ Bagendit', potensi:6.0, rata:4.0, umur:'110–120 hari',
+      keunggulan:['Adaptif sawah & gogo','Toleran kekeringan'], ketahanan:['Agak tahan blas'] },
+    { komoditas:'Padi', nama:'Inpago 8', potensi:8.1, rata:5.2, umur:'119 hari',
+      keunggulan:['Padi gogo / lahan kering','Nasi pulen'], ketahanan:['Tahan blas'] },
+    { komoditas:'Padi', nama:'Mapan P-05 (Hibrida)', potensi:11.0, rata:8.0, umur:'110 hari',
+      keunggulan:['Hibrida hasil tinggi','Vigor kuat'], ketahanan:['Agak tahan HDB'] },
+    { komoditas:'Padi', nama:'Inpari 22', potensi:7.0, rata:5.6, umur:'108 hari',
+      keunggulan:['Adaptasi luas','Nasi pulen'], ketahanan:['Agak tahan HDB'] },
+    { komoditas:'Padi', nama:'Inpari 34 Salin Agritan', potensi:8.1, rata:4.7, umur:'102 hari',
+      keunggulan:['Toleran salinitas','Cocok lahan salin'], ketahanan:['Agak tahan HDB'] },
+    { komoditas:'Padi', nama:'Inpari 35 Salin Agritan', potensi:7.6, rata:5.0, umur:'115 hari',
+      keunggulan:['Toleran salinitas'], ketahanan:['Agak tahan HDB'] },
+    { komoditas:'Padi', nama:'Inpari 36 Lanrang', potensi:8.0, rata:6.4, umur:'117 hari',
+      keunggulan:['Hasil stabil','Adaptif'], ketahanan:['Tahan wereng coklat biotipe 1,2,3'] },
+    { komoditas:'Padi', nama:'Inpari 37 Lanrang', potensi:8.0, rata:6.4, umur:'117 hari',
+      keunggulan:['Hasil stabil'], ketahanan:['Tahan wereng coklat'] },
+    { komoditas:'Padi', nama:'Inpari 38 Tadah Hujan Agritan', potensi:8.2, rata:5.9, umur:'119 hari',
+      keunggulan:['Cocok sawah tadah hujan'], ketahanan:['Agak tahan HDB & blas'] },
+    { komoditas:'Padi', nama:'Inpari 39 Tadah Hujan Agritan', potensi:8.4, rata:6.0, umur:'115 hari',
+      keunggulan:['Cocok tadah hujan','Toleran kering'], ketahanan:['Agak tahan HDB'] },
+    { komoditas:'Padi', nama:'Inpari 45 Dirgahayu', potensi:9.5, rata:6.0, umur:'115 hari',
+      keunggulan:['Potensi tinggi','Nasi pulen'], ketahanan:['Agak tahan HDB & blas'] },
+    { komoditas:'Padi', nama:'Inpari 48 Blas', potensi:7.5, rata:5.8, umur:'117 hari',
+      keunggulan:['Tahan blas','Cocok dataran tinggi'], ketahanan:['Tahan blas'] },
+    { komoditas:'Padi', nama:'Inpari 13', potensi:8.0, rata:6.6, umur:'99 hari',
+      keunggulan:['Sangat genjah','Hemat waktu'], ketahanan:['Tahan wereng coklat biotipe 1,2,3'] },
+    { komoditas:'Padi', nama:'Sintanur', potensi:6.0, rata:5.0, umur:'115–125 hari',
+      keunggulan:['Aromatik','Nasi wangi & pulen'], ketahanan:['Agak rentan wereng'] },
+  ];
+
+  const VARIETAS_SQL =
+`-- Jalankan sekali di Supabase: Dashboard → SQL Editor → Run
+create table if not exists public.varietas (
+  id uuid primary key default gen_random_uuid(),
+  komoditas text not null default 'Padi',
+  nama text not null,
+  potensi numeric,
+  rata numeric,
+  umur text,
+  keunggulan text[] default '{}',
+  ketahanan text[] default '{}',
+  created_at timestamptz default now()
+);
+alter table public.varietas enable row level security;
+drop policy if exists "varietas anon all" on public.varietas;
+create policy "varietas anon all" on public.varietas
+  for all using (true) with check (true);`;
+
+  let varietasData = [];
+  let varietasState = 'loading'; // ok | empty | no-table | offline
+  let varietasFilter = '';
+  let editVarId = null;
+
+  const fmtTon = n => (n===null||n===undefined||n==='') ? '–' : String(n).replace('.', ',');
+  const splitList = s => String(s||'').split(',').map(x=>x.trim()).filter(Boolean);
+
+  async function fetchVarietas() {
+    if (!sbClient) { varietasState='offline'; varietasData=VARIETAS_SEED; return; }
+    const { data, error } = await sbClient.from('varietas').select('*').order('nama',{ascending:true});
+    if (error) {
+      varietasState = /exist|schema cache|find the table|relation|not found/i.test(error.message) ? 'no-table' : 'offline';
+      varietasData = varietasState==='offline' ? VARIETAS_SEED : [];
+      return;
+    }
+    varietasData = data || [];
+    varietasState = varietasData.length ? 'ok' : 'empty';
+  }
+
+  async function renderVarietas(opts={}) {
+    if (opts.refetch !== false) await fetchVarietas();
+    const grid = document.getElementById('varietas-grid');
+    const countEl = document.getElementById('varietas-count');
+    const actions = document.getElementById('varietas-actions');
+    if (!grid) return;
+
+    if (varietasState==='no-table') {
+      if (countEl) countEl.textContent = 'belum disetup';
+      if (actions) actions.innerHTML = '';
+      grid.innerHTML = `<div class="varietas-setup">
+        <i class="ti ti-database-cog"></i>
+        <div class="vs-title">Tabel <code>varietas</code> belum ada di Supabase</div>
+        <div class="vs-desc">Jalankan SQL ini sekali di Supabase (SQL Editor), lalu muat ulang halaman.</div>
+        <pre class="vs-sql">${escHtml(VARIETAS_SQL)}</pre>
+        <button class="btn-seed" onclick="copyVarietasSQL(this)"><i class="ti ti-copy"></i> Salin SQL</button>
+      </div>`;
+      return;
+    }
+
+    if (actions) {
+      actions.innerHTML = (varietasState==='offline') ? ''
+        : `<button class="btn-produksi-add" onclick="bukaVarietasModal()"><i class="ti ti-plus"></i> Tambah Varietas</button>`;
+    }
+
+    if (varietasState==='empty') {
+      if (countEl) countEl.textContent = '0 varietas';
+      grid.innerHTML = `<div class="varietas-empty">
+        <i class="ti ti-database-off"></i> Katalog masih kosong.
+        <div><button class="btn-seed" onclick="seedVarietas(this)"><i class="ti ti-download"></i> Isi katalog awal (${VARIETAS_SEED.length} varietas)</button></div>
+      </div>`;
+      return;
+    }
+
+    const q = varietasFilter.trim().toLowerCase();
+    const list = varietasData.filter(v => !q
+      || (v.nama||'').toLowerCase().includes(q)
+      || (v.keunggulan||[]).join(' ').toLowerCase().includes(q)
+      || (v.ketahanan||[]).join(' ').toLowerCase().includes(q));
+    if (countEl) countEl.textContent = list.length + ' varietas' + (varietasState==='offline' ? ' · offline' : '');
+    if (!list.length) {
+      grid.innerHTML = '<div class="varietas-empty"><i class="ti ti-search-off"></i> Tidak ada varietas yang cocok.</div>';
+      return;
+    }
+    grid.innerHTML = list.map(v => `
+      <div class="var-card">
+        <div class="var-card-top">
+          <div class="var-name">${escHtml(v.nama)}</div>
+          <span class="var-badge">${escHtml(v.komoditas||'Padi')}</span>
+        </div>
+        <div class="var-potensi">
+          <div class="var-potensi-main"><span class="var-potensi-num">${fmtTon(v.potensi)}</span><span class="var-potensi-unit">ton/ha</span></div>
+          <div class="var-potensi-sub">Potensi hasil · rata-rata <b>${fmtTon(v.rata)} t/ha</b></div>
+        </div>
+        <div class="var-meta-row"><i class="ti ti-calendar-event"></i> Umur panen <b>${escHtml(v.umur||'–')}</b></div>
+        <div class="var-section">
+          <div class="var-section-label">Keunggulan</div>
+          <div class="var-chips">${(v.keunggulan||[]).map(k=>`<span class="var-chip ok">${escHtml(k)}</span>`).join('') || '<span class="var-chip">–</span>'}</div>
+        </div>
+        <div class="var-section">
+          <div class="var-section-label">Ketahanan</div>
+          <div class="var-chips">${(v.ketahanan||[]).map(k=>`<span class="var-chip">${escHtml(k)}</span>`).join('') || '<span class="var-chip">–</span>'}</div>
+        </div>
+      </div>`).join('');
+  }
+
+  function filterVarietas(val) { varietasFilter = val; renderVarietas({refetch:false}); }
+
+  function copyVarietasSQL(btn) {
+    navigator.clipboard?.writeText(VARIETAS_SQL).then(()=>{
+      showAlert('SQL disalin — tempel & Run di Supabase SQL Editor','success');
+      if (btn){ const o=btn.innerHTML; btn.innerHTML='<i class="ti ti-check"></i> Tersalin'; setTimeout(()=>btn.innerHTML=o,1800); }
+    }).catch(()=>showAlert('Gagal menyalin, salin manual dari kotak SQL','warning'));
+  }
+
+  async function seedVarietas(btn) {
+    if (!sbClient) { showAlert('Belum terhubung ke database','warning'); return; }
+    if (btn){ btn.disabled=true; btn.innerHTML='<i class="ti ti-loader spin"></i> Mengisi…'; }
+    const { error } = await sbClient.from('varietas').insert(VARIETAS_SEED);
+    if (error){ showAlert('Gagal mengisi: '+error.message,'error'); if(btn){btn.disabled=false; btn.innerHTML='<i class="ti ti-download"></i> Coba lagi';} return; }
+    showAlert('Katalog awal terisi ('+VARIETAS_SEED.length+' varietas)','success');
+    renderVarietas();
+  }
+
+  function bukaVarietasModal(id) {
+    editVarId = id || null;
+    const v = id ? varietasData.find(x=>String(x.id)===String(id)) : null;
+    document.getElementById('varietas-modal-title').innerHTML =
+      '<i class="ti ti-seeding" style="margin-right:6px"></i>' + (v ? 'Edit Varietas' : 'Tambah Varietas');
+    document.getElementById('v-nama').value = v?.nama || '';
+    document.getElementById('v-potensi').value = (v && v.potensi!=null) ? v.potensi : '';
+    document.getElementById('v-rata').value = (v && v.rata!=null) ? v.rata : '';
+    document.getElementById('v-umur').value = v?.umur || '';
+    document.getElementById('v-keunggulan').value = (v?.keunggulan||[]).join(', ');
+    document.getElementById('v-ketahanan').value = (v?.ketahanan||[]).join(', ');
+    document.getElementById('btn-hapus-varietas').style.display = v ? '' : 'none';
+    document.getElementById('varietas-modal').classList.add('active');
+  }
+  function tutupVarietasModal() {
+    document.getElementById('varietas-modal').classList.remove('active');
+    editVarId = null;
+  }
+  async function simpanVarietas() {
+    if (!sbClient) { showAlert('Belum terhubung ke database','warning'); return; }
+    const nama = document.getElementById('v-nama').value.trim();
+    if (!nama) { showAlert('Nama varietas wajib diisi','warning'); return; }
+    const pv = document.getElementById('v-potensi').value;
+    const rv = document.getElementById('v-rata').value;
+    const row = {
+      komoditas:'Padi', nama,
+      potensi: pv===''? null : parseFloat(pv),
+      rata: rv===''? null : parseFloat(rv),
+      umur: document.getElementById('v-umur').value.trim() || null,
+      keunggulan: splitList(document.getElementById('v-keunggulan').value),
+      ketahanan: splitList(document.getElementById('v-ketahanan').value),
+    };
+    const btn = document.getElementById('btn-simpan-varietas');
+    btn.disabled = true;
+    let error;
+    if (editVarId) ({ error } = await sbClient.from('varietas').update(row).eq('id',editVarId));
+    else ({ error } = await sbClient.from('varietas').insert([row]));
+    btn.disabled = false;
+    if (error) { showAlert('Gagal menyimpan: '+error.message,'error'); return; }
+    tutupVarietasModal();
+    showAlert(editVarId ? 'Varietas diperbarui' : 'Varietas ditambahkan','success');
+    renderVarietas();
+  }
+  async function hapusVarietas() {
+    if (!editVarId || !sbClient) return;
+    const { error } = await sbClient.from('varietas').delete().eq('id',editVarId);
+    if (error) { showAlert('Gagal menghapus: '+error.message,'error'); return; }
+    tutupVarietasModal();
+    showAlert('Varietas dihapus','warning');
+    renderVarietas();
   }
 
   // ── DOWNLOAD DROPDOWN ──
@@ -3234,6 +3650,9 @@
 
   // ── EXPOSE ──
   window.switchTab=switchTab; window.switchSubTab=switchSubTab;
+  window.filterVarietas=filterVarietas; window.copyVarietasSQL=copyVarietasSQL; window.seedVarietas=seedVarietas;
+  window.bukaVarietasModal=bukaVarietasModal; window.tutupVarietasModal=tutupVarietasModal;
+  window.simpanVarietas=simpanVarietas; window.hapusVarietas=hapusVarietas;
   window.tambahAUT=tambahAUT; window.showAUTPickerOrAdd=showAUTPickerOrAdd; window.tambahAUTFromPicker=tambahAUTFromPicker; window.unlinkAUT=unlinkAUT; window.hapusAUT=hapusAUT; window.updateAUT=updateAUT;
   window.tambahBiayaAUT=tambahBiayaAUT; window.hapusBiayaAUT=hapusBiayaAUT; window.updateBiayaAUT=updateBiayaAUT;
   window.tambahBarisProduksi=tambahBarisProduksi;
