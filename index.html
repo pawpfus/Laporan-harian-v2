@@ -1199,25 +1199,33 @@
     .var-chip.clickable i { font-size: 12px; opacity: 0.7; }
 
     /* ── POP-UP PENYAKIT / HAMA ─────────────────────────── */
-    #penyakit-modal .modal-content { max-width: 480px; }
+    /* Pop-up info penyakit: ringkas, tidak memenuhi layar */
+    #penyakit-modal { background: rgba(0,0,0,0.28); backdrop-filter: blur(2px); }
+    #penyakit-modal .modal-content {
+      max-width: 320px;
+      padding: 13px 15px;
+    }
+    #penyakit-modal .modal-header { margin-bottom: 0.6rem; }
+    #penyakit-modal .modal-title { font-size: 12.5px; }
+    #penyakit-modal .modal-footer { margin-top: 0.75rem; }
     .pk-badge {
-      display: inline-block; font-size: 10.5px; font-weight: 700;
+      display: inline-block; font-size: 8px; font-weight: 700;
       text-transform: uppercase; letter-spacing: 0.05em;
-      padding: 3px 10px; border-radius: 99px; margin-bottom: 14px;
+      padding: 2px 8px; border-radius: 99px; margin-bottom: 10px;
     }
     .pk-badge.penyakit { background: var(--coral-bg); color: var(--coral); border: 1px solid rgba(192,57,43,.25); }
     .pk-badge.hama     { background: var(--amber-bg); color: var(--amber); border: 1px solid rgba(196,124,18,.25); }
-    .pk-sec { margin-bottom: 14px; }
+    .pk-sec { margin-bottom: 10px; }
     .pk-sec:last-child { margin-bottom: 0; }
     .pk-sec-label {
-      display: flex; align-items: center; gap: 5px;
-      font-size: 11px; font-weight: 700; letter-spacing: 0.05em;
-      text-transform: uppercase; color: var(--ink-3); margin-bottom: 5px;
+      display: flex; align-items: center; gap: 4px;
+      font-size: 8.5px; font-weight: 700; letter-spacing: 0.05em;
+      text-transform: uppercase; color: var(--ink-3); margin-bottom: 3px;
     }
-    .pk-sec-label i { color: var(--moss); font-size: 14px; }
-    .pk-sec p { font-size: 13px; line-height: 1.55; color: var(--ink-2); margin: 0; }
-    .pk-list { margin: 0; padding-left: 18px; display: flex; flex-direction: column; gap: 5px; }
-    .pk-list li { font-size: 13px; line-height: 1.5; color: var(--ink-2); }
+    .pk-sec-label i { color: var(--moss); font-size: 11px; }
+    .pk-sec p { font-size: 10.5px; line-height: 1.45; color: var(--ink-2); margin: 0; }
+    .pk-list { margin: 0; padding-left: 15px; display: flex; flex-direction: column; gap: 3px; }
+    .pk-list li { font-size: 10.5px; line-height: 1.4; color: var(--ink-2); }
     .varietas-note {
       display: flex; align-items: flex-start; gap: 8px;
       margin-top: 1rem; padding: 11px 13px;
