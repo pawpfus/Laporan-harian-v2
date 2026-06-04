@@ -1088,7 +1088,7 @@
 
     /* ── PRODUKSI SUB-TABS ──────────────────────────────── */
     .sub-tabs {
-      display: grid; grid-template-columns: 1fr 1fr; gap: 3px;
+      display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; gap: 3px;
       background: var(--ground);
       border: 1px solid var(--rule);
       border-radius: var(--r-lg);
@@ -1501,7 +1501,7 @@
         left: 8px; right: 8px;
         bottom: max(8px, env(safe-area-inset-bottom));
         z-index: 900;
-        display: grid; grid-template-columns: repeat(5, 1fr);
+        display: grid; grid-template-columns: repeat(3, 1fr);
         gap: 0; padding: 6px 4px;
         margin-bottom: 0;
         border-radius: 20px;
@@ -1605,12 +1605,6 @@
     <button class="tab active" onclick="switchTab('input')" id="tab-input" role="tab">
       <i class="ti ti-edit"></i> Input
     </button>
-    <button class="tab" onclick="switchTab('data')" id="tab-data" role="tab">
-      <i class="ti ti-table"></i> Data
-    </button>
-    <button class="tab" onclick="switchTab('rekap')" id="tab-rekap" role="tab">
-      <i class="ti ti-chart-bar"></i> Rekap
-    </button>
     <button class="tab" onclick="switchTab('produksi')" id="tab-produksi" role="tab">
       <i class="ti ti-scale"></i> Produksi
     </button>
@@ -1619,8 +1613,22 @@
     </button>
   </div>
 
-  <!-- PANEL INPUT -->
+  <!-- PANEL INPUT (berisi sub-tab: Form / Data / Rekap) -->
   <div class="panel active" id="panel-input">
+    <div class="sub-tabs">
+      <button class="sub-tab active" id="isub-tab-form" onclick="switchInputSub('form')">
+        <i class="ti ti-edit"></i> Form
+      </button>
+      <button class="sub-tab" id="isub-tab-data" onclick="switchInputSub('data')">
+        <i class="ti ti-table"></i> Data
+      </button>
+      <button class="sub-tab" id="isub-tab-rekap" onclick="switchInputSub('rekap')">
+        <i class="ti ti-chart-bar"></i> Rekap
+      </button>
+    </div>
+
+    <!-- Sub-panel: Form -->
+    <div class="sub-panel active" id="subp-form">
     <div class="card">
       <div class="section-label"><i class="ti ti-info-circle"></i> Informasi Umum</div>
       <div class="form-grid">
@@ -1679,10 +1687,11 @@
         <i class="ti ti-device-floppy"></i> Simpan Laporan
       </button>
     </div>
-  </div>
+    </div>
+    <!-- /Sub-panel: Form -->
 
-  <!-- PANEL DATA -->
-  <div class="panel" id="panel-data">
+    <!-- Sub-panel: Data -->
+    <div class="sub-panel" id="panel-data">
     <div class="card">
       <div class="data-header">
         <div class="data-header-left">
@@ -1754,8 +1763,8 @@
     </div>
   </div>
 
-  <!-- PANEL REKAP -->
-  <div class="panel" id="panel-rekap">
+  <!-- Sub-panel: Rekap -->
+    <div class="sub-panel" id="panel-rekap">
     <div class="rekap-toolbar">
       <div class="rekap-field">
         <div class="rekap-field-label">Jenis LTT</div>
@@ -1834,7 +1843,10 @@
         <canvas id="chartKegiatan"></canvas>
       </div>
     </div>
+    </div>
+    <!-- /Sub-panel: Rekap -->
   </div>
+  <!-- /PANEL INPUT -->
 
   <!-- PANEL PRODUKSI -->
   <div class="panel" id="panel-produksi">
@@ -2335,9 +2347,10 @@
     const desa=document.getElementById('f-desa').value.trim();
     const kelompok=document.getElementById('f-kelompok').value.trim();
     const user=document.getElementById('f-user').value.trim();
-    const luas=parseFloat(document.getElementById('f-luas').value)||0;
+    const luasRaw=document.getElementById('f-luas').value;
+    const luas=parseFloat(luasRaw);
     if (!desa||!kelompok||!user||!tanggal) { showAlert('Semua data wajib diisi','warning'); return; }
-    if (luas <= 0) { showAlert('Luas harus lebih dari 0','warning'); return; }
+    if (luasRaw===''||isNaN(luas)||luas<0) { showAlert('Luas wajib diisi (boleh 0)','warning'); return; }
     const btn=document.getElementById('btn-simpan');
     btn.disabled=true; btn.innerHTML='<i class="ti ti-loader spin"></i> Menyimpan…';
     const row={tanggal,desa,kelompok_tani:kelompok,jenis_ltt:document.getElementById('f-jenis').value,
@@ -2533,9 +2546,10 @@
     const desa=document.getElementById('edit-desa').value.trim();
     const kelompok=document.getElementById('edit-kelompok').value.trim();
     const user=document.getElementById('edit-user').value.trim();
-    const luas=parseFloat(document.getElementById('edit-luas').value)||0;
+    const luasRaw=document.getElementById('edit-luas').value;
+    const luas=parseFloat(luasRaw);
     if (!desa||!kelompok||!user||!tanggal) { showAlert('Semua data wajib diisi','warning'); return; }
-    if (luas <= 0) { showAlert('Luas harus lebih dari 0','warning'); return; }
+    if (luasRaw===''||isNaN(luas)||luas<0) { showAlert('Luas wajib diisi (boleh 0)','warning'); return; }
     const btn=document.getElementById('btn-update');
     btn.disabled=true; btn.innerHTML='<i class="ti ti-loader spin"></i> Menyimpan…';
     const row={tanggal,desa,kelompok_tani:kelompok,jenis_ltt:document.getElementById('edit-jenis').value,
@@ -2634,7 +2648,7 @@
 
   // ── TABS ──
   async function switchTab(name) {
-    ['input','data','rekap','produksi','varietas'].forEach(t=>{
+    ['input','produksi','varietas'].forEach(t=>{
       const panel = document.getElementById('panel-'+t);
       const tab = document.getElementById('tab-'+t);
       if (t === name) {
@@ -2647,13 +2661,23 @@
       }
       tab.className = 'tab' + (t === name ? ' active' : '');
     });
-    if (name==='data')     await renderTable(true);
-    if (name==='rekap')    await renderRekap();
     if (name==='produksi') {
       if (activeSubTab==='produktivitas') renderProduksiCards();
       else renderAUTCards();
     }
     if (name==='varietas') renderVarietas();
+  }
+
+  // ── SUB-TAB DI DALAM INPUT (Form / Data / Rekap) ──
+  async function switchInputSub(name) {
+    ['form','data','rekap'].forEach(s=>{
+      document.getElementById('isub-tab-'+s)?.classList.toggle('active', s===name);
+    });
+    document.getElementById('subp-form').classList.toggle('active', name==='form');
+    document.getElementById('panel-data').classList.toggle('active', name==='data');
+    document.getElementById('panel-rekap').classList.toggle('active', name==='rekap');
+    if (name==='data')  await renderTable(true);
+    if (name==='rekap') await renderRekap();
   }
 
   // ── VARIETAS (katalog padi, tersimpan di tabel Supabase `varietas`) ──
@@ -3649,7 +3673,7 @@ create policy "varietas anon all" on public.varietas
   }
 
   // ── EXPOSE ──
-  window.switchTab=switchTab; window.switchSubTab=switchSubTab;
+  window.switchTab=switchTab; window.switchSubTab=switchSubTab; window.switchInputSub=switchInputSub;
   window.filterVarietas=filterVarietas; window.copyVarietasSQL=copyVarietasSQL; window.seedVarietas=seedVarietas;
   window.bukaVarietasModal=bukaVarietasModal; window.tutupVarietasModal=tutupVarietasModal;
   window.simpanVarietas=simpanVarietas; window.hapusVarietas=hapusVarietas;
