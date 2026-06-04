@@ -1191,6 +1191,33 @@
       background: var(--ground-2); color: var(--ink-2); border: 1px solid var(--rule);
     }
     .var-chip.ok { background: var(--moss-4); color: var(--moss); border-color: var(--moss-3); }
+    .var-chip.clickable {
+      cursor: pointer; display: inline-flex; align-items: center; gap: 3px;
+      transition: filter 0.15s, border-color 0.15s;
+    }
+    .var-chip.clickable:hover { filter: brightness(0.96); border-color: var(--ink-4); }
+    .var-chip.clickable i { font-size: 12px; opacity: 0.7; }
+
+    /* ── POP-UP PENYAKIT / HAMA ─────────────────────────── */
+    #penyakit-modal .modal-content { max-width: 480px; }
+    .pk-badge {
+      display: inline-block; font-size: 10.5px; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.05em;
+      padding: 3px 10px; border-radius: 99px; margin-bottom: 14px;
+    }
+    .pk-badge.penyakit { background: var(--coral-bg); color: var(--coral); border: 1px solid rgba(192,57,43,.25); }
+    .pk-badge.hama     { background: var(--amber-bg); color: var(--amber); border: 1px solid rgba(196,124,18,.25); }
+    .pk-sec { margin-bottom: 14px; }
+    .pk-sec:last-child { margin-bottom: 0; }
+    .pk-sec-label {
+      display: flex; align-items: center; gap: 5px;
+      font-size: 11px; font-weight: 700; letter-spacing: 0.05em;
+      text-transform: uppercase; color: var(--ink-3); margin-bottom: 5px;
+    }
+    .pk-sec-label i { color: var(--moss); font-size: 14px; }
+    .pk-sec p { font-size: 13px; line-height: 1.55; color: var(--ink-2); margin: 0; }
+    .pk-list { margin: 0; padding-left: 18px; display: flex; flex-direction: column; gap: 5px; }
+    .pk-list li { font-size: 13px; line-height: 1.5; color: var(--ink-2); }
     .varietas-note {
       display: flex; align-items: flex-start; gap: 8px;
       margin-top: 1rem; padding: 11px 13px;
@@ -1311,6 +1338,11 @@
       color: var(--moss);
       font-weight: 600;
       white-space: nowrap;
+    }
+    /* Samakan ukuran font angka dgn input teks di rincian biaya (hilangkan padding unit yg tak terpakai) */
+    @media (min-width: 769px) {
+      .aut-biaya-item .calc-input { font-size: 13px; }
+      .aut-biaya-item .calc-input.num { font-size: 13px; padding-right: 9px; }
     }
 
     @media (max-width: 768px) {
@@ -1958,6 +1990,19 @@
       <button class="btn-hapus-varietas" id="btn-hapus-varietas" onclick="hapusVarietas()" style="display:none"><i class="ti ti-trash"></i> Hapus</button>
       <button class="btn-cancel" onclick="tutupVarietasModal()">Batal</button>
       <button class="btn-save-edit" id="btn-simpan-varietas" onclick="simpanVarietas()">Simpan</button>
+    </div>
+  </div>
+</div>
+
+<div id="penyakit-modal" class="modal-overlay" onclick="if(event.target===this) tutupPenyakitModal()">
+  <div class="modal-content">
+    <div class="modal-header">
+      <div class="modal-title"><i id="pk-icon" class="ti ti-virus" style="margin-right:7px;color:var(--coral)"></i><span id="pk-nama">Penyakit</span></div>
+      <button class="btn-close-modal" onclick="tutupPenyakitModal()"><i class="ti ti-x"></i></button>
+    </div>
+    <div id="pk-body"></div>
+    <div class="modal-footer">
+      <button class="btn-cancel" onclick="tutupPenyakitModal()">Tutup</button>
     </div>
   </div>
 </div>
@@ -2764,6 +2809,105 @@ create policy "varietas anon all" on public.varietas
   const fmtTon = n => (n===null||n===undefined||n==='') ? '–' : String(n).replace('.', ',');
   const splitList = s => String(s||'').split(',').map(x=>x.trim()).filter(Boolean);
 
+  // ── INFO PENYAKIT / HAMA (untuk pop-up saat chip ketahanan diklik) ──
+  const DISEASE_INFO = {
+    hdb: {
+      nama:'Hawar Daun Bakteri (HDB / Kresek)', jenis:'Penyakit',
+      penyebab:'Bakteri Xanthomonas oryzae pv. oryzae. Menyebar lewat air, percikan hujan, dan luka daun; meningkat saat cuaca lembap dan pemupukan nitrogen berlebih.',
+      gejala:'Daun menguning dan mengering dari ujung/tepi seperti terbakar (hawar). Pada fase bibit–anakan daun bisa layu total (kresek). Pada potongan daun terinfeksi keluar lendir bakteri.',
+      pengendalian:[
+        'Gunakan varietas tahan (mis. Inpari 32 HDB, Inpari 30 Ciherang Sub1).',
+        'Pakai benih sehat/bersertifikat dan bebas penyakit.',
+        'Pemupukan nitrogen (urea) berimbang — jangan berlebih; tambah kalium (K).',
+        'Atur drainase, hindari genangan terlalu dalam, jaga jarak tanam agar tidak lembap.',
+        'Sanitasi lahan: musnahkan sisa tanaman sakit dan gulma inang.',
+        'Bila parah, aplikasi bakterisida berbahan tembaga sesuai anjuran setempat.',
+      ],
+    },
+    blas: {
+      nama:'Blas (Blast)', jenis:'Penyakit',
+      penyebab:'Jamur Pyricularia oryzae (Magnaporthe oryzae). Berkembang pesat saat kelembapan tinggi, embun lama, dan nitrogen berlebih.',
+      gejala:'Bercak belah ketupat (oval) abu-abu di tengah dengan tepi coklat pada daun (blas daun). Bila menyerang leher malai (blas leher) malai patah dan gabah banyak yang hampa.',
+      pengendalian:[
+        'Gunakan varietas tahan (mis. Inpari 48 Blas, Inpago 8).',
+        'Hindari pemupukan nitrogen berlebihan; pupuk berimbang.',
+        'Jarak tanam jangan terlalu rapat agar sirkulasi udara baik dan kelembapan turun.',
+        'Gunakan benih sehat dan lakukan perlakuan benih.',
+        'Aplikasi fungisida (mis. trisiklazol / azoksistrobin) saat awal gejala atau menjelang berbunga, sesuai anjuran.',
+      ],
+    },
+    wereng: {
+      nama:'Wereng Batang Coklat (WBC)', jenis:'Hama',
+      penyebab:'Serangga Nilaparvata lugens yang mengisap cairan pangkal batang. Juga menjadi vektor virus kerdil hampa & kerdil rumput.',
+      gejala:'Tanaman menguning lalu mengering berkelompok seperti terbakar ("hopperburn"); populasi padat di pangkal batang. Serangan berat dapat menyebabkan puso.',
+      pengendalian:[
+        'Gunakan varietas tahan (mis. Inpari 33, Inpari 13).',
+        'Tanam serempak dan lakukan pergiliran varietas; hindari tanam padi terus-menerus.',
+        'Pantau pangkal batang secara rutin; jaga musuh alami (laba-laba, kepik Cyrtorhinus).',
+        'Pengaturan air (pengeringan berkala) dan sistem tanam jajar legowo agar tidak terlalu lembap.',
+        'Insektisida tepat sasaran (mis. pimetrozin/buprofezin) hanya bila melampaui ambang; hindari yang memicu ledakan (resurgensi).',
+      ],
+    },
+    tungro: {
+      nama:'Tungro', jenis:'Penyakit',
+      penyebab:'Penyakit virus (Rice tungro bacilliform & spherical virus) yang ditularkan oleh wereng hijau (Nephotettix spp.).',
+      gejala:'Tanaman kerdil, anakan berkurang, daun muda menguning–oranye dari ujung, pertumbuhan tidak merata di petak.',
+      pengendalian:[
+        'Gunakan varietas tahan tungro dan tanam serempak.',
+        'Kendalikan vektor wereng hijau (pemantauan + insektisida bila perlu).',
+        'Cabut dan musnahkan tanaman terinfeksi; bersihkan gulma inang.',
+        'Atur waktu tanam menghindari puncak populasi wereng hijau.',
+      ],
+    },
+    tikus: {
+      nama:'Tikus Sawah', jenis:'Hama',
+      penyebab:'Tikus sawah (Rattus argentiventer), mamalia pengerat yang berkembang biak sangat cepat, aktif malam hari, dan bersarang di pematang, tanggul, serta tepi saluran air.',
+      gejala:'Batang padi terpotong rapi membentuk sudut ±45°; kerusakan khas mulai dari tengah petak lalu meluas ke tepi. Serangan paling merugikan pada fase generatif (bunting hingga masak) dan dapat menyebabkan puso.',
+      pengendalian:[
+        'Pengendalian dini & serempak satu hamparan sejak sebelum tanam/persemaian.',
+        'Sanitasi habitat: bersihkan gulma dan semak di pematang, perkecil ukuran pematang (<30 cm).',
+        'Tanam serempak untuk membatasi ketersediaan pakan dan masa berkembang biak.',
+        'Gropyok massal (perburuan) serta pengemposan/fumigasi lubang aktif.',
+        'Pasang TBS/LTBS (Trap Barrier System) dengan tanaman perangkap dan bubu.',
+        'Lestarikan musuh alami — terutama burung hantu Tyto alba (sediakan rubuha) dan ular sawah.',
+        'Rodentisida (umpan beracun) hanya bila populasi tinggi, digunakan hati-hati sesuai anjuran.',
+      ],
+    },
+  };
+  const DISEASE_MATCH = [
+    { key:'hdb',    kw:['hawar daun bakteri','hdb','kresek'] },
+    { key:'blas',   kw:['blas','blast'] },
+    { key:'tungro', kw:['tungro'] },
+    { key:'wereng', kw:['wereng'] },
+    { key:'tikus',  kw:['tikus'] },
+  ];
+  function detectDisease(text) {
+    const t = String(text||'').toLowerCase();
+    const m = DISEASE_MATCH.find(d => d.kw.some(k => t.includes(k)));
+    return m ? m.key : null;
+  }
+  function varChip(text, ok) {
+    const key = detectDisease(text);
+    const cls = 'var-chip' + (ok?' ok':'') + (key?' clickable':'');
+    const attr = key ? ` onclick="showPenyakit('${key}')" title="Klik: info penyakit & pengendalian"` : '';
+    const icon = key ? ' <i class="ti ti-info-circle"></i>' : '';
+    return `<span class="${cls}"${attr}>${escHtml(text)}${icon}</span>`;
+  }
+  function showPenyakit(key) {
+    const d = DISEASE_INFO[key]; if (!d) return;
+    const hama = d.jenis==='Hama';
+    document.getElementById('pk-icon').className = 'ti ' + (hama?'ti-bug':'ti-virus');
+    document.getElementById('pk-nama').textContent = d.nama;
+    document.getElementById('pk-body').innerHTML = `
+      <span class="pk-badge ${hama?'hama':'penyakit'}">${hama?'Hama':'Penyakit'}</span>
+      <div class="pk-sec"><div class="pk-sec-label">Penyebab</div><p>${escHtml(d.penyebab)}</p></div>
+      <div class="pk-sec"><div class="pk-sec-label">Gejala</div><p>${escHtml(d.gejala)}</p></div>
+      <div class="pk-sec"><div class="pk-sec-label"><i class="ti ti-shield-check"></i> Cara Pengendalian</div>
+        <ul class="pk-list">${d.pengendalian.map(x=>`<li>${escHtml(x)}</li>`).join('')}</ul></div>`;
+    document.getElementById('penyakit-modal').classList.add('active');
+  }
+  function tutupPenyakitModal() { document.getElementById('penyakit-modal').classList.remove('active'); }
+
   async function fetchVarietas() {
     if (!sbClient) { varietasState='offline'; varietasData=VARIETAS_SEED; return; }
     const { data, error } = await sbClient.from('varietas').select('*').order('nama',{ascending:true});
@@ -2833,11 +2977,11 @@ create policy "varietas anon all" on public.varietas
         <div class="var-meta-row"><i class="ti ti-calendar-event"></i> Umur panen <b>${escHtml(v.umur||'–')}</b></div>
         <div class="var-section">
           <div class="var-section-label">Keunggulan</div>
-          <div class="var-chips">${(v.keunggulan||[]).map(k=>`<span class="var-chip ok">${escHtml(k)}</span>`).join('') || '<span class="var-chip">–</span>'}</div>
+          <div class="var-chips">${(v.keunggulan||[]).map(k=>varChip(k,true)).join('') || '<span class="var-chip">–</span>'}</div>
         </div>
         <div class="var-section">
           <div class="var-section-label">Ketahanan</div>
-          <div class="var-chips">${(v.ketahanan||[]).map(k=>`<span class="var-chip">${escHtml(k)}</span>`).join('') || '<span class="var-chip">–</span>'}</div>
+          <div class="var-chips">${(v.ketahanan||[]).map(k=>varChip(k,false)).join('') || '<span class="var-chip">–</span>'}</div>
         </div>
       </div>`).join('');
   }
@@ -3675,6 +3819,7 @@ create policy "varietas anon all" on public.varietas
   // ── EXPOSE ──
   window.switchTab=switchTab; window.switchSubTab=switchSubTab; window.switchInputSub=switchInputSub;
   window.filterVarietas=filterVarietas; window.copyVarietasSQL=copyVarietasSQL; window.seedVarietas=seedVarietas;
+  window.showPenyakit=showPenyakit; window.tutupPenyakitModal=tutupPenyakitModal;
   window.bukaVarietasModal=bukaVarietasModal; window.tutupVarietasModal=tutupVarietasModal;
   window.simpanVarietas=simpanVarietas; window.hapusVarietas=hapusVarietas;
   window.tambahAUT=tambahAUT; window.showAUTPickerOrAdd=showAUTPickerOrAdd; window.tambahAUTFromPicker=tambahAUTFromPicker; window.unlinkAUT=unlinkAUT; window.hapusAUT=hapusAUT; window.updateAUT=updateAUT;
