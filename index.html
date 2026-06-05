@@ -1229,18 +1229,16 @@
     .sil-empty { font-size: 11px; color: var(--ink-3); margin: 0 0 6px; }
     /* Jadwal pemupukan */
     .pmp-sub { font-size: 10px; color: var(--ink-3); margin: -2px 0 10px; }
-    .pmp-stage {
+    /* 3 tahap digabung dalam satu kotak, dipisah garis */
+    .pmp-stages {
       border: 1px solid var(--rule); border-radius: var(--r-md);
-      background: var(--ground); padding: 8px 10px; margin-bottom: 7px;
+      background: var(--ground); padding: 2px 10px;
     }
-    .pmp-stage:last-of-type { margin-bottom: 0; }
+    .pmp-stage { padding: 9px 0; }
+    .pmp-stage + .pmp-stage { border-top: 1px solid var(--rule); }
     .pmp-stage-top { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 3px; }
     .pmp-fase { font-size: 10.5px; font-weight: 700; color: var(--ink); }
-    .pmp-hst {
-      font-size: 9px; font-weight: 700; white-space: nowrap;
-      color: var(--moss); background: var(--moss-4); border: 1px solid var(--moss-3);
-      padding: 1px 7px; border-radius: 99px;
-    }
+    .pmp-hst-txt { font-size: 9px; font-weight: 700; white-space: nowrap; color: var(--moss); }
     .pmp-tujuan { font-size: 9.5px; color: var(--ink-3); line-height: 1.4; margin-bottom: 5px; }
     .pmp-dosis { display: flex; flex-wrap: wrap; gap: 4px; }
     .pmp-dosis span {
@@ -3151,13 +3149,13 @@ create policy "varietas anon all" on public.varietas
   // Struktur dibangun sekali; tanggal diisi terpisah (tanpa membongkar DOM).
   function renderPemupukanBody() {
     _pmpStages = jadwalPemupukan(_pmpUmur);
-    const html = _pmpStages.map((s, i) => `
+    const html = '<div class="pmp-stages">' + _pmpStages.map((s, i) => `
       <div class="pmp-stage">
-        <div class="pmp-stage-top"><span class="pmp-fase">${escHtml(s.fase)}</span><span class="pmp-hst">${s.hst[0]}–${s.hst[1]} HST</span></div>
+        <div class="pmp-stage-top"><span class="pmp-fase">${escHtml(s.fase)}</span><span class="pmp-hst-txt">${s.hst[0]}–${s.hst[1]} HST</span></div>
         <div class="pmp-date" id="pmp-date-${i}" style="display:none"></div>
         <div class="pmp-tujuan">${escHtml(s.tujuan)}</div>
         <div class="pmp-dosis">${s.dosis.map(d=>`<span>${escHtml(d)}</span>`).join('')}</div>
-      </div>`).join('') +
+      </div>`).join('') + '</div>' +
       `<div class="pmp-panen" id="pmp-panen" style="display:none"><i class="ti ti-plant-2"></i> Perkiraan panen: <b id="pmp-panen-tgl"></b> <span>(${_pmpUmur} HST)</span></div>` +
       `<div class="pmp-note"><i class="ti ti-info-circle"></i> Dosis = acuan umum; sesuaikan rekomendasi setempat / uji tanah (PUTS). HST = hari setelah tanam.</div>`;
     document.getElementById('pmp-body').innerHTML = html;
