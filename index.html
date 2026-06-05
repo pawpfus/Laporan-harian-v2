@@ -2080,7 +2080,7 @@
 
 <!-- Hanya Supabase yang dimuat di awal. xlsx, jsPDF, jspdf-autotable, & Chart.js
      dimuat saat dibutuhkan (lazy) untuk mempercepat load awal. -->
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
   (function() {
     const saved = localStorage.getItem('app_theme');
@@ -4025,19 +4025,24 @@ create policy "varietas anon all" on public.varietas
   // ── UI Core ──
   // === Section: Boot ===
   // ── BOOT ──
-  // DOMContentLoaded: Supabase di-load via <script defer> sehingga siap sebelum event ini.
-  // Library berat (Chart/xlsx/jsPDF) dimuat lazy, jadi tak perlu menunggu 'load'.
-  window.addEventListener('DOMContentLoaded', () => A{
-    initTheme(); // Sync icon state
-    document.getElementById('f-tanggal').value = today();
-    restoreDraft();
-    loadProduksiData();
-    loadAUTData();
-    renderProduksiCards();
-    renderAUTCards();
-    attachDraftListeners();
+  // Library berat (Chart/xlsx/jsPDF) dimuat lazy. Supabase dimuat normal (blocking) sebelum script ini.
+  function bootApp() {
+    try { initTheme(); } catch(e){}
+    const ft = document.getElementById('f-tanggal'); if (ft) ft.value = today();
+    try { restoreDraft(); } catch(e){}
+    try { loadProduksiData(); } catch(e){}
+    try { loadAUTData(); } catch(e){}
+    try { renderProduksiCards(); } catch(e){}
+    try { renderAUTCards(); } catch(e){}
+    try { attachDraftListeners(); } catch(e){}
     init();
-  });
+  }
+  // Jalankan walau DOMContentLoaded sudah lewat (mis. script dieksekusi terlambat).
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', bootApp);
+  } else {
+    bootApp();
+  }
 </script>
 </body>
 </html>
