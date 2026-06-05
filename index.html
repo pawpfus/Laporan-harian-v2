@@ -1207,6 +1207,11 @@
     #penyakit-modal .modal-header, #pemupukan-modal .modal-header, #silsilah-modal .modal-header { margin-bottom: 0.6rem; }
     #penyakit-modal .modal-title, #pemupukan-modal .modal-title, #silsilah-modal .modal-title { font-size: 12.5px; }
     #penyakit-modal .modal-footer, #pemupukan-modal .modal-footer { margin-top: 0.75rem; }
+    /* matikan highlight biru tap/seleksi pada elemen varietas yang bisa diklik */
+    .var-name-click, .var-umur, .var-chip.clickable {
+      -webkit-tap-highlight-color: transparent;
+      user-select: none; -webkit-user-select: none;
+    }
     .var-name-click { cursor: pointer; transition: color 0.15s; }
     .var-name-click:hover { color: var(--moss); }
     .sil-empty { font-size: 11px; color: var(--ink-3); margin: 0 0 6px; }
@@ -2353,8 +2358,12 @@
     document.getElementById('stat-luas').textContent     = totalLuas.toFixed(1);
     document.getElementById('stat-desa').textContent     = totalDesa;
     document.getElementById('stat-kelompok').textContent = totalKelompok;
-    await ensureChartLib();
-    updateCharts(data);
+    try {
+      await ensureChartLib();
+      updateCharts(data);
+    } catch (e) {
+      console.warn('Chart.js gagal dimuat; statistik tetap tampil tanpa grafik.', e);
+    }
   }
 
   // ── INIT ──
@@ -2971,7 +2980,7 @@ create policy "varietas anon all" on public.varietas
   function varChip(text, ok) {
     const key = detectDisease(text);
     const cls = 'var-chip' + (ok?' ok':'') + (key?' clickable':'');
-    const attr = key ? ` onclick="showPenyakit('${key}')" title="Klik: info penyakit & pengendalian"` : '';
+    const attr = key ? ` data-penyakit="${key}" title="Klik: info penyakit & pengendalian"` : '';
     return `<span class="${cls}"${attr}>${escHtml(text)}</span>`;
   }
   function showPenyakit(key) {
@@ -3084,12 +3093,28 @@ create policy "varietas anon all" on public.varietas
     varietasState = varietasData.length ? 'ok' : 'empty';
   }
 
+  // Klik kartu varietas via event delegation (aman utk nama dgn tanda kutip)
+  function setupVarietasClicks() {
+    const grid = document.getElementById('varietas-grid');
+    if (!grid || grid._clicksBound) return;
+    grid._clicksBound = true;
+    grid.addEventListener('click', (e) => {
+      const sil = e.target.closest('[data-sil]');
+      if (sil) { showSilsilah(sil.dataset.sil); return; }
+      const pmp = e.target.closest('[data-pmp]');
+      if (pmp) { showPemupukan(pmp.dataset.pmp); return; }
+      const pk = e.target.closest('[data-penyakit]');
+      if (pk) { showPenyakit(pk.dataset.penyakit); return; }
+    });
+  }
+
   async function renderVarietas(opts={}) {
     if (opts.refetch !== false) await fetchVarietas();
     const grid = document.getElementById('varietas-grid');
     const countEl = document.getElementById('varietas-count');
     const actions = document.getElementById('varietas-actions');
     if (!grid) return;
+    setupVarietasClicks();
 
     if (varietasState==='no-table') {
       if (countEl) countEl.textContent = 'belum disetup';
@@ -3131,7 +3156,7 @@ create policy "varietas anon all" on public.varietas
     grid.innerHTML = list.map(v => `
       <div class="var-card">
         <div class="var-card-top">
-          <div class="var-name var-name-click" onclick="showSilsilah('${escHtml(v.id||v.nama)}')" title="Klik: silsilah & asal pemuliaan">${escHtml(v.nama)}</div>
+          <div class="var-name var-name-click" data-sil="${escHtml(v.id||v.nama)}" title="Klik: silsilah & asal pemuliaan">${escHtml(v.nama)}</div>
           <span class="var-badge">${escHtml(v.komoditas||'Padi')}</span>
         </div>
         <div class="var-potensi">
@@ -3139,7 +3164,7 @@ create policy "varietas anon all" on public.varietas
           <div class="var-potensi-sub">Potensi hasil · rata-rata <b>${fmtTon(v.rata)} t/ha</b></div>
         </div>
         ${v.umur
-          ? `<div class="var-meta-row var-umur" onclick="showPemupukan('${escHtml(v.id||v.nama)}')" title="Klik: rekomendasi jadwal pemupukan"><i class="ti ti-calendar-event"></i> Umur panen <b>${escHtml(v.umur)}</b></div>`
+          ? `<div class="var-meta-row var-umur" data-pmp="${escHtml(v.id||v.nama)}" title="Klik: rekomendasi jadwal pemupukan"><i class="ti ti-calendar-event"></i> Umur panen <b>${escHtml(v.umur)}</b></div>`
           : `<div class="var-meta-row"><i class="ti ti-calendar-event"></i> Umur panen <b>–</b></div>`}
         <div class="var-section">
           <div class="var-section-label">Keunggulan</div>
