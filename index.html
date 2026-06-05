@@ -329,6 +329,29 @@
       box-shadow: 0 0 0 3px rgba(45,92,46,0.12);
     }
 
+    /* Date picker kustom (pengganti input type=date native) */
+    .dp { position: relative; }
+    .dp-btn {
+      font-family: var(--font-ui); font-size: 14px;
+      padding: 9px 11px; border: 1px solid var(--rule); border-radius: var(--r-md);
+      background: var(--ground); color: var(--ink); width: 100%; cursor: pointer;
+      display: flex; align-items: center; justify-content: space-between; gap: 8px;
+      transition: border-color 0.15s, background 0.15s, box-shadow 0.15s;
+    }
+    .dp-btn:hover { border-color: var(--rule-2); }
+    .dp.open .dp-btn {
+      border-color: var(--moss); background: var(--surface);
+      box-shadow: 0 0 0 3px rgba(45,92,46,0.12);
+    }
+    .dp-btn .dp-label.empty { color: var(--ink-4); }
+    .dp-btn i { color: var(--ink-3); font-size: 16px; flex-shrink: 0; }
+    .dp-cal {
+      position: absolute; top: calc(100% + 4px); left: 0; z-index: 50;
+      width: 240px; max-width: 100%; padding: 8px;
+      background: var(--surface); border: 1px solid var(--rule); border-radius: var(--r-md);
+      box-shadow: var(--shadow-md);
+    }
+
     .divider {
       height: 1px;
       background: var(--rule);
@@ -527,7 +550,7 @@
       border-radius: var(--r-lg);
       padding: 6px;
       box-shadow: 0 8px 24px rgba(0,0,0,0.12);
-      z-index: 300; min-width: 210px;
+      z-index: 300; min-width: 240px;
       animation: dropIn 0.15s ease;
     }
     .waktu-dropdown.open { display: block; }
@@ -557,21 +580,11 @@
       color: var(--ink-3); margin-bottom: 7px;
     }
     .waktu-custom-row {
-      display: flex; align-items: center; gap: 6px; margin-bottom: 7px;
+      display: flex; flex-direction: column; align-items: stretch; gap: 6px; margin-bottom: 7px;
     }
-    .waktu-custom-row input[type=date] {
-      flex: 1; font-family: var(--font-ui); font-size: 12px;
-      padding: 6px 7px;
-      border: 1px solid var(--rule); border-radius: var(--r-sm);
-      background: var(--ground); color: var(--ink);
-      outline: none; transition: all 0.15s; min-width: 0;
-      position: relative;
-    }
-    .waktu-custom-row input[type=date]:focus {
-      border-color: var(--moss);
-      box-shadow: 0 0 0 3px rgba(45,92,46,0.1);
-      background: var(--surface);
-    }
+    .waktu-custom-row .dp { width: 100%; }
+    .waktu-custom-row .dp-btn { font-size: 12px; padding: 6px 8px; }
+    .waktu-custom-row .dp-cal { width: 100%; left: 0; right: 0; }
     .date-sep { font-size: 11px; color: var(--ink-4); flex-shrink: 0; }
     .btn-apply-custom {
       width: 100%; padding: 7px;
@@ -830,8 +843,7 @@
     /* ── MODAL ─────────────────────────────────────────── */
     .modal-overlay {
       position: fixed; inset: 0;
-      background: rgba(0,0,0,0.4);
-      backdrop-filter: blur(6px);
+      background: rgba(0,0,0,0.55);
       display: flex; align-items: center; justify-content: center;
       z-index: 1000; padding: 1rem;
       opacity: 0; pointer-events: none;
@@ -1199,7 +1211,7 @@
     .var-chip.clickable:hover { color: var(--moss); border-color: var(--moss); }
 
     /* ── POP-UP RINGKAS (penyakit & pemupukan) ──────────── */
-    #penyakit-modal, #pemupukan-modal, #silsilah-modal { background: rgba(0,0,0,0.28); backdrop-filter: blur(2px); }
+    #penyakit-modal, #pemupukan-modal, #silsilah-modal { background: rgba(0,0,0,0.45); }
     #penyakit-modal .modal-content, #pemupukan-modal .modal-content, #silsilah-modal .modal-content {
       max-width: 330px;
       padding: 13px 15px;
@@ -1241,6 +1253,66 @@
       font-size: 9px; color: var(--ink-3); line-height: 1.45; margin-top: 9px;
     }
     .pmp-note i { color: var(--ink-3); font-size: 11px; flex-shrink: 0; margin-top: 1px; }
+    /* Kalender tanam → panen di pop-up pemupukan */
+    .pmp-tanam-row {
+      position: relative;
+      display: flex; align-items: center; justify-content: space-between; gap: 8px;
+      margin-bottom: 10px; padding: 7px 10px;
+      background: var(--ground); border: 1px solid var(--rule); border-radius: var(--r-md);
+    }
+    .pmp-tanam-row > span { font-size: 10.5px; font-weight: 600; color: var(--ink-2); display: flex; align-items: center; gap: 5px; }
+    .pmp-tanam-row > span i { color: var(--moss); font-size: 13px; }
+    .pmp-date-btn {
+      display: flex; align-items: center; gap: 6px;
+      font-family: var(--font-ui); font-size: 11px; font-weight: 600; color: var(--ink);
+      background: var(--surface); border: 1px solid var(--rule); border-radius: var(--r-sm);
+      padding: 4px 9px; cursor: pointer; transition: border-color 0.15s;
+    }
+    .pmp-date-btn:hover { border-color: var(--moss); }
+    .pmp-date-btn i { color: var(--moss); font-size: 13px; }
+    /* Kalender kustom (bukan picker native) */
+    .pmp-cal {
+      position: absolute; top: calc(100% + 4px); right: 0; z-index: 30;
+      width: 232px; padding: 8px;
+      background: var(--surface); border: 1px solid var(--rule); border-radius: var(--r-md);
+      box-shadow: var(--shadow-md);
+    }
+    .pmp-cal-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; }
+    .pmp-cal-head > span { font-size: 11.5px; font-weight: 700; color: var(--ink); }
+    .pmp-cal-nav {
+      width: 22px; height: 22px; display: flex; align-items: center; justify-content: center;
+      background: var(--ground); border: 1px solid var(--rule); border-radius: var(--r-sm);
+      cursor: pointer; color: var(--ink-2); transition: all 0.15s;
+    }
+    .pmp-cal-nav:hover { background: var(--moss-4); color: var(--moss); border-color: var(--moss-3); }
+    .pmp-cal-nav i { font-size: 14px; }
+    .pmp-cal-dow { display: grid; grid-template-columns: repeat(7,1fr); gap: 2px; margin-bottom: 2px; }
+    .pmp-cal-dow span { text-align: center; font-size: 8.5px; font-weight: 700; color: var(--ink-4); }
+    .pmp-cal-grid { display: grid; grid-template-columns: repeat(7,1fr); gap: 2px; }
+    .pmp-cal-cell {
+      aspect-ratio: 1; display: flex; align-items: center; justify-content: center;
+      font-size: 10.5px; font-family: var(--font-mono); color: var(--ink-2);
+      background: none; border: none; border-radius: var(--r-sm); cursor: pointer;
+    }
+    .pmp-cal-cell.empty { visibility: hidden; cursor: default; }
+    .pmp-cal-cell:hover:not(.empty) { background: var(--ground-2); }
+    .pmp-cal-cell.today { border: 1px solid var(--moss-3); color: var(--moss); }
+    .pmp-cal-cell.sel { background: var(--moss); color: #fff; font-weight: 700; }
+    @media (prefers-color-scheme: dark) { .pmp-cal-cell.sel { color: #e8ede7; } }
+    .pmp-date {
+      display: flex; align-items: center; gap: 5px;
+      font-size: 10px; font-weight: 600; color: var(--moss); margin: 2px 0 5px;
+    }
+    .pmp-date i { font-size: 12px; }
+    .pmp-panen {
+      display: flex; align-items: center; gap: 6px;
+      margin-top: 9px; padding: 8px 10px; border-radius: var(--r-md);
+      background: var(--moss-4); border: 1px solid var(--moss-3);
+      font-size: 11px; color: var(--ink-2);
+    }
+    .pmp-panen i { color: var(--moss); font-size: 14px; }
+    .pmp-panen b { color: var(--moss); font-family: var(--font-mono); }
+    .pmp-panen span { color: var(--ink-3); font-size: 9.5px; }
     .var-umur { cursor: pointer; border-radius: var(--r-sm); transition: color 0.15s; }
     .var-umur:hover, .var-umur:hover b, .var-umur:hover i { color: var(--moss); }
     .pk-badge {
@@ -1699,8 +1771,14 @@
       <div class="section-label"><i class="ti ti-info-circle"></i> Informasi Umum</div>
       <div class="form-grid">
         <div class="field">
-          <label for="f-tanggal">Tanggal</label>
-          <input type="date" id="f-tanggal" />
+          <label>Tanggal</label>
+          <div class="dp" data-dp="f-tanggal">
+            <input type="hidden" id="f-tanggal" />
+            <button type="button" class="dp-btn" onclick="dpToggle('f-tanggal')">
+              <span class="dp-label empty">Pilih tanggal</span><i class="ti ti-calendar"></i>
+            </button>
+            <div class="dp-cal" style="display:none"></div>
+          </div>
         </div>
         <div class="field">
           <label for="f-user">Identitas</label>
@@ -1789,9 +1867,16 @@
             <div class="waktu-custom-section">
               <div class="waktu-custom-label">Rentang Custom</div>
               <div class="waktu-custom-row">
-                <input type="date" id="t-date-from" />
-                <span class="date-sep">—</span>
-                <input type="date" id="t-date-to" />
+                <div class="dp" data-dp="t-date-from">
+                  <input type="hidden" id="t-date-from" />
+                  <button type="button" class="dp-btn" onclick="dpToggle('t-date-from')"><span class="dp-label empty" data-ph="Dari">Dari</span><i class="ti ti-calendar"></i></button>
+                  <div class="dp-cal" style="display:none"></div>
+                </div>
+                <div class="dp" data-dp="t-date-to">
+                  <input type="hidden" id="t-date-to" />
+                  <button type="button" class="dp-btn" onclick="dpToggle('t-date-to')"><span class="dp-label empty" data-ph="Sampai">Sampai</span><i class="ti ti-calendar"></i></button>
+                  <div class="dp-cal" style="display:none"></div>
+                </div>
               </div>
               <button class="btn-apply-custom" onclick="applyTableCustomRange()">Terapkan</button>
             </div>
@@ -1864,9 +1949,16 @@
             <div class="waktu-custom-section">
               <div class="waktu-custom-label">Rentang Custom</div>
               <div class="waktu-custom-row">
-                <input type="date" id="r-date-from" />
-                <span class="date-sep">—</span>
-                <input type="date" id="r-date-to" />
+                <div class="dp" data-dp="r-date-from">
+                  <input type="hidden" id="r-date-from" />
+                  <button type="button" class="dp-btn" onclick="dpToggle('r-date-from')"><span class="dp-label empty" data-ph="Dari">Dari</span><i class="ti ti-calendar"></i></button>
+                  <div class="dp-cal" style="display:none"></div>
+                </div>
+                <div class="dp" data-dp="r-date-to">
+                  <input type="hidden" id="r-date-to" />
+                  <button type="button" class="dp-btn" onclick="dpToggle('r-date-to')"><span class="dp-label empty" data-ph="Sampai">Sampai</span><i class="ti ti-calendar"></i></button>
+                  <div class="dp-cal" style="display:none"></div>
+                </div>
               </div>
               <button class="btn-apply-custom" onclick="applyRekapCustomRange()">Terapkan</button>
             </div>
@@ -1980,7 +2072,15 @@
     </div>
     <input type="hidden" id="edit-id" />
     <div class="form-grid">
-      <div class="field"><label for="edit-tanggal">Tanggal</label><input type="date" id="edit-tanggal" /></div>
+      <div class="field"><label>Tanggal</label>
+        <div class="dp" data-dp="edit-tanggal">
+          <input type="hidden" id="edit-tanggal" />
+          <button type="button" class="dp-btn" onclick="dpToggle('edit-tanggal')">
+            <span class="dp-label empty">Pilih tanggal</span><i class="ti ti-calendar"></i>
+          </button>
+          <div class="dp-cal" style="display:none"></div>
+        </div>
+      </div>
       <div class="field"><label for="edit-user">Nama User</label><input type="text" id="edit-user" placeholder="Nama petugas" /></div>
       <div class="field"><label for="edit-desa">Desa</label><input type="text" id="edit-desa" placeholder="Nama desa" /></div>
       <div class="field"><label for="edit-kelompok">Kelompok Tani</label><input type="text" id="edit-kelompok" placeholder="Nama kelompok" /></div>
@@ -2045,6 +2145,13 @@
       <button class="btn-close-modal" onclick="tutupPemupukanModal()"><i class="ti ti-x"></i></button>
     </div>
     <div class="pmp-sub" id="pmp-sub"></div>
+    <div class="pmp-tanam-row">
+      <span><i class="ti ti-seeding"></i> Tanggal tanam</span>
+      <button type="button" class="pmp-date-btn" id="pmp-date-btn" onclick="togglePmpCal()">
+        <span id="pmp-date-label">Pilih tanggal</span><i class="ti ti-calendar"></i>
+      </button>
+      <div class="pmp-cal" id="pmp-cal" style="display:none"></div>
+    </div>
     <div id="pmp-body"></div>
   </div>
 </div>
@@ -2175,6 +2282,7 @@
     const fi = document.getElementById('t-date-from');
     const ti = document.getElementById('t-date-to');
     if (fi) fi.value = r.from||''; if (ti) ti.value = r.to||'';
+    dpUpdateLabel('t-date-from'); dpUpdateLabel('t-date-to');
   }
 
   function applyRekapDatePreset(preset) {
@@ -2183,6 +2291,7 @@
     const fi = document.getElementById('r-date-from');
     const ti = document.getElementById('r-date-to');
     if (fi) fi.value = r.from||''; if (ti) ti.value = r.to||'';
+    dpUpdateLabel('r-date-from'); dpUpdateLabel('r-date-to');
   }
 
   function setTableDatePreset(preset) {
@@ -2489,6 +2598,7 @@
     document.getElementById('f-luas').value='';
     clearDraft();
     document.getElementById('f-tanggal').value = today();
+    dpUpdateLabel('f-tanggal');
     showAlert('Laporan berhasil disimpan ke database','success');
     currentPage = 1;
     await renderTable(true); await renderRekap();
@@ -2653,6 +2763,7 @@
     if (!item) return;
     document.getElementById('edit-id').value=item.id;
     document.getElementById('edit-tanggal').value=item.tanggal;
+    dpUpdateLabel('edit-tanggal');
     document.getElementById('edit-user').value=item.user_name||'';
     document.getElementById('edit-desa').value=item.desa||'';
     document.getElementById('edit-kelompok').value=item.kelompok_tani||'';
@@ -2994,34 +3105,189 @@ create policy "varietas anon all" on public.varietas
     const u = umurDays && umurDays > 0 ? umurDays : 115;
     const prim = Math.max(30, Math.round(u * 0.33)); // perkiraan fase primordia (HST)
     return [
-      { fase:'Pemupukan I — Dasar', hst:'7–14 HST',
+      { fase:'Pemupukan I — Dasar', hst:[7,14],
         tujuan:'Memacu pertumbuhan awal & pembentukan anakan.',
         dosis:['NPK Phonska 100 kg/ha','Urea 50 kg/ha'] },
-      { fase:'Pemupukan II — Anakan aktif', hst:'21–28 HST',
+      { fase:'Pemupukan II — Anakan aktif', hst:[21,28],
         tujuan:'Memaksimalkan jumlah anakan produktif.',
         dosis:['NPK Phonska 100 kg/ha','Urea 100 kg/ha'] },
-      { fase:'Pemupukan III — Primordia/bunting', hst:`${prim-3}–${prim+2} HST`,
+      { fase:'Pemupukan III — Primordia/bunting', hst:[prim-3, prim+2],
         tujuan:'Mendukung pengisian malai & bobot gabah.',
         dosis:['Urea 50 kg/ha','KCl 50 kg/ha'] },
     ];
   }
+  // ── Helper tanggal (untuk kalender tanam→panen) ──
+  const _BULAN_ID = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];
+  function addDays(ymd, n) { const d = new Date(ymd + 'T00:00:00'); d.setDate(d.getDate() + n); return d; }
+  function fmtTgl(d) { return d.getDate() + ' ' + _BULAN_ID[d.getMonth()] + ' ' + d.getFullYear(); }
+  function fmtTglRange(d1, d2) {
+    if (d1.getFullYear() === d2.getFullYear() && d1.getMonth() === d2.getMonth())
+      return d1.getDate() + '–' + d2.getDate() + ' ' + _BULAN_ID[d2.getMonth()] + ' ' + d2.getFullYear();
+    if (d1.getFullYear() === d2.getFullYear())
+      return d1.getDate() + ' ' + _BULAN_ID[d1.getMonth()] + ' – ' + d2.getDate() + ' ' + _BULAN_ID[d2.getMonth()] + ' ' + d2.getFullYear();
+    return fmtTgl(d1) + ' – ' + fmtTgl(d2);
+  }
+
+  let _pmpUmur = 115, _pmpStages = [];
+  let _pmpTanam = '';            // tanggal tanam terpilih (YYYY-MM-DD)
+  let _pmpCalY = 0, _pmpCalM = 0; // bulan yang sedang ditampilkan kalender
+  const _HARI_ID = ['Mg','Sn','Sl','Rb','Km','Jm','Sb'];
+  const _BLN_FULL = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
+
   function showPemupukan(key) {
     const v = varietasData.find(x => String(x.id)===String(key) || x.nama===key);
     if (!v) return;
-    const um = parseInt((String(v.umur||'').match(/\d+/)||[])[0] || '0', 10);
-    const stages = jadwalPemupukan(um);
+    _pmpUmur = parseInt((String(v.umur||'').match(/\d+/)||[])[0] || '0', 10) || 115;
     document.getElementById('pmp-nama').textContent = v.nama;
     document.getElementById('pmp-sub').textContent = 'Umur tanaman ' + (v.umur || '–') + ' · acuan padi sawah';
-    document.getElementById('pmp-body').innerHTML = stages.map(s => `
+    _pmpTanam = today();
+    const d = new Date(_pmpTanam + 'T00:00:00');
+    _pmpCalY = d.getFullYear(); _pmpCalM = d.getMonth();
+    document.getElementById('pmp-cal').style.display = 'none';
+    renderPemupukanBody();
+    updatePmpDateLabel();
+    document.getElementById('pemupukan-modal').classList.add('active');
+  }
+  // Struktur dibangun sekali; tanggal diisi terpisah (tanpa membongkar DOM).
+  function renderPemupukanBody() {
+    _pmpStages = jadwalPemupukan(_pmpUmur);
+    const html = _pmpStages.map((s, i) => `
       <div class="pmp-stage">
-        <div class="pmp-stage-top"><span class="pmp-fase">${escHtml(s.fase)}</span><span class="pmp-hst">${escHtml(s.hst)}</span></div>
+        <div class="pmp-stage-top"><span class="pmp-fase">${escHtml(s.fase)}</span><span class="pmp-hst">${s.hst[0]}–${s.hst[1]} HST</span></div>
+        <div class="pmp-date" id="pmp-date-${i}" style="display:none"></div>
         <div class="pmp-tujuan">${escHtml(s.tujuan)}</div>
         <div class="pmp-dosis">${s.dosis.map(d=>`<span>${escHtml(d)}</span>`).join('')}</div>
       </div>`).join('') +
+      `<div class="pmp-panen" id="pmp-panen" style="display:none"><i class="ti ti-plant-2"></i> Perkiraan panen: <b id="pmp-panen-tgl"></b> <span>(${_pmpUmur} HST)</span></div>` +
       `<div class="pmp-note"><i class="ti ti-info-circle"></i> Dosis = acuan umum; sesuaikan rekomendasi setempat / uji tanah (PUTS). HST = hari setelah tanam.</div>`;
-    document.getElementById('pemupukan-modal').classList.add('active');
+    document.getElementById('pmp-body').innerHTML = html;
+    updatePemupukanDates();
+  }
+  function updatePemupukanDates() {
+    const tanam = _pmpTanam;
+    _pmpStages.forEach((s, i) => {
+      const el = document.getElementById('pmp-date-' + i);
+      if (!el) return;
+      if (tanam) {
+        el.innerHTML = `<i class="ti ti-calendar"></i> ${fmtTglRange(addDays(tanam, s.hst[0]), addDays(tanam, s.hst[1]))}`;
+        el.style.display = '';
+      } else { el.style.display = 'none'; }
+    });
+    const panenEl = document.getElementById('pmp-panen');
+    const panenTgl = document.getElementById('pmp-panen-tgl');
+    if (tanam && panenEl && panenTgl) {
+      panenTgl.textContent = fmtTgl(addDays(tanam, _pmpUmur));
+      panenEl.style.display = '';
+    } else if (panenEl) { panenEl.style.display = 'none'; }
   }
   function tutupPemupukanModal() { document.getElementById('pemupukan-modal').classList.remove('active'); }
+
+  // ── KALENDER KUSTOM (pengganti date picker native) ──
+  function updatePmpDateLabel() {
+    const el = document.getElementById('pmp-date-label');
+    if (el) el.textContent = _pmpTanam ? fmtTgl(new Date(_pmpTanam + 'T00:00:00')) : 'Pilih tanggal';
+  }
+  function togglePmpCal() {
+    const cal = document.getElementById('pmp-cal');
+    if (cal.style.display === 'none') { renderPmpCal(); cal.style.display = ''; }
+    else { cal.style.display = 'none'; }
+  }
+  function pmpCalNav(delta) {
+    _pmpCalM += delta;
+    if (_pmpCalM < 0) { _pmpCalM = 11; _pmpCalY--; }
+    if (_pmpCalM > 11) { _pmpCalM = 0; _pmpCalY++; }
+    renderPmpCal();
+  }
+  function pmpSelectDate(ymd) {
+    _pmpTanam = ymd;
+    document.getElementById('pmp-cal').style.display = 'none';
+    updatePmpDateLabel();
+    updatePemupukanDates();
+  }
+  function renderPmpCal() {
+    const cal = document.getElementById('pmp-cal');
+    const startDow = new Date(_pmpCalY, _pmpCalM, 1).getDay();
+    const days = new Date(_pmpCalY, _pmpCalM + 1, 0).getDate();
+    const td = today();
+    let cells = '';
+    for (let i = 0; i < startDow; i++) cells += '<span class="pmp-cal-cell empty"></span>';
+    for (let d = 1; d <= days; d++) {
+      const ymd = `${_pmpCalY}-${String(_pmpCalM+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+      const cls = 'pmp-cal-cell' + (ymd===_pmpTanam?' sel':'') + (ymd===td?' today':'');
+      cells += `<button type="button" class="${cls}" onclick="pmpSelectDate('${ymd}')">${d}</button>`;
+    }
+    cal.innerHTML = `
+      <div class="pmp-cal-head">
+        <button type="button" class="pmp-cal-nav" onclick="pmpCalNav(-1)"><i class="ti ti-chevron-left"></i></button>
+        <span>${_BLN_FULL[_pmpCalM]} ${_pmpCalY}</span>
+        <button type="button" class="pmp-cal-nav" onclick="pmpCalNav(1)"><i class="ti ti-chevron-right"></i></button>
+      </div>
+      <div class="pmp-cal-dow">${_HARI_ID.map(h=>`<span>${h}</span>`).join('')}</div>
+      <div class="pmp-cal-grid">${cells}</div>`;
+  }
+  function tutupPemupukanModal() { document.getElementById('pemupukan-modal').classList.remove('active'); }
+
+  // ── DATE PICKER KUSTOM GENERIK (terikat ke <input type=hidden id>) ──
+  const _dpCal = {}; // id -> {y, m}
+  function dpUpdateLabel(id) {
+    const inp = document.getElementById(id);
+    const lbl = document.querySelector(`[data-dp="${id}"] .dp-label`);
+    if (lbl) {
+      const has = inp && inp.value;
+      lbl.textContent = has ? fmtTgl(new Date(inp.value + 'T00:00:00')) : (lbl.dataset.ph || 'Pilih tanggal');
+      lbl.classList.toggle('empty', !has);
+    }
+  }
+  function dpToggle(id) {
+    const wrap = document.querySelector(`[data-dp="${id}"]`);
+    if (!wrap) return;
+    const cal = wrap.querySelector('.dp-cal');
+    document.querySelectorAll('.dp').forEach(w => { if (w!==wrap) { w.classList.remove('open'); const c=w.querySelector('.dp-cal'); if(c) c.style.display='none'; } });
+    if (cal.style.display === 'none') {
+      const v = document.getElementById(id).value || today();
+      const d = new Date(v + 'T00:00:00');
+      _dpCal[id] = { y:d.getFullYear(), m:d.getMonth() };
+      dpRenderCal(id); cal.style.display = ''; wrap.classList.add('open');
+    } else { cal.style.display = 'none'; wrap.classList.remove('open'); }
+  }
+  function dpNav(id, delta) {
+    const s = _dpCal[id]; if (!s) return;
+    s.m += delta;
+    if (s.m < 0) { s.m = 11; s.y--; }
+    if (s.m > 11) { s.m = 0; s.y++; }
+    dpRenderCal(id);
+  }
+  function dpSelect(id, ymd) {
+    const inp = document.getElementById(id); if (!inp) return;
+    inp.value = ymd;
+    const wrap = document.querySelector(`[data-dp="${id}"]`);
+    if (wrap) { wrap.querySelector('.dp-cal').style.display = 'none'; wrap.classList.remove('open'); }
+    dpUpdateLabel(id);
+    inp.dispatchEvent(new Event('change', { bubbles: true }));
+  }
+  function dpRenderCal(id) {
+    const s = _dpCal[id];
+    const cal = document.querySelector(`[data-dp="${id}"] .dp-cal`);
+    if (!s || !cal) return;
+    const startDow = new Date(s.y, s.m, 1).getDay();
+    const days = new Date(s.y, s.m + 1, 0).getDate();
+    const sel = document.getElementById(id).value, td = today();
+    let cells = '';
+    for (let i = 0; i < startDow; i++) cells += '<span class="pmp-cal-cell empty"></span>';
+    for (let d = 1; d <= days; d++) {
+      const ymd = `${s.y}-${String(s.m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+      const cls = 'pmp-cal-cell' + (ymd===sel?' sel':'') + (ymd===td?' today':'');
+      cells += `<button type="button" class="${cls}" onclick="dpSelect('${id}','${ymd}')">${d}</button>`;
+    }
+    cal.innerHTML = `
+      <div class="pmp-cal-head">
+        <button type="button" class="pmp-cal-nav" onclick="dpNav('${id}',-1)"><i class="ti ti-chevron-left"></i></button>
+        <span>${_BLN_FULL[s.m]} ${s.y}</span>
+        <button type="button" class="pmp-cal-nav" onclick="dpNav('${id}',1)"><i class="ti ti-chevron-right"></i></button>
+      </div>
+      <div class="pmp-cal-dow">${_HARI_ID.map(h=>`<span>${h}</span>`).join('')}</div>
+      <div class="pmp-cal-grid">${cells}</div>`;
+  }
 
   // ── SILSILAH / ASAL PEMULIAAN VARIETAS (knowledge base) ──
   // Sumber: deskripsi varietas Balitbangtan/BSIP. Best-effort; verifikasi untuk keperluan resmi.
@@ -4003,6 +4269,8 @@ create policy "varietas anon all" on public.varietas
   window.filterVarietas=filterVarietas; window.copyVarietasSQL=copyVarietasSQL; window.seedVarietas=seedVarietas;
   window.showPenyakit=showPenyakit; window.tutupPenyakitModal=tutupPenyakitModal;
   window.showPemupukan=showPemupukan; window.tutupPemupukanModal=tutupPemupukanModal;
+  window.togglePmpCal=togglePmpCal; window.pmpCalNav=pmpCalNav; window.pmpSelectDate=pmpSelectDate;
+  window.dpToggle=dpToggle; window.dpNav=dpNav; window.dpSelect=dpSelect;
   window.showSilsilah=showSilsilah; window.tutupSilsilahModal=tutupSilsilahModal;
   window.bukaVarietasModal=bukaVarietasModal; window.tutupVarietasModal=tutupVarietasModal;
   window.simpanVarietas=simpanVarietas; window.hapusVarietas=hapusVarietas;
@@ -4030,11 +4298,18 @@ create policy "varietas anon all" on public.varietas
     try { initTheme(); } catch(e){}
     const ft = document.getElementById('f-tanggal'); if (ft) ft.value = today();
     try { restoreDraft(); } catch(e){}
+    try { dpUpdateLabel('f-tanggal'); } catch(e){}
     try { loadProduksiData(); } catch(e){}
     try { loadAUTData(); } catch(e){}
     try { renderProduksiCards(); } catch(e){}
     try { renderAUTCards(); } catch(e){}
     try { attachDraftListeners(); } catch(e){}
+    // tutup kalender kustom saat klik di luar
+    document.addEventListener('click', (e) => {
+      if (!e.target.closest('.dp')) {
+        document.querySelectorAll('.dp.open').forEach(w => { w.classList.remove('open'); const c=w.querySelector('.dp-cal'); if(c) c.style.display='none'; });
+      }
+    });
     init();
   }
   // Jalankan walau DOMContentLoaded sudah lewat (mis. script dieksekusi terlambat).
