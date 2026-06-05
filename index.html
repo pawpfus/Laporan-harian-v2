@@ -1167,22 +1167,22 @@
     }
     .var-potensi {
       background: var(--moss-4); border-radius: var(--r-md);
-      padding: 10px 12px;
+      padding: 9px 12px; display: flex; flex-direction: column; gap: 3px;
     }
-    .var-potensi-main { display: flex; align-items: baseline; gap: 5px; }
-    .var-potensi-num {
-      font-family: var(--font-mono); font-weight: 700; font-size: 26px;
-      line-height: 1; color: var(--moss); font-variant-numeric: tabular-nums;
+    .var-potensi-row { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
+    .var-potensi-row > span { font-size: 12px; color: var(--ink-3); }
+    .var-potensi-row > b {
+      font-family: var(--font-mono); font-variant-numeric: tabular-nums;
+      font-weight: 700; font-size: 16px; color: var(--moss); white-space: nowrap;
     }
-    .var-potensi-unit { font-size: 12px; font-weight: 600; color: var(--moss); }
-    .var-potensi-sub { font-size: 11.5px; color: var(--ink-3); margin-top: 4px; }
-    .var-potensi-sub b { color: var(--ink-2); font-family: var(--font-mono); }
+    .var-potensi-row.rata > span { font-size: 11px; }
+    .var-potensi-row.rata > b { font-size: 12.5px; font-weight: 600; }
     .var-meta-row {
       display: flex; align-items: center; gap: 6px;
       font-size: 12.5px; color: var(--ink-3);
     }
     .var-meta-row i { font-size: 15px; color: var(--ink-3); }
-    .var-meta-row b { color: var(--ink); margin-left: auto; font-family: var(--font-mono); }
+    .var-meta-row b { color: var(--ink); margin-left: 6px; font-family: var(--font-mono); }
     .var-section { display: flex; flex-direction: column; gap: 6px; }
     .var-section-label {
       font-size: 10px; font-weight: 700; letter-spacing: 0.06em;
@@ -1276,15 +1276,6 @@
     .varietas-empty > div { margin-top: 12px; }
     .varietas-actions { margin-bottom: 12px; }
     .varietas-actions:empty { display: none; }
-    .var-edit {
-      flex-shrink: 0; width: 28px; height: 28px;
-      display: flex; align-items: center; justify-content: center;
-      border: 1px solid var(--rule); border-radius: var(--r-sm);
-      background: var(--ground); color: var(--ink-3);
-      cursor: pointer; transition: all 0.15s;
-    }
-    .var-edit:hover { background: var(--moss-4); color: var(--moss); border-color: var(--moss-3); }
-    .var-edit i { font-size: 15px; }
     .btn-seed {
       display: inline-flex; align-items: center; gap: 7px;
       padding: 9px 16px; border: none; border-radius: var(--r-md);
@@ -1678,7 +1669,7 @@
 
   <div class="tabs" role="tablist">
     <button class="tab active" onclick="switchTab('input')" id="tab-input" role="tab">
-      <i class="ti ti-edit"></i> Input
+      <i class="ti ti-edit"></i> Laporan
     </button>
     <button class="tab" onclick="switchTab('produksi')" id="tab-produksi" role="tab">
       <i class="ti ti-scale"></i> Produksi
@@ -3020,7 +3011,7 @@ create policy "varietas anon all" on public.varietas
     const um = parseInt((String(v.umur||'').match(/\d+/)||[])[0] || '0', 10);
     const stages = jadwalPemupukan(um);
     document.getElementById('pmp-nama').textContent = v.nama;
-    document.getElementById('pmp-sub').textContent = 'Umur panen ' + (v.umur || '–') + ' · acuan padi sawah';
+    document.getElementById('pmp-sub').textContent = 'Umur tanaman ' + (v.umur || '–') + ' · acuan padi sawah';
     document.getElementById('pmp-body').innerHTML = stages.map(s => `
       <div class="pmp-stage">
         <div class="pmp-stage-top"><span class="pmp-fase">${escHtml(s.fase)}</span><span class="pmp-hst">${escHtml(s.hst)}</span></div>
@@ -3160,12 +3151,12 @@ create policy "varietas anon all" on public.varietas
           <span class="var-badge">${escHtml(v.komoditas||'Padi')}</span>
         </div>
         <div class="var-potensi">
-          <div class="var-potensi-main"><span class="var-potensi-num">${fmtTon(v.potensi)}</span><span class="var-potensi-unit">ton/ha</span></div>
-          <div class="var-potensi-sub">Potensi hasil · rata-rata <b>${fmtTon(v.rata)} t/ha</b></div>
+          <div class="var-potensi-row"><span>Potensi</span><b>${fmtTon(v.potensi)} ton/ha</b></div>
+          <div class="var-potensi-row rata"><span>Rata-rata hasil</span><b>${fmtTon(v.rata)} ton/ha</b></div>
         </div>
         ${v.umur
-          ? `<div class="var-meta-row var-umur" data-pmp="${escHtml(v.id||v.nama)}" title="Klik: rekomendasi jadwal pemupukan"><i class="ti ti-calendar-event"></i> Umur panen <b>${escHtml(v.umur)}</b></div>`
-          : `<div class="var-meta-row"><i class="ti ti-calendar-event"></i> Umur panen <b>–</b></div>`}
+          ? `<div class="var-meta-row var-umur" data-pmp="${escHtml(v.id||v.nama)}" title="Klik: rekomendasi jadwal pemupukan"><i class="ti ti-calendar-event"></i> Umur tanaman <b>${escHtml(v.umur)}</b></div>`
+          : `<div class="var-meta-row"><i class="ti ti-calendar-event"></i> Umur tanaman <b>–</b></div>`}
         <div class="var-section">
           <div class="var-section-label">Keunggulan</div>
           <div class="var-chips">${(v.keunggulan||[]).map(k=>varChip(k,true)).join('') || '<span class="var-chip">–</span>'}</div>
@@ -4036,7 +4027,7 @@ create policy "varietas anon all" on public.varietas
   // ── BOOT ──
   // DOMContentLoaded: Supabase di-load via <script defer> sehingga siap sebelum event ini.
   // Library berat (Chart/xlsx/jsPDF) dimuat lazy, jadi tak perlu menunggu 'load'.
-  window.addEventListener('DOMContentLoaded', () => {
+  window.addEventListener('DOMContentLoaded', () => A{
     initTheme(); // Sync icon state
     document.getElementById('f-tanggal').value = today();
     restoreDraft();
