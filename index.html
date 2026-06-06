@@ -1109,8 +1109,9 @@
       border: 1px solid var(--rule);
       border-radius: var(--r-lg);
       padding: 4px;
-      margin-bottom: 1rem;
-      width: fit-content;
+      margin: 0 auto 1rem;
+      width: 100%;
+      max-width: 480px;
     }
     .sub-tab {
       padding: 7px 14px;
@@ -1702,6 +1703,78 @@
       .stats-grid { grid-template-columns: 1fr; }
       .tab { font-size: 8.5px; }
     }
+
+    /* ── KALKULATOR BENIH & PUPUK ──────────────────────── */
+    .kalk-card { overflow: hidden; }
+    .kalk-head {
+      display: flex; align-items: center; gap: 11px;
+      padding: 16px 20px;
+      background: linear-gradient(135deg, var(--moss-4) 0%, var(--surface) 70%);
+      border-bottom: 1px solid var(--rule);
+    }
+    .kalk-head-icon {
+      flex-shrink: 0;
+      color: var(--moss);
+      font-size: 19px;
+      display: flex; align-items: center;
+    }
+    .kalk-head-text {
+      font-size: 13px; font-weight: 600; color: var(--ink);
+      letter-spacing: -0.01em; line-height: 1.35;
+    }
+    /* Komoditas · Sistem Tanam · Luas Lahan dalam satu baris (tablet/desktop) */
+    #sub-panel-kalkulator .calc-inputs { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    /* Mobile: Komoditas + Luas sebaris, Sistem Tanam melebar penuh agar terbaca utuh */
+    @media (max-width: 480px) {
+      #sub-panel-kalkulator .calc-inputs { grid-template-columns: 1fr 1fr; gap: 10px; }
+      #sub-panel-kalkulator #kalk-sistem-field { grid-column: 1 / -1; order: 3; }
+    }
+    /* Layar sangat sempit: tumpuk penuh 1 kolom (urutan natural) */
+    @media (max-width: 360px) {
+      #sub-panel-kalkulator .calc-inputs { grid-template-columns: 1fr; }
+      #sub-panel-kalkulator #kalk-sistem-field { order: 0; }
+    }
+    #kalk-hasil { display: flex; flex-direction: column; gap: 12px; margin-top: 12px; }
+    .kalk-section {
+      background: var(--surface);
+      border: 1px solid var(--rule);
+      border-radius: var(--r-lg);
+      padding: 14px 16px;
+    }
+    .kalk-section-title {
+      display: flex; align-items: center; gap: 7px;
+      font-size: 11px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase;
+      color: var(--ink-3); margin-bottom: 12px;
+    }
+    .kalk-section-title i { font-size: 15px; color: var(--moss); }
+    .kalk-benih-big {
+      display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap;
+    }
+    .kalk-benih-big b {
+      font-family: var(--font-mono); font-size: 30px; font-weight: 700; color: var(--moss); line-height: 1;
+    }
+    .kalk-benih-big .unit { font-size: 13px; font-weight: 600; color: var(--ink-3); }
+    .kalk-benih-sub { font-size: 11px; color: var(--ink-3); margin-top: 6px; }
+    .kalk-pupuk-row {
+      display: flex; align-items: center; gap: 10px;
+      padding: 9px 0;
+    }
+    .kalk-pupuk-row + .kalk-pupuk-row { border-top: 1px solid var(--rule); }
+    .kalk-pupuk-name { font-size: 12.5px; font-weight: 600; color: var(--ink); flex: 1; min-width: 0; }
+    .kalk-pupuk-kg { font-family: var(--font-mono); font-size: 14px; font-weight: 700; color: var(--moss); white-space: nowrap; }
+    .kalk-karung {
+      display: inline-flex; align-items: center; gap: 4px;
+      font-size: 10px; font-weight: 600; color: var(--amber);
+      background: var(--amber-bg); border-radius: 999px; padding: 3px 8px; white-space: nowrap;
+    }
+    .kalk-karung i { font-size: 12px; }
+    .kalk-empty {
+      display: flex; flex-direction: column; align-items: center; gap: 6px;
+      padding: 32px 16px; text-align: center; color: var(--ink-3);
+    }
+    .kalk-empty i { font-size: 30px; color: var(--ink-4); }
+    .kalk-empty strong { font-size: 13px; color: var(--ink-2); }
+    .kalk-empty span { font-size: 11.5px; }
   </style>
 </head>
 <body>
@@ -1741,11 +1814,11 @@
     <button class="tab active" onclick="switchTab('input')" id="tab-input" role="tab">
       <i class="ti ti-edit"></i> Laporan
     </button>
-    <button class="tab" onclick="switchTab('produksi')" id="tab-produksi" role="tab">
-      <i class="ti ti-scale"></i> Produksi
-    </button>
     <button class="tab" onclick="switchTab('varietas')" id="tab-varietas" role="tab">
       <i class="ti ti-seeding"></i> Varietas
+    </button>
+    <button class="tab" onclick="switchTab('produksi')" id="tab-produksi" role="tab">
+      <i class="ti ti-scale"></i> Produksi
     </button>
   </div>
 
@@ -2008,7 +2081,10 @@
   <div class="panel" id="panel-produksi">
     <!-- Sub-tabs -->
     <div class="sub-tabs">
-      <button class="sub-tab active" id="sub-tab-produktivitas" onclick="switchSubTab('produktivitas')">
+      <button class="sub-tab active" id="sub-tab-kalkulator" onclick="switchSubTab('kalkulator')">
+        <i class="ti ti-calculator"></i> Benih &amp; Pupuk
+      </button>
+      <button class="sub-tab" id="sub-tab-produktivitas" onclick="switchSubTab('produktivitas')">
         <i class="ti ti-scale"></i> Produktivitas
       </button>
       <button class="sub-tab" id="sub-tab-aut" onclick="switchSubTab('aut')">
@@ -2017,7 +2093,7 @@
     </div>
 
     <!-- Sub-panel: Produktivitas -->
-    <div class="sub-panel active" id="sub-panel-produktivitas">
+    <div class="sub-panel" id="sub-panel-produktivitas">
       <div class="produksi-topbar">
         <button class="btn-produksi-add" onclick="tambahBarisProduksi()">
           <i class="ti ti-plus"></i> Tambah Petani
@@ -2036,6 +2112,36 @@
       </div>
       <div id="aut-cards"></div>
       <div id="aut-total-wrap"></div>
+    </div>
+
+    <!-- Sub-panel: Kalkulator Benih & Pupuk -->
+    <div class="sub-panel active" id="sub-panel-kalkulator">
+      <div class="calc-card kalk-card">
+        <div class="kalk-head">
+          <div class="kalk-head-icon"><i class="ti ti-calculator"></i></div>
+          <div class="kalk-head-text">Kebutuhan benih pupuk</div>
+        </div>
+        <div class="calc-card-body">
+          <div class="calc-inputs">
+            <div class="calc-field">
+              <div class="calc-field-label">Komoditas</div>
+              <select class="calc-input" id="kalk-komoditas" onchange="onKalkKomoditas()"></select>
+            </div>
+            <div class="calc-field" id="kalk-sistem-field">
+              <div class="calc-field-label">Sistem Tanam</div>
+              <select class="calc-input" id="kalk-sistem" onchange="hitungKalkulator()"></select>
+            </div>
+            <div class="calc-field">
+              <div class="calc-field-label">Luas Lahan</div>
+              <div class="calc-field-control">
+                <input class="calc-input num" type="number" min="0" step="0.01" id="kalk-luas" placeholder="0,00" oninput="hitungKalkulator()" />
+                <span class="calc-input-unit">Ha</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div id="kalk-hasil"></div>
     </div>
   </div>
 
@@ -2899,7 +3005,8 @@
     });
     if (name==='produksi') {
       if (activeSubTab==='produktivitas') renderProduksiCards();
-      else renderAUTCards();
+      else if (activeSubTab==='aut') renderAUTCards();
+      else if (activeSubTab==='kalkulator') initKalkulator();
     }
     if (name==='varietas') renderVarietas();
   }
@@ -3610,6 +3717,111 @@ create policy "varietas anon all" on public.varietas
     return Number(n).toLocaleString('id-ID',{minimumFractionDigits:dec,maximumFractionDigits:dec});
   }
 
+  // === Section: Kalkulator Benih & Pupuk ===
+  // Acuan benih (kg/ha) & dosis pupuk (kg/ha) — rekomendasi umum padi/jagung/kedelai
+  // (Permentan & BPTP/BSIP). Sesuaikan dengan uji tanah & anjuran setempat.
+  const KALK_REF = {
+    Padi: {
+      benih: [
+        { sistem:'Tanam Pindah (Tapin)', rate:25 },
+        { sistem:'Jajar Legowo', rate:25 },
+        { sistem:'Tabela (Tabur Benih Langsung)', rate:50 },
+      ],
+      jadwal: [
+        { fase:'Pemupukan I — Dasar', hst:[7,14], tujuan:'Memacu pertumbuhan awal & pembentukan anakan.',
+          dosis:[['NPK Phonska',100],['Urea',50]] },
+        { fase:'Pemupukan II — Anakan aktif', hst:[21,28], tujuan:'Memaksimalkan jumlah anakan produktif.',
+          dosis:[['NPK Phonska',100],['Urea',100]] },
+        { fase:'Pemupukan III — Primordia/bunting', hst:[35,40], tujuan:'Mendukung pengisian malai & bobot gabah.',
+          dosis:[['Urea',50],['KCl',50]] },
+      ],
+      umur:115,
+    },
+    Jagung: {
+      benih: [ { sistem:'Hibrida — 1 biji/lubang (75×20 cm)', rate:20 } ],
+      jadwal: [
+        { fase:'Pemupukan I — Dasar', hst:[7,10], tujuan:'Pertumbuhan awal & perakaran.',
+          dosis:[['NPK Phonska',300],['Urea',100]] },
+        { fase:'Pemupukan II — Vegetatif', hst:[28,30], tujuan:'Pembentukan daun & batang.',
+          dosis:[['Urea',150]] },
+        { fase:'Pemupukan III — Menjelang berbunga', hst:[40,45], tujuan:'Mendukung pengisian tongkol.',
+          dosis:[['Urea',100]] },
+      ],
+      umur:100,
+    },
+    Kedelai: {
+      benih: [ { sistem:'Tugal — 2 biji/lubang (40×15 cm)', rate:45 } ],
+      jadwal: [
+        { fase:'Pemupukan Dasar', hst:[0,7], tujuan:'Diberikan saat / menjelang tanam.',
+          dosis:[['Urea',50],['SP-36',100],['KCl',75]] },
+      ],
+      umur:85,
+    },
+  };
+
+  let _kalkInit = false;
+  function initKalkulator() {
+    if (!_kalkInit) {
+      document.getElementById('kalk-komoditas').innerHTML =
+        Object.keys(KALK_REF).map(k=>`<option>${k}</option>`).join('');
+      _kalkInit = true;
+      onKalkKomoditas();
+    } else {
+      hitungKalkulator();
+    }
+  }
+
+  function onKalkKomoditas() {
+    const ref = KALK_REF[document.getElementById('kalk-komoditas').value];
+    document.getElementById('kalk-sistem').innerHTML =
+      ref.benih.map((b,i)=>`<option value="${i}">${escHtml(b.sistem)}</option>`).join('');
+    // Sembunyikan dropdown sistem bila hanya satu pilihan.
+    document.getElementById('kalk-sistem-field').style.display = ref.benih.length>1 ? '' : 'none';
+    hitungKalkulator();
+  }
+
+  function hitungKalkulator() {
+    const ref = KALK_REF[document.getElementById('kalk-komoditas').value];
+    const luas = Math.max(0, parseFloat(document.getElementById('kalk-luas').value) || 0);
+    const sIdx = parseInt(document.getElementById('kalk-sistem').value || '0', 10) || 0;
+    const benih = ref.benih[sIdx] || ref.benih[0];
+    const out = document.getElementById('kalk-hasil');
+
+    if (luas <= 0) {
+      out.innerHTML = `<div class="kalk-section"><div class="kalk-empty">
+        <i class="ti ti-ruler-2"></i><strong>Masukkan luas lahan</strong>
+        <span>Isi luas (Ha) untuk menghitung kebutuhan benih &amp; pupuk.</span></div></div>`;
+      return;
+    }
+
+    const benihKg = benih.rate * luas;
+    const karungChip = kg => `<span class="kalk-karung"><i class="ti ti-package"></i>${fmt(Math.ceil(kg/50),0)} karung (50kg)</span>`;
+
+    // Total pupuk lintas fase.
+    const totals = {};
+    ref.jadwal.forEach(s => s.dosis.forEach(([nama,dose]) => { totals[nama] = (totals[nama]||0) + dose*luas; }));
+
+    const benihHtml = `<div class="kalk-section">
+      <div class="kalk-section-title"><i class="ti ti-seeding"></i> Kebutuhan Benih</div>
+      <div class="kalk-benih-big"><b>${fmt(benihKg,1)}</b><span class="unit">kg</span></div>
+      <div class="kalk-benih-sub">${escHtml(benih.sistem)} · ${fmt(benih.rate,0)} kg/ha × ${fmt(luas,2)} Ha</div>
+    </div>`;
+
+    const pupukRows = Object.entries(totals).map(([nama,kg]) => `
+      <div class="kalk-pupuk-row">
+        <div class="kalk-pupuk-name">${escHtml(nama)}</div>
+        ${karungChip(kg)}
+        <div class="kalk-pupuk-kg">${fmt(kg,0)} kg</div>
+      </div>`).join('');
+    const pupukHtml = `<div class="kalk-section">
+      <div class="kalk-section-title"><i class="ti ti-flask"></i> Total Kebutuhan Pupuk</div>
+      ${pupukRows}
+      <div class="pmp-note"><i class="ti ti-info-circle"></i> Dosis = acuan umum; sesuaikan rekomendasi setempat / uji tanah (PUTS/PUTK). 1 karung = 50 kg.</div>
+    </div>`;
+
+    out.innerHTML = benihHtml + pupukHtml;
+  }
+
   // === Section: Produksi ===
   function renderProduksiCards() {
     const container=document.getElementById('produksi-cards');
@@ -3731,15 +3943,16 @@ create policy "varietas anon all" on public.varietas
   }
 
   // ── SUB-TABS PRODUKSI ──
-  let activeSubTab = 'produktivitas';
+  let activeSubTab = 'kalkulator';
   function switchSubTab(name) {
     activeSubTab = name;
-    ['produktivitas','aut'].forEach(t => {
+    ['produktivitas','aut','kalkulator'].forEach(t => {
       document.getElementById('sub-tab-'+t)?.classList.toggle('active', t===name);
       document.getElementById('sub-panel-'+t)?.classList.toggle('active', t===name);
     });
     if (name==='produktivitas') renderProduksiCards();
     if (name==='aut') renderAUTCards();
+    if (name==='kalkulator') initKalkulator();
   }
 
   // ── ANALISIS USAHA TANI ──
