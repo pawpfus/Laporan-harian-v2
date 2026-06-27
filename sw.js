@@ -5,7 +5,7 @@
    - CDN (font, ikon, css): stale-while-revalidate
    - Supabase / API / POST: TIDAK di-cache (selalu jaringan)
 */
-const VERSION = 'v1.0.2';
+const VERSION = 'v1.0.3';
 const SHELL_CACHE = `shell-${VERSION}`;
 const RUNTIME_CACHE = `runtime-${VERSION}`;
 
