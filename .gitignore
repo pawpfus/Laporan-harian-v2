@@ -1,0 +1,15 @@
+# This folder is shared with other unrelated projects — keep them out of this repo.
+/agent-room/
+/coin-quest/
+/eviden_lcs/
+/ksa_pendampingan/
+/cowork-terminal.html
+/starbyte-cowork.html
+
+# Local dev / editor config (contains other projects' launch configs)
+/.claude/
+
+# OS / editor noise
+Thumbs.db
+.DS_Store
+*.tmp
