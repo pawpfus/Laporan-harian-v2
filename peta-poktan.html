@@ -512,19 +512,46 @@ function setDpField(fieldId, valId, value){
   else wrap.style.display = 'none';
 }
 
+// --- efek pengetikan (typewriter) untuk isi panel ---
+let typeTimers = [];
+function clearTyping(){ typeTimers.forEach(t => clearTimeout(t)); typeTimers = []; }
+function typeInto(el, text, delay, cps){
+  el.textContent = '';
+  // teks panjang tetap selesai < ~0.9 dtk
+  const step = Math.min(1000 / (cps || 45), 900 / Math.max(text.length, 1));
+  typeTimers.push(setTimeout(() => {
+    let i = 0;
+    const iv = setInterval(() => {
+      i++;
+      el.textContent = i < text.length ? text.slice(0, i) + '▌' : text;
+      if(i >= text.length) clearInterval(iv);
+    }, step);
+    typeTimers.push(iv);
+  }, delay));
+}
+
 function populateDetail(id){
   const s = sectors[id];
   const ov = getOv(s);
-  document.getElementById('dp-tag').textContent = s.code;
-  document.getElementById('dp-name').textContent = s.name;
-  document.getElementById('dp-ketua').textContent = ketuaOf(s);
-  document.getElementById('dp-luas').textContent = s.areaHa.toFixed(2) + ' Ha';
+  clearTyping();
   const c = layerById[id].getBounds().getCenter();
-  document.getElementById('dp-coord').textContent = c.lat.toFixed(6) + ', ' + c.lng.toFixed(6);
-  document.getElementById('dp-verts').textContent = s.vertexCount + ' titik GPS';
+  // atur dulu field opsional (tampil/sembunyi), teksnya ditimpa efek ketik
   setDpField('dpf-anggota', 'dp-anggota', ov.anggota ? ov.anggota + ' orang' : '');
   setDpField('dpf-komoditas', 'dp-komoditas', ov.komoditas || '');
   setDpField('dpf-catatan', 'dp-catatan', ov.catatan || '');
+  typeInto(document.getElementById('dp-tag'), s.code, 60, 30);
+  typeInto(document.getElementById('dp-name'), s.name, 160, 28);
+  const seq = [
+    ['dp-ketua', ketuaOf(s)],
+    ov.anggota ? ['dp-anggota', ov.anggota + ' orang'] : null,
+    ov.komoditas ? ['dp-komoditas', ov.komoditas] : null,
+    ['dp-luas', s.areaHa.toFixed(2) + ' Ha'],
+    ['dp-coord', c.lat.toFixed(6) + ', ' + c.lng.toFixed(6)],
+    ['dp-verts', s.vertexCount + ' titik GPS'],
+    ov.catatan ? ['dp-catatan', ov.catatan] : null
+  ].filter(Boolean);
+  seq.forEach(([elId, text], i) =>
+    typeInto(document.getElementById(elId), text, 320 + i * 100));
 }
 
 // ===== CALLOUT LINE (garis penunjuk dari poligon ke tab info) =====
@@ -593,6 +620,7 @@ function deselectAll(){
   if(activeLayer) activeLayer.setStyle({ weight: 2, opacity: 0.9, fillOpacity: 0.14 });
   activeLayer = null; activeId = null;
   clearTimeout(panelTimer);
+  clearTyping();
   calloutSvg.innerHTML = '';
   document.querySelectorAll('.sector-item').forEach(el => el.classList.remove('active'));
   document.getElementById('detail-panel').classList.remove('open');
