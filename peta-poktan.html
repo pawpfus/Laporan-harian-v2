@@ -84,6 +84,10 @@
   .sector-item .meta b{color:var(--green);}
   #sector-list .ftr{padding:10px 14px;border-top:1px solid var(--line);font-size:10px;color:var(--text-dim);}
   #sector-list .ftr .totalha{color:var(--amber);font-weight:bold;}
+  #sector-close{display:none;width:20px;height:20px;border:1px solid var(--line);background:transparent;
+    color:var(--text-dim);font-size:13px;cursor:pointer;align-items:center;justify-content:center;
+    line-height:1;padding:0;}
+  #sector-close:hover{color:var(--red);border-color:var(--red);}
 
   /* ===== TOP-RIGHT BUTTONS ===== */
   #topright-btns{position:absolute;top:76px;right:16px;z-index:480;display:flex;gap:10px;}
@@ -213,11 +217,8 @@
     #topbar .clock .time{font-size:13px;letter-spacing:1px;}
     #topbar .clock .date{font-size:8.5px;}
 
-    #sector-toggle{display:flex;align-items:center;gap:6px;pointer-events:auto;
-      background:var(--panel-bg);border:1px solid var(--line);color:var(--cyan);
-      font-family:'Orbitron',sans-serif;font-size:9.5px;letter-spacing:1.5px;
-      padding:8px 10px;cursor:pointer;}
-    #sector-toggle svg{width:13px;height:13px;}
+    #sector-toggle{display:flex;position:absolute;top:58px;left:10px;z-index:480;}
+    #sector-close{display:flex;}
 
     #sector-list{top:58px;left:0;bottom:0;width:78vw;max-width:300px;z-index:600;
       transform:translateX(-101%);transition:transform 0.35s ease;border:none;border-right:1px solid var(--cyan);}
@@ -260,19 +261,25 @@
       <small>POLYGON LAHAN POKTAN</small>
     </div>
   </div>
-  <button id="sector-toggle">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
-    SEKTOR
-  </button>
   <div class="clock">
     <div class="time hud-font" id="clock-time">--:--:--</div>
     <div class="date" id="clock-date">-- --- ----</div>
   </div>
 </div>
 
+<button id="sector-toggle" class="hud-btn">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+  SEKTOR
+</button>
+
 <div id="sector-list">
   <div class="corner tl"></div><div class="corner tr"></div>
-  <div class="hdr"><span>DAFTAR SEKTOR</span><span class="count" id="list-count">4</span></div>
+  <div class="hdr"><span>DAFTAR SEKTOR</span>
+    <span style="display:flex;align-items:center;gap:10px">
+      <span class="count" id="list-count">4</span>
+      <button id="sector-close" aria-label="Tutup daftar">&times;</button>
+    </span>
+  </div>
   <div class="items" id="sector-items"></div>
   <div class="ftr">TOTAL LUAS TERPANTAU: <span class="totalha" id="total-ha">-- Ha</span></div>
 </div>
@@ -630,6 +637,9 @@ function deselectAll(){
 document.getElementById('dp-close').addEventListener('click', deselectAll);
 document.getElementById('sector-toggle').addEventListener('click', () => {
   document.getElementById('sector-list').classList.toggle('open');
+});
+document.getElementById('sector-close').addEventListener('click', () => {
+  document.getElementById('sector-list').classList.remove('open');
 });
 document.getElementById('overview-btn').addEventListener('click', () => {
   deselectAll();
