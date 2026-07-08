@@ -138,6 +138,22 @@
     transition:transform 0.5s cubic-bezier(.2,.9,.25,1), opacity 0.35s;
     display:flex;flex-direction:column;}
   #detail-panel.open{transform:perspective(1100px) rotateY(-7deg) translateX(0);opacity:1;}
+
+  /* isi panel muncul bertahap setelah garis callout */
+  #detail-panel .dp-head, #detail-panel .dp-field, #detail-panel .dp-foot{
+    opacity:0;transform:translateX(16px);
+    transition:opacity 0.28s ease, transform 0.28s ease;}
+  #detail-panel.open .dp-head{opacity:1;transform:none;transition-delay:0.08s;}
+  #detail-panel.open .dp-field{opacity:1;transform:none;}
+  #detail-panel.open .dp-field:nth-child(1){transition-delay:0.18s;}
+  #detail-panel.open .dp-field:nth-child(2){transition-delay:0.26s;}
+  #detail-panel.open .dp-field:nth-child(3){transition-delay:0.34s;}
+  #detail-panel.open .dp-field:nth-child(4){transition-delay:0.42s;}
+  #detail-panel.open .dp-field:nth-child(5){transition-delay:0.50s;}
+  #detail-panel.open .dp-field:nth-child(6){transition-delay:0.58s;}
+  #detail-panel.open .dp-field:nth-child(7){transition-delay:0.66s;}
+  #detail-panel.open .dp-field:nth-child(8){transition-delay:0.74s;}
+  #detail-panel.open .dp-foot{opacity:1;transform:none;transition-delay:0.82s;}
   #detail-panel .dp-head{padding:14px 16px 10px;border-bottom:1px solid var(--line);position:relative;}
   #detail-panel .dp-head .tag{font-size:9.5px;letter-spacing:3px;color:var(--cyan);}
   #detail-panel .dp-head h2{font-family:'Orbitron',sans-serif;font-size:16px;margin:6px 0 0;color:var(--green);
@@ -554,16 +570,18 @@ function selectSector(id){
 
   document.querySelectorAll('.sector-item').forEach(el => el.classList.toggle('active', el.dataset.id == id));
 
-  populateDetail(id);
   document.getElementById('active-sector').textContent = s.code + ' — ' + s.name.toUpperCase();
 
   if(window.innerWidth <= 820) document.getElementById('sector-list').classList.remove('open');
 
-  // koreografi: garis tergambar dulu → tab info muncul → kamera bergerak
+  // koreografi: garis tergambar dulu → tab info muncul bertahap → kamera bergerak
+  const panel = document.getElementById('detail-panel');
+  panel.classList.remove('open'); // supaya animasi bertahap terulang saat ganti sektor
   drawCallout(true);
   clearTimeout(panelTimer);
   panelTimer = setTimeout(() => {
-    document.getElementById('detail-panel').classList.add('open');
+    populateDetail(id);
+    panel.classList.add('open');
     const pad = panelPadding();
     try {
       map.flyToBounds(layer.getBounds(), { paddingTopLeft: pad.paddingTopLeft, paddingBottomRight: pad.paddingBottomRight, maxZoom: 17.5, duration: 1.1 });
