@@ -65,9 +65,10 @@
   #topbar .clock .time{font-size:18px;color:var(--cyan);text-shadow:0 0 8px rgba(46,224,255,0.55);letter-spacing:2px;}
   #topbar .clock .date{font-size:10px;color:var(--text-dim);letter-spacing:1.5px;margin-top:2px;}
 
-  /* ===== SECTOR LIST (left) ===== */
+  /* ===== SECTOR LIST (left, isometrik) ===== */
   #sector-list{position:absolute;top:76px;left:16px;bottom:64px;width:260px;z-index:480;
     background:var(--panel-bg);border:1px solid var(--line);backdrop-filter:blur(3px);
+    transform-origin:left center;transform:perspective(1100px) rotateY(6deg);
     display:flex;flex-direction:column;box-shadow:0 0 24px rgba(0,0,0,0.5);}
   #sector-list .hdr{padding:10px 14px;border-bottom:1px solid var(--line);font-size:10.5px;
     letter-spacing:2px;color:var(--cyan);display:flex;justify-content:space-between;align-items:center;}
@@ -119,13 +120,24 @@
   #em-save{color:#04121a;background:var(--green);border-color:var(--green);font-weight:bold;}
   #em-save:hover{color:#04121a;background:#3dff9f;border-color:#3dff9f;}
 
-  /* ===== DETAIL PANEL (right) ===== */
+  /* ===== CALLOUT LINE (garis penunjuk HUD) ===== */
+  #callout-svg{position:absolute;inset:0;z-index:460;pointer-events:none;width:100%;height:100%;}
+  #callout-svg .c-line{stroke:var(--cyan);stroke-width:1.5;fill:none;
+    filter:drop-shadow(0 0 4px rgba(46,224,255,0.7));}
+  #callout-svg .c-line.draw{stroke-dasharray:var(--len);stroke-dashoffset:var(--len);
+    animation:calloutDraw 0.38s ease-out forwards;}
+  @keyframes calloutDraw{to{stroke-dashoffset:0;}}
+  #callout-svg .c-ring{fill:none;stroke:var(--cyan);stroke-width:1.5;}
+
+  /* ===== DETAIL PANEL (right, isometrik) ===== */
   #detail-panel{position:absolute;top:128px;right:16px;bottom:64px;width:320px;z-index:490;
     background:var(--panel-bg);border:1px solid var(--cyan);backdrop-filter:blur(3px);
     box-shadow:0 0 30px rgba(46,224,255,0.15), 0 0 40px rgba(0,0,0,0.6);
-    transform:translateX(360px);opacity:0;transition:transform 0.45s cubic-bezier(.2,.9,.25,1), opacity 0.35s;
+    transform-origin:right center;
+    transform:perspective(1100px) rotateY(-30deg) translateX(380px);opacity:0;
+    transition:transform 0.5s cubic-bezier(.2,.9,.25,1), opacity 0.35s;
     display:flex;flex-direction:column;}
-  #detail-panel.open{transform:translateX(0);opacity:1;}
+  #detail-panel.open{transform:perspective(1100px) rotateY(-7deg) translateX(0);opacity:1;}
   #detail-panel .dp-head{padding:14px 16px 10px;border-bottom:1px solid var(--line);position:relative;}
   #detail-panel .dp-head .tag{font-size:9.5px;letter-spacing:3px;color:var(--cyan);}
   #detail-panel .dp-head h2{font-family:'Orbitron',sans-serif;font-size:16px;margin:6px 0 0;color:var(--green);
@@ -193,15 +205,15 @@
 
     #sector-list{top:58px;left:0;bottom:0;width:78vw;max-width:300px;z-index:600;
       transform:translateX(-101%);transition:transform 0.35s ease;border:none;border-right:1px solid var(--cyan);}
-    #sector-list.open{transform:translateX(0);}
+    #sector-list.open{transform:translateX(0) perspective(900px) rotateY(4deg);transform-origin:left center;}
 
     #topright-btns{top:58px;right:10px;gap:8px;}
     .hud-btn{padding:8px 10px;font-size:9.5px;letter-spacing:1.5px;}
 
     #detail-panel{left:10px;right:10px;top:auto;bottom:52px;width:auto;height:58vh;max-height:58vh;
-      border-left:1px solid var(--cyan);
-      transform:translateY(105%);}
-    #detail-panel.open{transform:translateY(0);}
+      border-left:1px solid var(--cyan);transform-origin:center bottom;
+      transform:perspective(900px) rotateX(14deg) translateY(105%);}
+    #detail-panel.open{transform:perspective(900px) rotateX(4deg) translateY(0);}
 
     #bottombar{padding:7px 12px;font-size:8.5px;flex-direction:column;gap:4px;align-items:flex-start;}
     #bottombar .seg{gap:14px;}
@@ -220,6 +232,7 @@
 
 <div id="map"></div>
 <div id="map-tint"></div>
+<svg id="callout-svg" xmlns="http://www.w3.org/2000/svg"></svg>
 <div id="map-vignette"></div>
 <div id="scanline"></div>
 
@@ -498,6 +511,39 @@ function populateDetail(id){
   setDpField('dpf-catatan', 'dp-catatan', ov.catatan || '');
 }
 
+// ===== CALLOUT LINE (garis penunjuk dari poligon ke tab info) =====
+const calloutSvg = document.getElementById('callout-svg');
+let panelTimer = null;
+
+function calloutTarget(){
+  const w = window.innerWidth, h = window.innerHeight;
+  if(w <= 820) return { x: w * 0.5, y: h - h * 0.58 - 62 }; // tepat di atas bottom sheet
+  return { x: w - 344, y: 172 }; // tepi kiri panel detail
+}
+
+function drawCallout(animate){
+  if(activeId === null){ calloutSvg.innerHTML = ''; return; }
+  let p;
+  try { p = map.latLngToContainerPoint(layerById[activeId].getBounds().getCenter()); }
+  catch(e){ return; }
+  const t = calloutTarget();
+  const dx = t.x - p.x, dy = t.y - p.y;
+  const diag = Math.min(Math.abs(dx), Math.abs(dy)) * 0.45;
+  const ex = p.x + Math.sign(dx) * diag, ey = p.y + Math.sign(dy) * diag;
+  const len = Math.ceil(Math.hypot(ex - p.x, ey - p.y) + Math.hypot(t.x - ex, t.y - ey));
+  calloutSvg.innerHTML = `
+    <circle cx="${p.x}" cy="${p.y}" r="3.5" fill="var(--cyan)"/>
+    <circle class="c-ring" cx="${p.x}" cy="${p.y}" r="7">
+      <animate attributeName="r" from="6" to="24" dur="1.6s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" from="0.9" to="0" dur="1.6s" repeatCount="indefinite"/>
+    </circle>
+    <path class="c-line${animate ? ' draw' : ''}" style="--len:${len}" d="M ${p.x} ${p.y} L ${ex} ${ey} L ${t.x} ${t.y}"/>
+    <circle cx="${t.x}" cy="${t.y}" r="2.5" fill="var(--cyan)"/>`;
+}
+
+map.on('move zoom', () => { if(activeId !== null) drawCallout(false); });
+window.addEventListener('resize', () => drawCallout(false));
+
 function selectSector(id){
   const s = sectors[id];
   const layer = layerById[id];
@@ -511,18 +557,25 @@ function selectSector(id){
   populateDetail(id);
   document.getElementById('active-sector').textContent = s.code + ' — ' + s.name.toUpperCase();
 
-  document.getElementById('detail-panel').classList.add('open');
   if(window.innerWidth <= 820) document.getElementById('sector-list').classList.remove('open');
 
-  const pad = panelPadding();
-  try {
-    map.flyToBounds(layer.getBounds(), { paddingTopLeft: pad.paddingTopLeft, paddingBottomRight: pad.paddingBottomRight, maxZoom: 17.5, duration: 1.1 });
-  } catch(e) { /* peta belum punya ukuran (tab tersembunyi) — data panel tetap tampil */ }
+  // koreografi: garis tergambar dulu → tab info muncul → kamera bergerak
+  drawCallout(true);
+  clearTimeout(panelTimer);
+  panelTimer = setTimeout(() => {
+    document.getElementById('detail-panel').classList.add('open');
+    const pad = panelPadding();
+    try {
+      map.flyToBounds(layer.getBounds(), { paddingTopLeft: pad.paddingTopLeft, paddingBottomRight: pad.paddingBottomRight, maxZoom: 17.5, duration: 1.1 });
+    } catch(e) { /* peta belum punya ukuran (tab tersembunyi) — data panel tetap tampil */ }
+  }, 400);
 }
 
 function deselectAll(){
   if(activeLayer) activeLayer.setStyle({ weight: 2, opacity: 0.9, fillOpacity: 0.14 });
   activeLayer = null; activeId = null;
+  clearTimeout(panelTimer);
+  calloutSvg.innerHTML = '';
   document.querySelectorAll('.sector-item').forEach(el => el.classList.remove('active'));
   document.getElementById('detail-panel').classList.remove('open');
   document.getElementById('active-sector').textContent = 'NONE';
