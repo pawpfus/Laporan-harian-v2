@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
 <title>FARM AXIS // Command Center</title>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
 <style>
@@ -279,6 +280,7 @@
         <textarea id="em-catatan" rows="3" maxlength="500" placeholder="Info tambahan..."></textarea>
       </label>
     </div>
+    <div id="em-status" style="padding:0 16px 10px;font-size:11px;letter-spacing:0.5px;color:var(--text-dim);min-height:14px;"></div>
     <div class="em-foot">
       <button id="em-cancel">BATAL</button>
       <button id="em-save">SIMPAN</button>
@@ -338,6 +340,7 @@
   <div class="seg">
     <span>SEKTOR AKTIF: <b id="active-sector">NONE</b></span>
     <span>SUMBER PETA: <b>ESRI SATELIT</b></span>
+    <span>SYNC: <b id="sync-mode" style="color:var(--amber)">LOKAL</b></span>
   </div>
 </div>
 
@@ -414,7 +417,9 @@ function panelPadding(){
   return { paddingTopLeft: L.point(300,120), paddingBottomRight: L.point(360,90) };
 }
 
-// --- data tambahan per sektor, tersimpan di perangkat (localStorage) ---
+// --- data tambahan per sektor ---
+// Sumber utama: tabel Supabase `poktan_info` (sinkron antar perangkat).
+// localStorage dipakai sebagai cache/fallback saat offline atau tabel belum dibuat.
 const OVERRIDES_KEY = 'farmaxis_overrides';
 function loadOverrides(){
   try { return JSON.parse(localStorage.getItem(OVERRIDES_KEY)) || {}; }
@@ -425,6 +430,53 @@ let overrides = loadOverrides();
 function getOv(s){ return overrides[s.name] || {}; }
 function ketuaOf(s){ return getOv(s).ketua || s.ketua || '—'; }
 
+// Supabase yang sama dengan aplikasi Laporan Pertanian
+const SUPABASE_URL = 'https://penaujinawijzwcimgde.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBlbmF1amluYXdpanp3Y2ltZ2RlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg5NzgzNzcsImV4cCI6MjA5NDU1NDM3N30.FNNGqO7X5wpZ9Ng8qehPagS74uP-GMo8Z2AdzSEU6v4';
+let sb = null;
+try {
+  if(window.supabase && window.supabase.createClient)
+    sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+} catch(e){ sb = null; }
+
+let syncMode = 'LOKAL'; // LOKAL | CLOUD
+function updateSyncBadge(){
+  const el = document.getElementById('sync-mode');
+  if(!el) return;
+  el.textContent = syncMode;
+  el.style.color = syncMode === 'CLOUD' ? 'var(--green)' : 'var(--amber)';
+}
+
+function rowToOv(r){
+  const ov = {};
+  if(r.ketua) ov.ketua = r.ketua;
+  if(r.anggota) ov.anggota = String(r.anggota);
+  if(r.komoditas) ov.komoditas = r.komoditas;
+  if(r.catatan) ov.catatan = r.catatan;
+  return ov;
+}
+
+async function loadCloudOverrides(){
+  if(!sb) return;
+  try {
+    const { data, error } = await sb.from('poktan_info').select('*');
+    if(error) throw error;
+    syncMode = 'CLOUD';
+    data.forEach(r => {
+      const ov = rowToOv(r);
+      if(Object.keys(ov).length) overrides[r.name] = ov;
+      else delete overrides[r.name];
+    });
+    saveOverrides(overrides);
+    buildList();
+    if(activeId !== null) populateDetail(activeId);
+  } catch(e) {
+    syncMode = 'LOKAL';
+    console.warn('poktan_info tidak terjangkau — pakai data lokal.', e.message || e);
+  }
+  updateSyncBadge();
+}
+
 function setDpField(fieldId, valId, value){
   const wrap = document.getElementById(fieldId);
   if(value){ document.getElementById(valId).textContent = value; wrap.style.display = ''; }
@@ -434,7 +486,7 @@ function setDpField(fieldId, valId, value){
 function populateDetail(id){
   const s = sectors[id];
   const ov = getOv(s);
-  document.getElementById('dp-tag').textContent = 'SEKTOR // ' + s.code;
+  document.getElementById('dp-tag').textContent = s.code;
   document.getElementById('dp-name').textContent = s.name;
   document.getElementById('dp-ketua').textContent = ketuaOf(s);
   document.getElementById('dp-luas').textContent = s.areaHa.toFixed(2) + ' Ha';
@@ -504,6 +556,8 @@ function openEditModal(){
   const id = activeId !== null ? activeId : 0;
   emSector.value = id;
   fillEditForm(id);
+  const st = document.getElementById('em-status');
+  st.textContent = ''; st.style.color = 'var(--text-dim)';
   editModal.classList.add('show');
 }
 
@@ -512,7 +566,13 @@ document.getElementById('edit-btn').addEventListener('click', openEditModal);
 document.getElementById('em-cancel').addEventListener('click', () => editModal.classList.remove('show'));
 editModal.addEventListener('click', e => { if(e.target === editModal) editModal.classList.remove('show'); });
 
-document.getElementById('em-save').addEventListener('click', () => {
+function setEmStatus(msg, tone){
+  const el = document.getElementById('em-status');
+  el.textContent = msg;
+  el.style.color = tone === 'ok' ? 'var(--green)' : tone === 'warn' ? 'var(--amber)' : 'var(--text-dim)';
+}
+
+document.getElementById('em-save').addEventListener('click', async () => {
   const id = parseInt(emSector.value, 10);
   const s = sectors[id];
   const ov = {};
@@ -529,8 +589,30 @@ document.getElementById('em-save').addEventListener('click', () => {
   saveOverrides(overrides);
   buildList();
   if(activeId !== null) populateDetail(activeId);
+
+  // sinkron ke Supabase (tabel poktan_info)
+  if(sb){
+    setEmStatus('Menyimpan ke cloud...', '');
+    const row = {
+      name: s.name,
+      ketua: ov.ketua || null,
+      anggota: ov.anggota || null,
+      komoditas: ov.komoditas || null,
+      catatan: ov.catatan || null,
+      updated_at: new Date().toISOString()
+    };
+    const { error } = await sb.from('poktan_info').upsert(row);
+    if(error){
+      syncMode = 'LOKAL'; updateSyncBadge();
+      setEmStatus('⚠ Gagal sinkron cloud — tersimpan lokal saja. (' + (error.message || 'error') + ')', 'warn');
+      return; // biarkan modal terbuka agar pesan terbaca
+    }
+    syncMode = 'CLOUD'; updateSyncBadge();
+  }
   editModal.classList.remove('show');
 });
+
+loadCloudOverrides();
 
 // sector list panel
 const itemsEl = document.getElementById('sector-items');
