@@ -13,6 +13,7 @@
     --green:#22ee88;
     --green-dim:#0f7a45;
     --cyan:#2ee0ff;
+    --pink:#ff2bd6;
     --amber:#ffb020;
     --red:#ff3b5c;
     --bg:#04080a;
@@ -27,6 +28,11 @@
   .hud-font{font-family:'Orbitron',sans-serif;}
 
   #map{position:absolute;inset:0;z-index:1;background:#04080a;}
+  /* mode oblique: peta miring 3D saat sektor dipilih */
+  #map, #callout-svg{transition:transform 1s cubic-bezier(.25,.9,.3,1);}
+  body.oblique #map, body.oblique #callout-svg{
+    transform:perspective(1400px) rotateX(16deg) scale(1.18);
+    transform-origin:center 62%;}
   .leaflet-tile-pane{filter:brightness(0.32) contrast(1.08) saturate(0.9);}
   #map-tint{position:absolute;inset:0;z-index:390;pointer-events:none;
     background:linear-gradient(135deg, rgba(4,14,12,0.32), rgba(4,10,16,0.30));}
@@ -68,7 +74,7 @@
   /* ===== SECTOR LIST (left, isometrik) ===== */
   #sector-list{position:absolute;top:76px;left:16px;bottom:64px;width:260px;z-index:480;
     background:var(--panel-bg);border:1px solid var(--line);backdrop-filter:blur(3px);
-    transform-origin:left center;transform:perspective(1100px) rotateY(6deg);
+    transform-origin:left center;transform:perspective(1100px) rotateY(12deg);
     display:flex;flex-direction:column;box-shadow:0 0 24px rgba(0,0,0,0.5);}
   #sector-list .hdr{padding:10px 14px;border-bottom:1px solid var(--line);font-size:10.5px;
     letter-spacing:2px;color:var(--cyan);display:flex;justify-content:space-between;align-items:center;}
@@ -77,7 +83,7 @@
   .sector-item{padding:11px 14px;border-bottom:1px solid rgba(46,224,255,0.12);cursor:pointer;
     transition:background 0.15s;position:relative;}
   .sector-item:hover{background:rgba(46,224,255,0.07);}
-  .sector-item.active{background:rgba(34,238,136,0.10);border-left:3px solid var(--green);}
+  .sector-item.active{background:rgba(255,43,214,0.09);border-left:3px solid var(--pink);}
   .sector-item .id{font-size:9px;color:var(--text-dim);letter-spacing:1.5px;}
   .sector-item .name{font-size:12.5px;color:var(--text);margin-top:3px;font-weight:bold;}
   .sector-item .meta{font-size:10px;color:var(--text-dim);margin-top:3px;}
@@ -124,12 +130,12 @@
 
   /* ===== CALLOUT LINE (garis penunjuk HUD) ===== */
   #callout-svg{position:absolute;inset:0;z-index:460;pointer-events:none;width:100%;height:100%;}
-  #callout-svg .c-line{stroke:var(--cyan);stroke-width:1.5;fill:none;
-    filter:drop-shadow(0 0 4px rgba(46,224,255,0.7));}
+  #callout-svg .c-line{stroke:var(--pink);stroke-width:1.5;fill:none;
+    filter:drop-shadow(0 0 4px rgba(255,43,214,0.75));}
   #callout-svg .c-line.draw{stroke-dasharray:var(--len);stroke-dashoffset:var(--len);
     animation:calloutDraw 0.38s ease-out forwards;}
   @keyframes calloutDraw{to{stroke-dashoffset:0;}}
-  #callout-svg .c-ring{fill:none;stroke:var(--cyan);stroke-width:1.5;}
+  #callout-svg .c-ring{fill:none;stroke:var(--pink);stroke-width:1.5;}
 
   /* ===== DETAIL PANEL (right, isometrik) ===== */
   #detail-panel{position:absolute;top:128px;right:16px;bottom:64px;width:320px;z-index:490;
@@ -139,13 +145,12 @@
     transform:perspective(1100px) rotateY(-30deg) translateX(380px);opacity:0;
     transition:transform 0.5s cubic-bezier(.2,.9,.25,1), opacity 0.35s;
     display:flex;flex-direction:column;}
-  #detail-panel.open{transform:perspective(1100px) rotateY(-7deg) translateX(0);opacity:1;}
+  #detail-panel.open{transform:perspective(1100px) rotateY(-12deg) translateX(0);opacity:1;}
 
   /* isi panel muncul bertahap setelah garis callout */
-  #detail-panel .dp-head, #detail-panel .dp-field, #detail-panel .dp-actions, #detail-panel .dp-foot{
+  #detail-panel .dp-head, #detail-panel .dp-field, #detail-panel .dp-foot{
     opacity:0;transform:translateX(16px);
     transition:opacity 0.28s ease, transform 0.28s ease;}
-  #detail-panel.open .dp-actions{opacity:1;transform:none;transition-delay:0.78s;}
   #detail-panel.open .dp-head{opacity:1;transform:none;transition-delay:0.08s;}
   #detail-panel.open .dp-field{opacity:1;transform:none;}
   #detail-panel.open .dp-field:nth-child(1){transition-delay:0.18s;}
@@ -158,7 +163,8 @@
   #detail-panel.open .dp-field:nth-child(8){transition-delay:0.74s;}
   #detail-panel.open .dp-foot{opacity:1;transform:none;transition-delay:0.82s;}
   #detail-panel .dp-head{padding:14px 16px 10px;border-bottom:1px solid var(--line);position:relative;}
-  #detail-panel .dp-head .tag{font-size:9.5px;letter-spacing:3px;color:var(--cyan);}
+  #detail-panel .dp-head .tag{font-size:9.5px;letter-spacing:3px;color:var(--pink);
+    text-shadow:0 0 8px rgba(255,43,214,0.5);}
   #detail-panel .dp-head h2{font-family:'Orbitron',sans-serif;font-size:16px;margin:6px 0 0;color:var(--green);
     text-shadow:0 0 10px rgba(34,238,136,0.5);line-height:1.3;}
   #detail-panel .dp-close{position:absolute;top:10px;right:10px;width:22px;height:22px;
@@ -168,7 +174,8 @@
   #detail-panel .dp-body{padding:14px 16px;overflow-y:auto;flex:1;}
   .dp-field{margin-bottom:14px;}
   .dp-field .lbl{font-size:9.5px;letter-spacing:2px;color:var(--text-dim);display:flex;align-items:center;gap:6px;}
-  .dp-field .lbl::before{content:'';width:5px;height:5px;background:var(--cyan);display:inline-block;}
+  .dp-field .lbl::before{content:'';width:5px;height:5px;background:var(--pink);display:inline-block;
+    box-shadow:0 0 5px rgba(255,43,214,0.7);}
   .dp-field .val{font-size:14px;color:var(--text);margin-top:5px;padding-left:11px;}
   .dp-field .val.big{font-size:22px;color:var(--amber);text-shadow:0 0 8px rgba(255,176,32,0.4);}
   .dp-field .val.mono{font-size:11.5px;letter-spacing:0.5px;color:var(--cyan);}
@@ -176,14 +183,14 @@
   .status-row .sdot{width:8px;height:8px;border-radius:50%;background:var(--green);
     box-shadow:0 0 6px var(--green);animation:blink 1.6s ease-in-out infinite;}
   .status-row span{font-size:12px;color:var(--green);letter-spacing:1.5px;}
-  #detail-panel .dp-actions{padding:10px 16px;border-top:1px solid var(--line);}
-  #dp-edit{width:100%;display:flex;align-items:center;justify-content:center;gap:8px;
-    font-family:'Orbitron',sans-serif;font-size:10.5px;letter-spacing:2px;padding:10px;
-    background:rgba(255,176,32,0.08);border:1px solid rgba(255,176,32,0.4);color:var(--amber);cursor:pointer;}
-  #dp-edit:hover{background:rgba(255,176,32,0.16);}
-  #dp-edit svg{width:13px;height:13px;}
-  #detail-panel .dp-foot{padding:10px 16px;border-top:1px solid var(--line);font-size:9px;
-    color:var(--text-dim);letter-spacing:1px;}
+  #dp-edit{display:flex;align-items:center;gap:5px;flex:none;
+    font-family:'Orbitron',sans-serif;font-size:8.5px;letter-spacing:1.5px;padding:5px 9px;
+    background:transparent;border:1px solid rgba(255,176,32,0.35);color:var(--amber);cursor:pointer;}
+  #dp-edit:hover{background:rgba(255,176,32,0.12);}
+  #dp-edit svg{width:10px;height:10px;}
+  #detail-panel .dp-foot{padding:8px 16px;border-top:1px solid var(--line);font-size:9px;
+    color:var(--text-dim);letter-spacing:1px;display:flex;align-items:center;
+    justify-content:space-between;gap:10px;}
 
   /* ===== BOTTOM STATUS BAR ===== */
   #bottombar{position:absolute;left:0;right:0;bottom:0;z-index:500;
@@ -335,7 +342,7 @@
   <div class="dp-body">
     <div class="dp-field">
       <div class="lbl">STATUS</div>
-      <div class="status-row"><span class="sdot"></span><span>TERPANTAU / ACTIVE</span></div>
+      <div class="status-row"><span class="sdot"></span><span>ACTIVE</span></div>
     </div>
     <div class="dp-field">
       <div class="lbl">KETUA KELOMPOK</div>
@@ -366,13 +373,12 @@
       <div class="val" id="dp-catatan" style="font-size:12px;line-height:1.5">&mdash;</div>
     </div>
   </div>
-  <div class="dp-actions">
+  <div class="dp-foot"><span>DATA PRIMER &middot; SURVEI GPS</span>
     <button id="dp-edit">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5z"/></svg>
       EDIT DATA
     </button>
   </div>
-  <div class="dp-foot">DATA PRIMER &middot; SUMBER: SURVEI GPS LAPANGAN</div>
 </div>
 
 <div id="bottombar">
@@ -434,7 +440,7 @@ L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_only_labels/{z}/{x}/{y}{r}.p
   subdomains: 'abcd', maxZoom: 19, opacity: 0.85
 }).addTo(map);
 
-const PALETTE = ['#22ee88', '#2ee0ff'];
+const PALETTE = ['#22ee88', '#2ee0ff', '#ff2bd6'];
 let activeLayer = null, activeId = null;
 const layerById = {};
 
@@ -589,13 +595,13 @@ function drawCallout(animate){
   const ex = p.x + Math.sign(dx) * diag, ey = p.y + Math.sign(dy) * diag;
   const len = Math.ceil(Math.hypot(ex - p.x, ey - p.y) + Math.hypot(t.x - ex, t.y - ey));
   calloutSvg.innerHTML = `
-    <circle cx="${p.x}" cy="${p.y}" r="3.5" fill="var(--cyan)"/>
+    <circle cx="${p.x}" cy="${p.y}" r="3.5" fill="var(--pink)"/>
     <circle class="c-ring" cx="${p.x}" cy="${p.y}" r="7">
       <animate attributeName="r" from="6" to="24" dur="1.6s" repeatCount="indefinite"/>
       <animate attributeName="opacity" from="0.9" to="0" dur="1.6s" repeatCount="indefinite"/>
     </circle>
     <path class="c-line${animate ? ' draw' : ''}" style="--len:${len}" d="M ${p.x} ${p.y} L ${ex} ${ey} L ${t.x} ${t.y}"/>
-    <circle cx="${t.x}" cy="${t.y}" r="2.5" fill="var(--cyan)"/>`;
+    <circle cx="${t.x}" cy="${t.y}" r="2.5" fill="var(--pink)"/>`;
 }
 
 map.on('move zoom', () => { if(activeId !== null) drawCallout(false); });
@@ -615,7 +621,8 @@ function selectSector(id){
 
   if(window.innerWidth <= 820) document.getElementById('sector-list').classList.remove('open');
 
-  // koreografi: garis tergambar dulu → tab info muncul bertahap → kamera bergerak
+  // koreografi: garis tergambar dulu → tab info muncul bertahap → kamera bergerak (oblique)
+  document.body.classList.add('oblique');
   const panel = document.getElementById('detail-panel');
   panel.classList.remove('open'); // supaya animasi bertahap terulang saat ganti sektor
   drawCallout(true);
@@ -635,6 +642,7 @@ function deselectAll(){
   activeLayer = null; activeId = null;
   clearTimeout(panelTimer);
   clearTyping();
+  document.body.classList.remove('oblique');
   calloutSvg.innerHTML = '';
   document.querySelectorAll('.sector-item').forEach(el => el.classList.remove('active'));
   document.getElementById('detail-panel').classList.remove('open');
