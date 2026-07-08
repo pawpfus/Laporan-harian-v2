@@ -97,8 +97,6 @@
     box-shadow:0 0 24px rgba(0,0,0,0.5);}
   .hud-btn:hover{background:rgba(46,224,255,0.1);}
   .hud-btn svg{width:13px;height:13px;}
-  #edit-btn{color:var(--amber);border-color:rgba(255,176,32,0.4);}
-  #edit-btn:hover{background:rgba(255,176,32,0.08);}
 
   /* ===== EDIT MODAL ===== */
   #edit-modal{position:fixed;inset:0;z-index:700;display:none;align-items:center;justify-content:center;
@@ -144,9 +142,10 @@
   #detail-panel.open{transform:perspective(1100px) rotateY(-7deg) translateX(0);opacity:1;}
 
   /* isi panel muncul bertahap setelah garis callout */
-  #detail-panel .dp-head, #detail-panel .dp-field, #detail-panel .dp-foot{
+  #detail-panel .dp-head, #detail-panel .dp-field, #detail-panel .dp-actions, #detail-panel .dp-foot{
     opacity:0;transform:translateX(16px);
     transition:opacity 0.28s ease, transform 0.28s ease;}
+  #detail-panel.open .dp-actions{opacity:1;transform:none;transition-delay:0.78s;}
   #detail-panel.open .dp-head{opacity:1;transform:none;transition-delay:0.08s;}
   #detail-panel.open .dp-field{opacity:1;transform:none;}
   #detail-panel.open .dp-field:nth-child(1){transition-delay:0.18s;}
@@ -177,6 +176,12 @@
   .status-row .sdot{width:8px;height:8px;border-radius:50%;background:var(--green);
     box-shadow:0 0 6px var(--green);animation:blink 1.6s ease-in-out infinite;}
   .status-row span{font-size:12px;color:var(--green);letter-spacing:1.5px;}
+  #detail-panel .dp-actions{padding:10px 16px;border-top:1px solid var(--line);}
+  #dp-edit{width:100%;display:flex;align-items:center;justify-content:center;gap:8px;
+    font-family:'Orbitron',sans-serif;font-size:10.5px;letter-spacing:2px;padding:10px;
+    background:rgba(255,176,32,0.08);border:1px solid rgba(255,176,32,0.4);color:var(--amber);cursor:pointer;}
+  #dp-edit:hover{background:rgba(255,176,32,0.16);}
+  #dp-edit svg{width:13px;height:13px;}
   #detail-panel .dp-foot{padding:10px 16px;border-top:1px solid var(--line);font-size:9px;
     color:var(--text-dim);letter-spacing:1px;}
 
@@ -285,10 +290,6 @@
 </div>
 
 <div id="topright-btns">
-  <div id="edit-btn" class="hud-btn">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5z"/></svg>
-    EDIT DATA
-  </div>
   <div id="overview-btn" class="hud-btn">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-6 9 6v10a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg>
     OVERVIEW
@@ -364,6 +365,12 @@
       <div class="lbl">CATATAN</div>
       <div class="val" id="dp-catatan" style="font-size:12px;line-height:1.5">&mdash;</div>
     </div>
+  </div>
+  <div class="dp-actions">
+    <button id="dp-edit">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5z"/></svg>
+      EDIT DATA
+    </button>
   </div>
   <div class="dp-foot">DATA PRIMER &middot; SUMBER: SURVEI GPS LAPANGAN</div>
 </div>
@@ -671,7 +678,7 @@ function openEditModal(){
 }
 
 emSector.addEventListener('change', () => fillEditForm(parseInt(emSector.value, 10)));
-document.getElementById('edit-btn').addEventListener('click', openEditModal);
+document.getElementById('dp-edit').addEventListener('click', openEditModal);
 document.getElementById('em-cancel').addEventListener('click', () => editModal.classList.remove('show'));
 editModal.addEventListener('click', e => { if(e.target === editModal) editModal.classList.remove('show'); });
 
