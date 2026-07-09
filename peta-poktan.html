@@ -122,19 +122,15 @@
   .em-body input:focus,.em-body select:focus,.em-body textarea:focus{border-color:var(--cyan);}
   .em-body select option{background:#0a181c;}
 
-  /* scrollbar bergaya HUD — menyatu dengan tema, bukan scrollbar abu-abu bawaan OS */
-  #sector-list .items, #detail-panel .dp-body, .em-box, .em-body textarea{
+  /* scrollbar bergaya HUD di daftar sektor & panel detail; modal edit pakai scrollbar native */
+  #sector-list .items, #detail-panel .dp-body{
     scrollbar-width:thin;scrollbar-color:rgba(46,224,255,0.35) rgba(5,14,16,0.4);}
-  #sector-list .items::-webkit-scrollbar, #detail-panel .dp-body::-webkit-scrollbar,
-  .em-box::-webkit-scrollbar, .em-body textarea::-webkit-scrollbar{width:8px;height:8px;}
-  #sector-list .items::-webkit-scrollbar-track, #detail-panel .dp-body::-webkit-scrollbar-track,
-  .em-box::-webkit-scrollbar-track, .em-body textarea::-webkit-scrollbar-track{
+  #sector-list .items::-webkit-scrollbar, #detail-panel .dp-body::-webkit-scrollbar{width:8px;height:8px;}
+  #sector-list .items::-webkit-scrollbar-track, #detail-panel .dp-body::-webkit-scrollbar-track{
     background:rgba(5,14,16,0.4);}
-  #sector-list .items::-webkit-scrollbar-thumb, #detail-panel .dp-body::-webkit-scrollbar-thumb,
-  .em-box::-webkit-scrollbar-thumb, .em-body textarea::-webkit-scrollbar-thumb{
+  #sector-list .items::-webkit-scrollbar-thumb, #detail-panel .dp-body::-webkit-scrollbar-thumb{
     background:rgba(46,224,255,0.30);border:2px solid rgba(5,14,16,0.9);}
-  #sector-list .items::-webkit-scrollbar-thumb:hover, #detail-panel .dp-body::-webkit-scrollbar-thumb:hover,
-  .em-box::-webkit-scrollbar-thumb:hover, .em-body textarea::-webkit-scrollbar-thumb:hover{
+  #sector-list .items::-webkit-scrollbar-thumb:hover, #detail-panel .dp-body::-webkit-scrollbar-thumb:hover{
     background:rgba(46,224,255,0.55);}
 
   /* input angka: spinner bawaan browser diganti stepper HUD */
