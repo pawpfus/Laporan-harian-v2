@@ -28,7 +28,7 @@
 
   #map{position:absolute;inset:0;z-index:1;background:#04080a;}
   /* mode oblique: peta miring 3D saat sektor dipilih */
-  #map, #callout-svg{transition:transform 1s cubic-bezier(.25,.9,.3,1);}
+  #map, #callout-svg{transition:transform 1s cubic-bezier(.25,.9,.3,1);will-change:transform;}
   body.oblique #map, body.oblique #callout-svg{
     transform:perspective(1400px) rotateX(30deg) scale(1.38);
     transform-origin:center 62%;}
@@ -40,10 +40,11 @@
 
   /* scanline sweep */
   #scanline{position:absolute;inset:0;z-index:395;pointer-events:none;overflow:hidden;}
-  #scanline::before{content:'';position:absolute;left:0;right:0;height:120px;top:-120px;
+  #scanline::before{content:'';position:absolute;left:0;right:0;height:120px;top:0;
     background:linear-gradient(to bottom, rgba(46,224,255,0) 0%, rgba(46,224,255,0.06) 50%, rgba(46,224,255,0) 100%);
+    transform:translateY(-120px);will-change:transform;
     animation:sweep 7s linear infinite;}
-  @keyframes sweep{0%{top:-120px;}100%{top:100%;}}
+  @keyframes sweep{0%{transform:translateY(-120px);}100%{transform:translateY(100vh);}}
   #scanline::after{content:'';position:absolute;inset:0;
     background:repeating-linear-gradient(to bottom, rgba(255,255,255,0.025) 0px, rgba(255,255,255,0.025) 1px, transparent 1px, transparent 3px);}
 
@@ -72,7 +73,7 @@
 
   /* ===== SECTOR LIST (left, isometrik) ===== */
   #sector-list{position:absolute;top:76px;left:16px;bottom:64px;width:260px;z-index:480;
-    background:var(--panel-bg);border:1px solid var(--line);backdrop-filter:blur(3px);
+    background:var(--panel-bg);border:1px solid var(--line);
     transform-origin:left center;transform:perspective(1100px) rotateY(12deg);
     display:flex;flex-direction:column;box-shadow:0 0 24px rgba(0,0,0,0.5);}
   #sector-list .hdr{padding:10px 14px;border-bottom:1px solid var(--line);font-size:10.5px;
@@ -120,6 +121,35 @@
     font-family:'Share Tech Mono',monospace;font-size:13px;padding:8px 10px;outline:none;resize:vertical;}
   .em-body input:focus,.em-body select:focus,.em-body textarea:focus{border-color:var(--cyan);}
   .em-body select option{background:#0a181c;}
+
+  /* scrollbar bergaya HUD — menyatu dengan tema, bukan scrollbar abu-abu bawaan OS */
+  #sector-list .items, #detail-panel .dp-body, .em-box, .em-body textarea{
+    scrollbar-width:thin;scrollbar-color:rgba(46,224,255,0.35) rgba(5,14,16,0.4);}
+  #sector-list .items::-webkit-scrollbar, #detail-panel .dp-body::-webkit-scrollbar,
+  .em-box::-webkit-scrollbar, .em-body textarea::-webkit-scrollbar{width:8px;height:8px;}
+  #sector-list .items::-webkit-scrollbar-track, #detail-panel .dp-body::-webkit-scrollbar-track,
+  .em-box::-webkit-scrollbar-track, .em-body textarea::-webkit-scrollbar-track{
+    background:rgba(5,14,16,0.4);}
+  #sector-list .items::-webkit-scrollbar-thumb, #detail-panel .dp-body::-webkit-scrollbar-thumb,
+  .em-box::-webkit-scrollbar-thumb, .em-body textarea::-webkit-scrollbar-thumb{
+    background:rgba(46,224,255,0.30);border:2px solid rgba(5,14,16,0.9);}
+  #sector-list .items::-webkit-scrollbar-thumb:hover, #detail-panel .dp-body::-webkit-scrollbar-thumb:hover,
+  .em-box::-webkit-scrollbar-thumb:hover, .em-body textarea::-webkit-scrollbar-thumb:hover{
+    background:rgba(46,224,255,0.55);}
+
+  /* input angka: spinner bawaan browser diganti stepper HUD */
+  .em-body input[type=number]{-moz-appearance:textfield;appearance:textfield;text-align:center;}
+  .em-body input[type=number]::-webkit-inner-spin-button,
+  .em-body input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none;margin:0;}
+  .num-wrap{display:flex;align-items:stretch;}
+  .num-wrap input{flex:1;min-width:0;}
+  .num-btn{width:40px;flex:none;background:rgba(10,24,28,0.9);border:1px solid var(--line);
+    color:var(--cyan);font-family:'Share Tech Mono',monospace;font-size:16px;
+    line-height:1;cursor:pointer;padding:0;user-select:none;}
+  .num-btn:first-child{border-right:none;}
+  .num-btn:last-child{border-left:none;}
+  .num-btn:hover{background:rgba(46,224,255,0.12);color:#eafcff;}
+  .num-btn:active{background:rgba(46,224,255,0.22);}
   .em-foot{padding:12px 16px;border-top:1px solid var(--line);display:flex;justify-content:flex-end;gap:10px;}
   .em-foot button{font-family:'Orbitron',sans-serif;font-size:10px;letter-spacing:1.5px;
     padding:9px 16px;cursor:pointer;border:1px solid var(--line);background:transparent;color:var(--text-dim);}
@@ -138,7 +168,7 @@
 
   /* ===== DETAIL PANEL (right, isometrik) ===== */
   #detail-panel{position:absolute;top:128px;right:16px;bottom:64px;width:320px;z-index:490;
-    background:var(--panel-bg);border:1px solid var(--cyan);backdrop-filter:blur(3px);
+    background:var(--panel-bg);border:1px solid var(--cyan);will-change:transform,opacity;
     box-shadow:0 0 30px rgba(46,224,255,0.15), 0 0 40px rgba(0,0,0,0.6);
     transform-origin:right center;
     transform:perspective(1100px) rotateY(-30deg) translateX(380px);opacity:0;
@@ -311,8 +341,12 @@
       <label>KETUA KELOMPOK
         <input id="em-ketua" type="text" maxlength="80" />
       </label>
-      <label>JUMLAH ANGGOTA
-        <input id="em-anggota" type="number" min="0" max="9999" placeholder="mis. 25" />
+      <label for="em-anggota">JUMLAH ANGGOTA
+        <span class="num-wrap">
+          <button type="button" class="num-btn" data-step="-1" aria-label="Kurangi">&minus;</button>
+          <input id="em-anggota" type="number" inputmode="numeric" min="0" max="9999" placeholder="mis. 25" />
+          <button type="button" class="num-btn" data-step="1" aria-label="Tambah">+</button>
+        </span>
       </label>
       <label>KOMODITAS UTAMA
         <input id="em-komoditas" type="text" maxlength="120" placeholder="mis. Padi, Jagung" />
@@ -479,6 +513,7 @@ function loadOverrides(){
   catch(e){ return {}; }
 }
 function saveOverrides(o){ localStorage.setItem(OVERRIDES_KEY, JSON.stringify(o)); }
+const escHtml = t => String(t).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 let overrides = loadOverrides();
 function getOv(s){ return overrides[s.name] || {}; }
 function ketuaOf(s){ return getOv(s).ketua || s.ketua || '—'; }
@@ -579,8 +614,12 @@ function populateDetail(id){
 }
 
 // ===== CALLOUT LINE (garis penunjuk dari poligon ke tab info) =====
+// Node SVG dibuat sekali lalu atributnya di-update — innerHTML tiap frame
+// membuat animasi ring restart terus dan berat saat peta digeser.
 const calloutSvg = document.getElementById('callout-svg');
 let panelTimer = null;
+let activeCenter = null; // pusat poligon aktif (cache; getBounds tiap frame mahal)
+let coNodes = null;
 
 function calloutTarget(){
   const w = window.innerWidth, h = window.innerHeight;
@@ -588,28 +627,59 @@ function calloutTarget(){
   return { x: w - 344, y: 172 }; // tepi kiri panel detail
 }
 
+function ensureCalloutNodes(){
+  if(coNodes) return;
+  calloutSvg.innerHTML = `
+    <circle class="co-dot" r="3.5" fill="var(--cyan)"/>
+    <circle class="c-ring co-ring" r="7">
+      <animate attributeName="r" from="6" to="24" dur="1.6s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" from="0.9" to="0" dur="1.6s" repeatCount="indefinite"/>
+    </circle>
+    <path class="c-line co-path"/>
+    <circle class="co-end" r="2.5" fill="var(--cyan)"/>`;
+  coNodes = {
+    dot: calloutSvg.querySelector('.co-dot'),
+    ring: calloutSvg.querySelector('.co-ring'),
+    path: calloutSvg.querySelector('.co-path'),
+    end: calloutSvg.querySelector('.co-end')
+  };
+}
+
+function clearCallout(){ calloutSvg.innerHTML = ''; coNodes = null; }
+
 function drawCallout(animate){
-  if(activeId === null){ calloutSvg.innerHTML = ''; return; }
+  if(activeId === null || !activeCenter){ clearCallout(); return; }
   let p;
-  try { p = map.latLngToContainerPoint(layerById[activeId].getBounds().getCenter()); }
+  try { p = map.latLngToContainerPoint(activeCenter); }
   catch(e){ return; }
   const t = calloutTarget();
   const dx = t.x - p.x, dy = t.y - p.y;
   const diag = Math.min(Math.abs(dx), Math.abs(dy)) * 0.45;
   const ex = p.x + Math.sign(dx) * diag, ey = p.y + Math.sign(dy) * diag;
-  const len = Math.ceil(Math.hypot(ex - p.x, ey - p.y) + Math.hypot(t.x - ex, t.y - ey));
-  calloutSvg.innerHTML = `
-    <circle cx="${p.x}" cy="${p.y}" r="3.5" fill="var(--cyan)"/>
-    <circle class="c-ring" cx="${p.x}" cy="${p.y}" r="7">
-      <animate attributeName="r" from="6" to="24" dur="1.6s" repeatCount="indefinite"/>
-      <animate attributeName="opacity" from="0.9" to="0" dur="1.6s" repeatCount="indefinite"/>
-    </circle>
-    <path class="c-line${animate ? ' draw' : ''}" style="--len:${len}" d="M ${p.x} ${p.y} L ${ex} ${ey} L ${t.x} ${t.y}"/>
-    <circle cx="${t.x}" cy="${t.y}" r="2.5" fill="var(--cyan)"/>`;
+  ensureCalloutNodes();
+  coNodes.dot.setAttribute('cx', p.x); coNodes.dot.setAttribute('cy', p.y);
+  coNodes.ring.setAttribute('cx', p.x); coNodes.ring.setAttribute('cy', p.y);
+  coNodes.end.setAttribute('cx', t.x); coNodes.end.setAttribute('cy', t.y);
+  coNodes.path.setAttribute('d', `M ${p.x} ${p.y} L ${ex} ${ey} L ${t.x} ${t.y}`);
+  if(animate){
+    const len = Math.ceil(Math.hypot(ex - p.x, ey - p.y) + Math.hypot(t.x - ex, t.y - ey));
+    coNodes.path.style.setProperty('--len', len);
+    coNodes.path.classList.remove('draw');
+    void coNodes.path.getBoundingClientRect(); // paksa reflow agar animasi draw terulang
+    coNodes.path.classList.add('draw');
+  } else {
+    coNodes.path.classList.remove('draw'); // panjang path berubah — garis tampil utuh
+  }
 }
 
-map.on('move zoom', () => { if(activeId !== null) drawCallout(false); });
-window.addEventListener('resize', () => drawCallout(false));
+// redraw maksimal sekali per frame saat peta bergerak
+let coRaf = 0;
+function scheduleCallout(){
+  if(coRaf || activeId === null) return;
+  coRaf = requestAnimationFrame(() => { coRaf = 0; drawCallout(false); });
+}
+map.on('move zoom', scheduleCallout);
+window.addEventListener('resize', scheduleCallout);
 
 function selectSector(id){
   const s = sectors[id];
@@ -617,6 +687,7 @@ function selectSector(id){
   if(activeLayer) activeLayer.setStyle({ weight: 2, opacity: 0.9, fillOpacity: 0.14 });
   layer.setStyle({ weight: 3.5, opacity: 1, fillOpacity: 0.28 });
   activeLayer = layer; activeId = id;
+  activeCenter = layer.getBounds().getCenter();
   layer.bringToFront();
 
   document.querySelectorAll('.sector-item').forEach(el => el.classList.toggle('active', el.dataset.id == id));
@@ -643,11 +714,12 @@ function selectSector(id){
 
 function deselectAll(){
   if(activeLayer) activeLayer.setStyle({ weight: 2, opacity: 0.9, fillOpacity: 0.14 });
-  activeLayer = null; activeId = null;
+  activeLayer = null; activeId = null; activeCenter = null;
   clearTimeout(panelTimer);
+  if(coRaf){ cancelAnimationFrame(coRaf); coRaf = 0; }
   clearTyping();
   document.body.classList.remove('oblique');
-  calloutSvg.innerHTML = '';
+  clearCallout();
   document.querySelectorAll('.sector-item').forEach(el => el.classList.remove('active'));
   document.getElementById('detail-panel').classList.remove('open');
   document.getElementById('active-sector').textContent = 'NONE';
@@ -690,6 +762,13 @@ function openEditModal(){
 }
 
 emSector.addEventListener('change', () => fillEditForm(parseInt(emSector.value, 10)));
+
+// stepper -/+ untuk input jumlah anggota (spinner bawaan browser disembunyikan)
+document.querySelectorAll('.num-btn').forEach(btn => btn.addEventListener('click', () => {
+  const inp = document.getElementById('em-anggota');
+  const v = (parseInt(inp.value, 10) || 0) + parseInt(btn.dataset.step, 10);
+  inp.value = Math.min(9999, Math.max(0, v));
+}));
 document.getElementById('dp-edit').addEventListener('click', openEditModal);
 document.getElementById('em-cancel').addEventListener('click', () => editModal.classList.remove('show'));
 editModal.addEventListener('click', e => { if(e.target === editModal) editModal.classList.remove('show'); });
@@ -744,7 +823,6 @@ loadCloudOverrides();
 
 // sector list panel
 const itemsEl = document.getElementById('sector-items');
-const escHtml = t => String(t).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 function buildList(){
   itemsEl.innerHTML = '';
   sectors.forEach(s => {
@@ -763,14 +841,20 @@ document.getElementById('list-count').textContent = sectors.length;
 document.getElementById('boot-count').textContent = sectors.length;
 document.getElementById('total-ha').textContent = sectors.reduce((a,s)=>a+s.areaHa,0).toFixed(2) + ' Ha';
 
-// cursor coordinate readout
+// cursor coordinate readout — di-update maksimal sekali per frame
+const cursorEl = document.getElementById('cursor-coord');
+const zoomEl = document.getElementById('zoom-level');
+let mmRaf = 0, mmLatLng = null;
 map.on('mousemove', e => {
-  document.getElementById('cursor-coord').textContent = e.latlng.lat.toFixed(5) + ', ' + e.latlng.lng.toFixed(5);
+  mmLatLng = e.latlng;
+  if(mmRaf) return;
+  mmRaf = requestAnimationFrame(() => {
+    mmRaf = 0;
+    cursorEl.textContent = mmLatLng.lat.toFixed(5) + ', ' + mmLatLng.lng.toFixed(5);
+  });
 });
-map.on('zoomend', () => {
-  document.getElementById('zoom-level').textContent = map.getZoom();
-});
-document.getElementById('zoom-level').textContent = map.getZoom();
+map.on('zoomend', () => { zoomEl.textContent = map.getZoom(); });
+zoomEl.textContent = map.getZoom();
 
 // clock (WITA)
 function tickClock(){
