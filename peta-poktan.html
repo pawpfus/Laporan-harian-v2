@@ -667,17 +667,13 @@ let coNodes = null;
 const detailPanel = document.getElementById('detail-panel');
 
 function calloutTarget(){
-  const w = window.innerWidth, h = window.innerHeight;
-  // ujung garis menembus ~45px KE DALAM panel: svg (z 460) tergambar di bawah
-  // panel (z 490), jadi garis tampak masuk ke belakang panel, bukan berhenti di tepinya
-  if(detailPanel.classList.contains('open')){
-    const r = detailPanel.getBoundingClientRect();
-    if(w <= 820) return { x: r.left + r.width / 2, y: r.top + 44 };
-    return { x: r.left + 46, y: r.top + 52 };
-  }
-  // fase awal (garis tampil duluan, panel belum terbuka): perkiraan posisi panel
-  if(w <= 820) return { x: w * 0.5, y: h - h * 0.58 - 8 };
-  return { x: w - 290, y: 172 };
+  // Tujuan akhir dihitung dari kotak LAYOUT panel (offset*, tak terpengaruh
+  // transform) — diketahui sejak awal, jadi garis langsung digambar sekali ke
+  // titik ~45px di dalam area panel tanpa berhenti/menyesuaikan ulang.
+  // Svg (z 460) di bawah panel (z 490): ujung garis tertutup panel saat muncul.
+  const px = detailPanel.offsetLeft, py = detailPanel.offsetTop, pw = detailPanel.offsetWidth;
+  if(window.innerWidth <= 820) return { x: px + pw / 2, y: py + 44 };
+  return { x: px + 46, y: py + 52 };
 }
 
 // Titik target di atas adalah posisi LAYAR. Saat mode oblique, #callout-svg ikut
@@ -707,13 +703,11 @@ function ensureCalloutNodes(){
       <animate attributeName="r" from="6" to="24" dur="1.6s" repeatCount="indefinite"/>
       <animate attributeName="opacity" from="0.9" to="0" dur="1.6s" repeatCount="indefinite"/>
     </circle>
-    <path class="c-line co-path"/>
-    <circle class="co-end" r="2.5" fill="var(--pink)"/>`;
+    <path class="c-line co-path"/>`;
   coNodes = {
     dot: calloutSvg.querySelector('.co-dot'),
     ring: calloutSvg.querySelector('.co-ring'),
-    path: calloutSvg.querySelector('.co-path'),
-    end: calloutSvg.querySelector('.co-end')
+    path: calloutSvg.querySelector('.co-path')
   };
 }
 
@@ -732,7 +726,6 @@ function drawCallout(animate){
   ensureCalloutNodes();
   coNodes.dot.setAttribute('cx', p.x); coNodes.dot.setAttribute('cy', p.y);
   coNodes.ring.setAttribute('cx', p.x); coNodes.ring.setAttribute('cy', p.y);
-  coNodes.end.setAttribute('cx', t.x); coNodes.end.setAttribute('cy', t.y);
   coNodes.path.setAttribute('d', `M ${p.x} ${p.y} L ${ex} ${ey} L ${t.x} ${t.y}`);
   if(animate){
     const len = Math.ceil(Math.hypot(ex - p.x, ey - p.y) + Math.hypot(t.x - ex, t.y - ey));
@@ -753,11 +746,8 @@ function scheduleCallout(){
 }
 map.on('move zoom', scheduleCallout);
 window.addEventListener('resize', scheduleCallout);
-// setelah transisi oblique/panel selesai, gambar ulang agar ujung garis menetap di tepi panel
+// setelah transisi oblique selesai, gambar ulang agar ujung garis menetap di panel
 document.getElementById('map').addEventListener('transitionend', e => {
-  if(e.propertyName === 'transform') scheduleCallout();
-});
-detailPanel.addEventListener('transitionend', e => {
   if(e.propertyName === 'transform') scheduleCallout();
 });
 
