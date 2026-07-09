@@ -10,6 +10,8 @@
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
 <style>
   :root{
+    color-scheme:dark; /* kontrol native (dropdown, scrollbar) dirender versi gelap */
+    --pink:#ff2e88;
     --green:#22ee88;
     --green-dim:#0f7a45;
     --cyan:#2ee0ff;
@@ -83,7 +85,7 @@
   .sector-item{padding:11px 14px;border-bottom:1px solid rgba(46,224,255,0.12);cursor:pointer;
     transition:background 0.15s;position:relative;}
   .sector-item:hover{background:rgba(46,224,255,0.07);}
-  .sector-item.active{background:rgba(34,238,136,0.10);border-left:3px solid var(--green);}
+  .sector-item.active{background:rgba(255,46,136,0.10);border-left:3px solid var(--pink);}
   .sector-item .id{font-size:9px;color:var(--text-dim);letter-spacing:1.5px;}
   .sector-item .name{font-size:12.5px;color:var(--text);margin-top:3px;font-weight:bold;}
   .sector-item .meta{font-size:10px;color:var(--text-dim);margin-top:3px;}
@@ -155,12 +157,14 @@
 
   /* ===== CALLOUT LINE (garis penunjuk HUD) ===== */
   #callout-svg{position:absolute;inset:0;z-index:460;pointer-events:none;width:100%;height:100%;}
-  #callout-svg .c-line{stroke:var(--cyan);stroke-width:1.5;fill:none;
-    filter:drop-shadow(0 0 4px rgba(46,224,255,0.7));}
+  #callout-svg .c-line{stroke:var(--pink);stroke-width:1.5;fill:none;
+    filter:drop-shadow(0 0 4px rgba(255,46,136,0.7));}
   #callout-svg .c-line.draw{stroke-dasharray:var(--len);stroke-dashoffset:var(--len);
     animation:calloutDraw 0.38s ease-out forwards;}
   @keyframes calloutDraw{to{stroke-dashoffset:0;}}
-  #callout-svg .c-ring{fill:none;stroke:var(--cyan);stroke-width:1.5;}
+  #callout-svg .c-ring{fill:none;stroke:var(--pink);stroke-width:1.5;}
+  /* poligon terpilih: satu-satunya elemen pink di peta */
+  .sector-poly.active-poly{filter:drop-shadow(0 0 7px rgba(255,46,136,0.75));}
 
   /* ===== DETAIL PANEL (right, isometrik) ===== */
   #detail-panel{position:absolute;top:128px;right:16px;bottom:64px;width:320px;z-index:490;
@@ -475,6 +479,7 @@ const GREEN_SECTORS = [
   'Galimpua', 'Galimpua II', 'Galimpua III', 'Galimpua IV'
 ];
 const sectorColor = s => GREEN_SECTORS.includes(s.name) ? '#22ee88' : '#2ee0ff';
+const PINK = '#ff2e88'; // warna sektor terpilih — hanya satu di layar
 let activeLayer = null, activeId = null;
 const layerById = {};
 
@@ -626,13 +631,13 @@ function calloutTarget(){
 function ensureCalloutNodes(){
   if(coNodes) return;
   calloutSvg.innerHTML = `
-    <circle class="co-dot" r="3.5" fill="var(--cyan)"/>
+    <circle class="co-dot" r="3.5" fill="var(--pink)"/>
     <circle class="c-ring co-ring" r="7">
       <animate attributeName="r" from="6" to="24" dur="1.6s" repeatCount="indefinite"/>
       <animate attributeName="opacity" from="0.9" to="0" dur="1.6s" repeatCount="indefinite"/>
     </circle>
     <path class="c-line co-path"/>
-    <circle class="co-end" r="2.5" fill="var(--cyan)"/>`;
+    <circle class="co-end" r="2.5" fill="var(--pink)"/>`;
   coNodes = {
     dot: calloutSvg.querySelector('.co-dot'),
     ring: calloutSvg.querySelector('.co-ring'),
@@ -677,11 +682,20 @@ function scheduleCallout(){
 map.on('move zoom', scheduleCallout);
 window.addEventListener('resize', scheduleCallout);
 
+// kembalikan poligon ke warna aslinya (cyan/hijau) setelah tidak terpilih
+function restorePolyStyle(id){
+  const layer = layerById[id];
+  const c = sectorColor(sectors[id]);
+  layer.setStyle({ color: c, fillColor: c, weight: 2, opacity: 0.9, fillOpacity: 0.14 });
+  if(layer._path) layer._path.classList.remove('active-poly');
+}
+
 function selectSector(id){
   const s = sectors[id];
   const layer = layerById[id];
-  if(activeLayer) activeLayer.setStyle({ weight: 2, opacity: 0.9, fillOpacity: 0.14 });
-  layer.setStyle({ weight: 3.5, opacity: 1, fillOpacity: 0.28 });
+  if(activeId !== null && activeId !== id) restorePolyStyle(activeId);
+  layer.setStyle({ color: PINK, fillColor: PINK, weight: 3.5, opacity: 1, fillOpacity: 0.22 });
+  if(layer._path) layer._path.classList.add('active-poly');
   activeLayer = layer; activeId = id;
   activeCenter = layer.getBounds().getCenter();
   layer.bringToFront();
@@ -709,7 +723,7 @@ function selectSector(id){
 }
 
 function deselectAll(){
-  if(activeLayer) activeLayer.setStyle({ weight: 2, opacity: 0.9, fillOpacity: 0.14 });
+  if(activeId !== null) restorePolyStyle(activeId);
   activeLayer = null; activeId = null; activeCenter = null;
   clearTimeout(panelTimer);
   if(coRaf){ cancelAnimationFrame(coRaf); coRaf = 0; }
