@@ -445,6 +445,47 @@ function ringArea(coords){
   return Math.abs(area * R * R / 2);
 }
 
+// --- titik jangkar di dalam poligon ---
+// Pusat bounding box bisa jatuh di LUAR poligon berbentuk cekung/L,
+// sehingga dot callout tampak melayang di luar lahan.
+function pointInPoly(lat, lng, latlngs){
+  let inside = false;
+  for(let i = 0, j = latlngs.length - 1; i < latlngs.length; j = i++){
+    const [yi, xi] = latlngs[i], [yj, xj] = latlngs[j];
+    if((yi > lat) !== (yj > lat) && lng < (xj - xi) * (lat - yi) / (yj - yi) + xi)
+      inside = !inside;
+  }
+  return inside;
+}
+
+function polygonAnchor(latlngs){
+  // centroid area (shoelace)
+  let a = 0, cLat = 0, cLng = 0;
+  const n = latlngs.length;
+  for(let i = 0, j = n - 1; i < n; j = i++){
+    const [y1, x1] = latlngs[j], [y2, x2] = latlngs[i];
+    const f = x1 * y2 - x2 * y1;
+    a += f; cLng += (x1 + x2) * f; cLat += (y1 + y2) * f;
+  }
+  let lat, lng;
+  if(Math.abs(a) > 1e-12){ lat = cLat / (3 * a); lng = cLng / (3 * a); }
+  else { lat = latlngs[0][0]; lng = latlngs[0][1]; }
+  if(pointInPoly(lat, lng, latlngs)) return L.latLng(lat, lng);
+  // centroid masih di luar (bentuk sangat cekung): iris poligon dengan garis
+  // horizontal di lat centroid, ambil titik tengah segmen terlebar
+  const xs = [];
+  for(let i = 0, j = n - 1; i < n; j = i++){
+    const [y1, x1] = latlngs[j], [y2, x2] = latlngs[i];
+    if((y1 > lat) !== (y2 > lat)) xs.push(x1 + (lat - y1) * (x2 - x1) / (y2 - y1));
+  }
+  xs.sort((p, q) => p - q);
+  let best = -1;
+  for(let i = 0; i + 1 < xs.length; i += 2){
+    if(xs[i+1] - xs[i] > best){ best = xs[i+1] - xs[i]; lng = (xs[i] + xs[i+1]) / 2; }
+  }
+  return L.latLng(lat, lng);
+}
+
 const sectors = POKTAN_DATA.map((d, i) => {
   const latlngs = d.coords.map(c => [c[1], c[0]]);
   const areaHa = ringArea(d.coords) / 10000;
@@ -455,6 +496,7 @@ const sectors = POKTAN_DATA.map((d, i) => {
     ketua: d.ketua,
     latlngs,
     areaHa,
+    anchor: polygonAnchor(latlngs),
     vertexCount: d.coords.length - 1
   };
 });
@@ -594,7 +636,7 @@ function populateDetail(id){
   const s = sectors[id];
   const ov = getOv(s);
   clearTyping();
-  const c = layerById[id].getBounds().getCenter();
+  const c = s.anchor;
   // atur dulu field opsional (tampil/sembunyi), teksnya ditimpa efek ketik
   setDpField('dpf-anggota', 'dp-anggota', ov.anggota ? ov.anggota + ' orang' : '');
   setDpField('dpf-komoditas', 'dp-komoditas', ov.komoditas || '');
@@ -697,7 +739,7 @@ function selectSector(id){
   layer.setStyle({ color: PINK, fillColor: PINK, weight: 3.5, opacity: 1, fillOpacity: 0.22 });
   if(layer._path) layer._path.classList.add('active-poly');
   activeLayer = layer; activeId = id;
-  activeCenter = layer.getBounds().getCenter();
+  activeCenter = s.anchor;
   layer.bringToFront();
 
   document.querySelectorAll('.sector-item').forEach(el => el.classList.toggle('active', el.dataset.id == id));
