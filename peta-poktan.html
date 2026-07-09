@@ -670,6 +670,25 @@ function calloutTarget(){
   return { x: w - 344, y: 172 }; // tepi kiri panel detail
 }
 
+// Titik target di atas adalah posisi LAYAR. Saat mode oblique, #callout-svg ikut
+// dimiringkan (panel tidak), jadi titik layar harus diproyeksikan balik ke
+// koordinat lokal svg lewat invers transform — kalau tidak, ujung garis lepas dari panel.
+function screenToSvg(sx, sy){
+  const cs = getComputedStyle(calloutSvg);
+  if(!cs.transform || cs.transform === 'none') return { x: sx, y: sy };
+  const m = new DOMMatrix(cs.transform);
+  if(m.isIdentity) return { x: sx, y: sy };
+  const [ox, oy] = cs.transformOrigin.split(' ').map(parseFloat);
+  // cari (dx,dy) relatif origin, z=0, yang terproyeksi ke (sx,sy):
+  // sistem linear 2x2 dari out.x/out.w = X dan out.y/out.w = Y
+  const X = sx - ox, Y = sy - oy;
+  const A = m.m11 - X * m.m14, B = m.m21 - X * m.m24, C = X * m.m44 - m.m41;
+  const D = m.m12 - Y * m.m14, E = m.m22 - Y * m.m24, F = Y * m.m44 - m.m42;
+  const det = A * E - B * D;
+  if(Math.abs(det) < 1e-9) return { x: sx, y: sy };
+  return { x: (C * E - B * F) / det + ox, y: (A * F - C * D) / det + oy };
+}
+
 function ensureCalloutNodes(){
   if(coNodes) return;
   calloutSvg.innerHTML = `
@@ -695,7 +714,8 @@ function drawCallout(animate){
   let p;
   try { p = map.latLngToContainerPoint(activeCenter); }
   catch(e){ return; }
-  const t = calloutTarget();
+  const ts = calloutTarget();
+  const t = screenToSvg(ts.x, ts.y);
   const dx = t.x - p.x, dy = t.y - p.y;
   const diag = Math.min(Math.abs(dx), Math.abs(dy)) * 0.45;
   const ex = p.x + Math.sign(dx) * diag, ey = p.y + Math.sign(dy) * diag;
@@ -723,6 +743,10 @@ function scheduleCallout(){
 }
 map.on('move zoom', scheduleCallout);
 window.addEventListener('resize', scheduleCallout);
+// setelah transisi oblique selesai, gambar ulang sekali agar ujung garis menetap di panel
+document.getElementById('map').addEventListener('transitionend', e => {
+  if(e.propertyName === 'transform') scheduleCallout();
+});
 
 // kembalikan poligon ke warna aslinya (cyan/hijau) setelah tidak terpilih
 function restorePolyStyle(id){
