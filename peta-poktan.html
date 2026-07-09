@@ -664,10 +664,19 @@ let panelTimer = null;
 let activeCenter = null; // pusat poligon aktif (cache; getBounds tiap frame mahal)
 let coNodes = null;
 
+const detailPanel = document.getElementById('detail-panel');
+
 function calloutTarget(){
   const w = window.innerWidth, h = window.innerHeight;
-  if(w <= 820) return { x: w * 0.5, y: h - h * 0.58 - 62 }; // tepat di atas bottom sheet
-  return { x: w - 344, y: 172 }; // tepi kiri panel detail
+  if(detailPanel.classList.contains('open')){
+    // panel sudah tampil: tempelkan ujung garis ke tepi panel yang terukur di layar
+    const r = detailPanel.getBoundingClientRect();
+    if(w <= 820) return { x: r.left + r.width / 2, y: r.top + 2 };
+    return { x: r.left + 2, y: r.top + 48 };
+  }
+  // fase awal (garis tampil duluan, panel belum terbuka): perkiraan tepi panel
+  if(w <= 820) return { x: w * 0.5, y: h - h * 0.58 - 52 };
+  return { x: w - 336, y: 172 };
 }
 
 // Titik target di atas adalah posisi LAYAR. Saat mode oblique, #callout-svg ikut
@@ -743,8 +752,11 @@ function scheduleCallout(){
 }
 map.on('move zoom', scheduleCallout);
 window.addEventListener('resize', scheduleCallout);
-// setelah transisi oblique selesai, gambar ulang sekali agar ujung garis menetap di panel
+// setelah transisi oblique/panel selesai, gambar ulang agar ujung garis menetap di tepi panel
 document.getElementById('map').addEventListener('transitionend', e => {
+  if(e.propertyName === 'transform') scheduleCallout();
+});
+detailPanel.addEventListener('transitionend', e => {
   if(e.propertyName === 'transform') scheduleCallout();
 });
 
