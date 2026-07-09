@@ -668,15 +668,16 @@ const detailPanel = document.getElementById('detail-panel');
 
 function calloutTarget(){
   const w = window.innerWidth, h = window.innerHeight;
+  // ujung garis menembus ~45px KE DALAM panel: svg (z 460) tergambar di bawah
+  // panel (z 490), jadi garis tampak masuk ke belakang panel, bukan berhenti di tepinya
   if(detailPanel.classList.contains('open')){
-    // panel sudah tampil: tempelkan ujung garis ke tepi panel yang terukur di layar
     const r = detailPanel.getBoundingClientRect();
-    if(w <= 820) return { x: r.left + r.width / 2, y: r.top + 2 };
-    return { x: r.left + 2, y: r.top + 48 };
+    if(w <= 820) return { x: r.left + r.width / 2, y: r.top + 44 };
+    return { x: r.left + 46, y: r.top + 52 };
   }
-  // fase awal (garis tampil duluan, panel belum terbuka): perkiraan tepi panel
-  if(w <= 820) return { x: w * 0.5, y: h - h * 0.58 - 52 };
-  return { x: w - 336, y: 172 };
+  // fase awal (garis tampil duluan, panel belum terbuka): perkiraan posisi panel
+  if(w <= 820) return { x: w * 0.5, y: h - h * 0.58 - 8 };
+  return { x: w - 290, y: 172 };
 }
 
 // Titik target di atas adalah posisi LAYAR. Saat mode oblique, #callout-svg ikut
