@@ -437,14 +437,21 @@ L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_only_labels/{z}/{x}/{y}{r}.p
   subdomains: 'abcd', maxZoom: 19, opacity: 0.85
 }).addTo(map);
 
-const PALETTE = ['#22ee88', '#2ee0ff'];
+// Semua poligon cyan, kecuali daftar ini hijau
+const GREEN_SECTORS = [
+  'Massenreng Pulu', 'Massenreng Pulu II',
+  'Massappa II', 'Massappa III',
+  'Malilu Sipakainge', 'Malilu Sipakainge II', 'Malilu Sipakainge III',
+  'Galimpua', 'Galimpua II', 'Galimpua III', 'Galimpua IV'
+];
+const sectorColor = s => GREEN_SECTORS.includes(s.name) ? '#22ee88' : '#2ee0ff';
 let activeLayer = null, activeId = null;
 const layerById = {};
 
 const allBounds = L.latLngBounds([]);
 
 sectors.forEach((s, i) => {
-  const color = PALETTE[i % PALETTE.length];
+  const color = sectorColor(s);
   const poly = L.polygon(s.latlngs, {
     color, weight: 2, opacity: 0.9,
     fillColor: color, fillOpacity: 0.14,
