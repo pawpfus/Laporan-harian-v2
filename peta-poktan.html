@@ -14,7 +14,6 @@
     color-scheme:dark; /* kontrol native (dropdown, scrollbar) dirender versi gelap */
     --pink:#ff2e88;
     --green:#22ee88;
-    --green-dim:#0f7a45;
     --cyan:#2ee0ff;
     --amber:#ffb020;
     --red:#ff3b5c;
@@ -248,7 +247,6 @@
   .leaflet-control-attribution{background:rgba(4,8,10,0.7) !important;color:var(--text-dim) !important;
     font-size:9px !important;}
   .leaflet-control-attribution a{color:var(--cyan) !important;}
-  .leaflet-popup{display:none;}
 
   #sector-toggle{display:none;}
 
@@ -531,7 +529,7 @@ const GREEN_SECTORS = [
 ];
 const sectorColor = s => GREEN_SECTORS.includes(s.name) ? '#22ee88' : '#2ee0ff';
 const PINK = '#ff2e88'; // warna sektor terpilih — hanya satu di layar
-let activeLayer = null, activeId = null;
+let activeId = null;
 const layerById = {};
 
 sectors.forEach(s => {
@@ -769,7 +767,7 @@ function selectSector(id){
   if(activeId !== null && activeId !== id) restorePolyStyle(activeId);
   layer.setStyle({ color: PINK, fillColor: PINK, weight: 3.5, opacity: 1, fillOpacity: 0.22 });
   if(layer._path) layer._path.classList.add('active-poly');
-  activeLayer = layer; activeId = id;
+  activeId = id;
   activeCenter = s.anchor;
   layer.bringToFront();
 
@@ -797,7 +795,7 @@ function selectSector(id){
 
 function deselectAll(){
   if(activeId !== null) restorePolyStyle(activeId);
-  activeLayer = null; activeId = null; activeCenter = null;
+  activeId = null; activeCenter = null;
   clearTimeout(panelTimer);
   if(coRaf){ cancelAnimationFrame(coRaf); coRaf = 0; }
   clearTyping();
