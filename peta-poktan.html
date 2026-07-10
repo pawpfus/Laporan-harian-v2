@@ -249,6 +249,16 @@
   @keyframes fadein{to{opacity:1;}}
   #boot.hide{opacity:0;pointer-events:none;}
 
+  /* kontrol ikon (saluran & posisi) — model sama dengan tombol zoom */
+  .hud-ctrl{border:1px solid var(--line) !important;border-radius:0 !important;}
+  .hud-ctrl a{width:30px;height:30px;display:flex;align-items:center;justify-content:center;
+    background:var(--panel-bg);color:var(--cyan);cursor:pointer;
+    border-bottom:1px solid var(--line);border-radius:0 !important;}
+  .hud-ctrl a:last-child{border-bottom:none;}
+  .hud-ctrl a:hover{background:rgba(46,224,255,0.1);color:var(--cyan);}
+  .hud-ctrl a.on{color:var(--green);background:rgba(34,238,136,0.12);}
+  .hud-ctrl a svg{width:16px;height:16px;}
+
   /* leaflet control restyle */
   .leaflet-control-zoom{border:1px solid var(--line) !important;}
   .leaflet-control-zoom a{background:var(--panel-bg) !important;color:var(--cyan) !important;
@@ -334,14 +344,6 @@
 </div>
 
 <div id="topright-btns">
-  <div id="water-btn" class="hud-btn">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 7c2-2 4-2 6 0s4 2 6 0 4-2 6 0M2 12c2-2 4-2 6 0s4 2 6 0 4-2 6 0M2 17c2-2 4-2 6 0s4 2 6 0 4-2 6 0"/></svg>
-    SALURAN
-  </div>
-  <div id="gps-btn" class="hud-btn">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="7"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/><circle cx="12" cy="12" r="1.5" fill="currentColor"/></svg>
-    POSISI
-  </div>
   <div id="overview-btn" class="hud-btn">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-6 9 6v10a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg>
     OVERVIEW
@@ -541,6 +543,23 @@ const map = L.map('map', { zoomControl:false, attributionControl:true, minZoom:1
 const allBounds = L.latLngBounds(sectors.flatMap(s => s.latlngs));
 map.fitBounds(allBounds, { padding: [90, 90] });
 L.control.zoom({ position:'bottomright' }).addTo(map);
+// tombol ikon SALURAN & POSISI — ditumpuk di atas kontrol zoom, model sama
+const HudCtrl = L.Control.extend({
+  options: { position: 'bottomright' },
+  onAdd(){
+    const div = L.DomUtil.create('div', 'leaflet-bar hud-ctrl');
+    div.innerHTML = `
+      <a id="water-btn" role="button" title="Jaringan irigasi &amp; drainase" aria-label="Jaringan saluran">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 7c2-2 4-2 6 0s4 2 6 0 4-2 6 0M2 12c2-2 4-2 6 0s4 2 6 0 4-2 6 0M2 17c2-2 4-2 6 0s4 2 6 0 4-2 6 0"/></svg>
+      </a>
+      <a id="gps-btn" role="button" title="Posisi saya (GPS)" aria-label="Posisi saya">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="7"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/><circle cx="12" cy="12" r="1.5" fill="currentColor"/></svg>
+      </a>`;
+    L.DomEvent.disableClickPropagation(div);
+    return div;
+  }
+});
+map.addControl(new HudCtrl());
 // updateWhenZooming:false + keepBuffer: lebih sedikit bongkar-pasang tile
 // saat flyTo/pinch-zoom → animasi lebih halus, request batal berkurang
 L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
