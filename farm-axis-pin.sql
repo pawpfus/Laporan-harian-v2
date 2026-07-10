@@ -25,7 +25,8 @@ create policy "poktan_info anon read" on public.poktan_info for select using (tr
 create or replace function public.upsert_poktan_info(
   p_pin text, p_name text, p_ketua text, p_anggota text, p_komoditas text, p_catatan text
 ) returns void
-language plpgsql security definer set search_path = public as $$
+-- search_path menyertakan 'extensions': di Supabase pgcrypto (crypt) hidup di schema itu
+language plpgsql security definer set search_path = public, extensions as $$
 begin
   if not exists (
     select 1 from public.app_config
