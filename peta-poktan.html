@@ -115,6 +115,22 @@
     border-color:rgba(34,238,136,0.5);}
   .gps-dot{animation:blink 1.6s ease-in-out infinite;}
 
+  /* ===== TOOLBAR SALURAN (gambar irigasi/drainase) ===== */
+  #water-bar{position:absolute;top:76px;left:50%;transform:translateX(-50%);z-index:495;
+    display:none;align-items:center;gap:8px;flex-wrap:wrap;max-width:92vw;
+    background:var(--panel-bg);border:1px solid var(--line);padding:8px 12px;
+    font-size:10px;letter-spacing:1px;color:var(--text-dim);
+    box-shadow:0 0 24px rgba(0,0,0,0.5);}
+  #water-bar.show{display:flex;}
+  #water-bar select,#water-bar input{background:rgba(10,24,28,0.9);border:1px solid var(--line);
+    color:var(--text);font-family:'Share Tech Mono',monospace;font-size:11px;padding:4px 6px;outline:none;}
+  #water-bar button{font-family:'Orbitron',sans-serif;font-size:9px;letter-spacing:1px;padding:5px 9px;
+    cursor:pointer;border:1px solid var(--line);background:transparent;color:var(--cyan);}
+  #water-bar button:hover{background:rgba(46,224,255,0.1);}
+  #water-bar button.warn{color:var(--red);border-color:rgba(255,59,92,0.4);}
+  body.drawing .leaflet-container{cursor:crosshair;}
+  @media (max-width:820px){#water-bar{top:100px;}}
+
   /* ===== EDIT MODAL ===== */
   #edit-modal{position:fixed;inset:0;z-index:700;display:none;align-items:center;justify-content:center;
     background:rgba(2,6,8,0.72);backdrop-filter:blur(3px);}
@@ -334,6 +350,10 @@
 </div>
 
 <div id="topright-btns">
+  <div id="water-btn" class="hud-btn">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 7c2-2 4-2 6 0s4 2 6 0 4-2 6 0M2 12c2-2 4-2 6 0s4 2 6 0 4-2 6 0M2 17c2-2 4-2 6 0s4 2 6 0 4-2 6 0"/></svg>
+    SALURAN
+  </div>
   <div id="gps-btn" class="hud-btn">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="7"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/><circle cx="12" cy="12" r="1.5" fill="currentColor"/></svg>
     POSISI
@@ -343,6 +363,8 @@
     OVERVIEW
   </div>
 </div>
+
+<div id="water-bar"></div>
 
 <div id="edit-modal">
   <div class="em-box">
@@ -442,6 +464,8 @@
   <div class="seg">
     <span>KURSOR: <b id="cursor-coord">--.-----, --.-----</b></span>
     <span>ZOOM: <b id="zoom-level">--</b></span>
+    <span><b style="color:var(--cyan)">&#9473;</b> IRIGASI</span>
+    <span><b style="color:var(--amber)">&#9548;</b> DRAINASE</span>
   </div>
   <div class="seg">
     <span>SEKTOR AKTIF: <b id="active-sector">NONE</b></span>
@@ -867,6 +891,7 @@ function restorePolyStyle(id){
 }
 
 function selectSector(id){
+  if(drawMode) return; // sedang menggambar saluran — klik peta = menambah titik
   const s = sectors[id];
   const layer = layerById[id];
   if(activeId !== null && activeId !== id) restorePolyStyle(activeId);
@@ -968,6 +993,178 @@ gpsBtn.addEventListener('click', () => {
     gpsStatusEl.textContent = err.code === 1 ? 'IZIN DITOLAK' : 'SINYAL GPS GAGAL';
   }, { enableHighAccuracy: true, maximumAge: 5000, timeout: 20000 });
 });
+
+// ===== JARINGAN IRIGASI & DRAINASE (digambar manual, sinkron Supabase) =====
+const waterBtn = document.getElementById('water-btn');
+const waterBar = document.getElementById('water-bar');
+const WATER_STYLE = {
+  irigasi:  { color: '#2ee0ff', weight: 3,   opacity: 0.85 },
+  drainase: { color: '#ffb020', weight: 2.5, opacity: 0.85, dashArray: '6 6' }
+};
+let waterLines = {};   // id -> { layer, row }
+let drawMode = false, drawPts = [], drawLine = null, drawDots = [];
+let selectedWater = null;
+
+function renderWaterRow(row){
+  const layer = L.polyline(row.coords, WATER_STYLE[row.jenis] || WATER_STYLE.irigasi).addTo(map);
+  layer.on('click', e => {
+    if(drawMode) return;
+    L.DomEvent.stopPropagation(e);
+    selectWater(row.id);
+  });
+  waterLines[row.id] = { layer, row };
+}
+
+async function loadWater(){
+  Object.values(waterLines).forEach(w => map.removeLayer(w.layer));
+  waterLines = {}; selectedWater = null;
+  let rows = [];
+  try { rows = JSON.parse(localStorage.getItem('farmaxis_saluran')) || []; } catch(e){}
+  if(sb){
+    try {
+      const { data, error } = await sb.from('saluran_air').select('*');
+      if(error) throw error;
+      rows = data;
+      localStorage.setItem('farmaxis_saluran', JSON.stringify(rows));
+    } catch(e){ /* offline / tabel belum dibuat — pakai cache lokal */ }
+  }
+  rows.forEach(renderWaterRow);
+}
+
+function setWbStatus(msg, tone){
+  const el = document.getElementById('wb-status');
+  if(!el) return;
+  el.textContent = msg;
+  el.style.color = tone === 'ok' ? 'var(--green)' : tone === 'warn' ? 'var(--amber)' : 'var(--text-dim)';
+}
+
+function clearTempDraw(){
+  if(drawLine){ map.removeLayer(drawLine); drawLine = null; }
+  drawDots.forEach(d => map.removeLayer(d)); drawDots = [];
+}
+
+function updateTempLine(){
+  const sel = document.getElementById('wb-jenis');
+  const jenis = sel ? sel.value : 'irigasi';
+  clearTempDraw();
+  if(drawPts.length){
+    drawLine = L.polyline(drawPts, Object.assign({}, WATER_STYLE[jenis], { dashArray: '4 6', weight: 2.5 })).addTo(map);
+    drawPts.forEach(p => drawDots.push(L.circleMarker(p, { radius: 3, color: '#fff', weight: 1,
+      fillColor: WATER_STYLE[jenis].color, fillOpacity: 1 }).addTo(map)));
+  }
+  const c = document.getElementById('wb-count');
+  if(c) c.textContent = drawPts.length + ' TITIK';
+}
+
+function clearWaterSel(){
+  if(selectedWater && waterLines[selectedWater]){
+    const w = waterLines[selectedWater];
+    w.layer.setStyle(WATER_STYLE[w.row.jenis] || WATER_STYLE.irigasi);
+  }
+  selectedWater = null;
+}
+
+function closeWaterBar(){
+  clearWaterSel();
+  waterBar.classList.remove('show');
+  waterBar.innerHTML = '';
+}
+
+function stopDraw(){
+  drawMode = false;
+  document.body.classList.remove('drawing');
+  waterBtn.classList.remove('on');
+  map.doubleClickZoom.enable();
+  drawPts = []; clearTempDraw();
+  closeWaterBar();
+}
+
+function startDraw(){
+  deselectAll(); closeWaterBar();
+  drawMode = true;
+  document.body.classList.add('drawing');
+  waterBtn.classList.add('on');
+  map.doubleClickZoom.disable();
+  drawPts = [];
+  waterBar.innerHTML = `
+    <span style="color:var(--cyan)">MODE GAMBAR</span>
+    <select id="wb-jenis"><option value="irigasi">IRIGASI</option><option value="drainase">DRAINASE</option></select>
+    <input id="wb-nama" type="text" maxlength="60" placeholder="nama saluran (opsional)" style="width:150px">
+    <input id="wb-pin" type="password" inputmode="numeric" maxlength="12" placeholder="PIN" style="width:56px">
+    <span id="wb-count">0 TITIK</span>
+    <button id="wb-undo">UNDO</button>
+    <button id="wb-save">SIMPAN</button>
+    <button id="wb-close" class="warn">TUTUP</button>
+    <span id="wb-status">klik peta mengikuti jalur saluran</span>`;
+  document.getElementById('wb-pin').value = localStorage.getItem('farmaxis_pin') || '';
+  document.getElementById('wb-jenis').addEventListener('change', updateTempLine);
+  document.getElementById('wb-undo').addEventListener('click', () => { drawPts.pop(); updateTempLine(); });
+  document.getElementById('wb-close').addEventListener('click', stopDraw);
+  document.getElementById('wb-save').addEventListener('click', async () => {
+    if(drawPts.length < 2){ setWbStatus('minimal 2 titik', 'warn'); return; }
+    if(!sb){ setWbStatus('perlu koneksi internet untuk menyimpan', 'warn'); return; }
+    const pin = document.getElementById('wb-pin').value.trim();
+    const jenis = document.getElementById('wb-jenis').value;
+    const nama = document.getElementById('wb-nama').value.trim();
+    setWbStatus('menyimpan...');
+    const { error } = await sb.rpc('simpan_saluran',
+      { p_pin: pin, p_jenis: jenis, p_nama: nama, p_coords: drawPts });
+    if(error){
+      setWbStatus(error.code === 'PGRST202' || /find the function/i.test(error.message || '')
+        ? 'jalankan farm-axis-saluran.sql di Supabase dulu'
+        : /PIN salah/i.test(error.message || '') ? 'PIN salah' : ('gagal: ' + (error.message || 'error')), 'warn');
+      return;
+    }
+    localStorage.setItem('farmaxis_pin', pin);
+    drawPts = []; updateTempLine();
+    document.getElementById('wb-nama').value = '';
+    setWbStatus('tersimpan ✓ — lanjut gambar saluran berikutnya', 'ok');
+    loadWater();
+  });
+  waterBar.classList.add('show');
+  updateTempLine();
+}
+
+function selectWater(id){
+  clearWaterSel();
+  const w = waterLines[id];
+  if(!w) return;
+  selectedWater = id;
+  const base = WATER_STYLE[w.row.jenis] || WATER_STYLE.irigasi;
+  w.layer.setStyle({ weight: base.weight + 2, opacity: 1 });
+  waterBar.innerHTML = `
+    <span style="color:${w.row.jenis === 'irigasi' ? 'var(--cyan)' : 'var(--amber)'}">${w.row.jenis.toUpperCase()}</span>
+    <span style="color:var(--text)">${escHtml(w.row.nama || 'TANPA NAMA')}</span>
+    <input id="wb-pin" type="password" inputmode="numeric" maxlength="12" placeholder="PIN" style="width:56px">
+    <button id="wb-del" class="warn">HAPUS</button>
+    <button id="wb-close">TUTUP</button>
+    <span id="wb-status"></span>`;
+  document.getElementById('wb-pin').value = localStorage.getItem('farmaxis_pin') || '';
+  document.getElementById('wb-close').addEventListener('click', closeWaterBar);
+  document.getElementById('wb-del').addEventListener('click', async () => {
+    if(!sb){ setWbStatus('perlu koneksi internet', 'warn'); return; }
+    const pin = document.getElementById('wb-pin').value.trim();
+    setWbStatus('menghapus...');
+    const { error } = await sb.rpc('hapus_saluran', { p_pin: pin, p_id: id });
+    if(error){
+      setWbStatus(/PIN salah/i.test(error.message || '') ? 'PIN salah'
+        : ('gagal: ' + (error.message || 'error')), 'warn');
+      return;
+    }
+    localStorage.setItem('farmaxis_pin', pin);
+    closeWaterBar();
+    loadWater();
+  });
+  waterBar.classList.add('show');
+}
+
+map.on('click', e => {
+  if(!drawMode) return;
+  drawPts.push([e.latlng.lat, e.latlng.lng]);
+  updateTempLine();
+});
+waterBtn.addEventListener('click', () => { drawMode ? stopDraw() : startDraw(); });
+loadWater();
 
 // ===== EDIT MODAL =====
 const editModal = document.getElementById('edit-modal');
