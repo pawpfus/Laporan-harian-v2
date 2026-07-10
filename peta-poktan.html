@@ -4,6 +4,10 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
 <title>FARM AXIS // Command Center</title>
+<meta name="theme-color" content="#04080a" />
+<link rel="manifest" href="manifest-peta.webmanifest" />
+<link rel="icon" type="image/png" href="icons/farmaxis-192.png" />
+<link rel="apple-touch-icon" href="icons/farmaxis-180.png" />
 <!-- semua aset di-host sendiri (vendor/) — tak bergantung CDN pihak ketiga -->
 <link rel="stylesheet" href="vendor/leaflet/leaflet.css" />
 <script src="vendor/supabase.js"></script><!-- @supabase/supabase-js 2.110.1 (pinned) -->
@@ -107,6 +111,9 @@
     box-shadow:0 0 24px rgba(0,0,0,0.5);}
   .hud-btn:hover{background:rgba(46,224,255,0.1);}
   .hud-btn svg{width:13px;height:13px;}
+  .hud-btn.on{background:rgba(34,238,136,0.12);color:var(--green);
+    border-color:rgba(34,238,136,0.5);}
+  .gps-dot{animation:blink 1.6s ease-in-out infinite;}
 
   /* ===== EDIT MODAL ===== */
   #edit-modal{position:fixed;inset:0;z-index:700;display:none;align-items:center;justify-content:center;
@@ -192,7 +199,8 @@
   #detail-panel.open .dp-field:nth-child(6){transition-delay:0.58s;}
   #detail-panel.open .dp-field:nth-child(7){transition-delay:0.66s;}
   #detail-panel.open .dp-field:nth-child(8){transition-delay:0.74s;}
-  #detail-panel.open .dp-foot{opacity:1;transform:none;transition-delay:0.82s;}
+  #detail-panel.open .dp-field:nth-child(9){transition-delay:0.82s;}
+  #detail-panel.open .dp-foot{opacity:1;transform:none;transition-delay:0.90s;}
   #detail-panel .dp-head{padding:14px 16px 10px;border-bottom:1px solid var(--line);position:relative;}
   #detail-panel .dp-head .tag{font-size:9.5px;letter-spacing:3px;color:var(--cyan);}
   #detail-panel .dp-head h2{font-family:'Orbitron',sans-serif;font-size:16px;margin:6px 0 0;color:var(--green);
@@ -325,6 +333,10 @@
 </div>
 
 <div id="topright-btns">
+  <div id="gps-btn" class="hud-btn">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="7"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/><circle cx="12" cy="12" r="1.5" fill="currentColor"/></svg>
+    POSISI
+  </div>
   <div id="overview-btn" class="hud-btn">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-6 9 6v10a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg>
     OVERVIEW
@@ -354,6 +366,10 @@
       </label>
       <label>CATATAN
         <textarea id="em-catatan" rows="3" maxlength="500" placeholder="Info tambahan..."></textarea>
+      </label>
+      <label>PIN EDIT
+        <input id="em-pin" type="password" inputmode="numeric" maxlength="12"
+               placeholder="PIN pengaman data" autocomplete="off" />
       </label>
     </div>
     <div id="em-status" style="padding:0 16px 10px;font-size:11px;letter-spacing:0.5px;color:var(--text-dim);min-height:14px;"></div>
@@ -400,6 +416,10 @@
       <div class="lbl">TITIK BATAS POLIGON</div>
       <div class="val mono" id="dp-verts">&mdash;</div>
     </div>
+    <div class="dp-field" id="dpf-cuaca" style="display:none">
+      <div class="lbl">CUACA SEKTOR</div>
+      <div class="val mono" id="dp-cuaca">&mdash;</div>
+    </div>
     <div class="dp-field" id="dpf-catatan" style="display:none">
       <div class="lbl">CATATAN</div>
       <div class="val" id="dp-catatan" style="font-size:12px;line-height:1.5">&mdash;</div>
@@ -420,6 +440,7 @@
   </div>
   <div class="seg">
     <span>SEKTOR AKTIF: <b id="active-sector">NONE</b></span>
+    <span>GPS: <b id="gps-status">OFF</b></span>
     <span>SUMBER PETA: <b>ESRI SATELIT</b></span>
     <span>SYNC: <b id="sync-mode" style="color:var(--amber)">LOKAL</b></span>
   </div>
@@ -634,6 +655,36 @@ function typeInto(el, text, delay, cps){
   }, delay));
 }
 
+// --- cuaca sektor (Open-Meteo, tanpa API key) ---
+const WX_TTL = 15 * 60 * 1000; // cache 15 menit per titik
+let wxCache = {};
+try { wxCache = JSON.parse(localStorage.getItem('farmaxis_wx')) || {}; } catch(e){}
+const WMO = {
+  0:'CERAH', 1:'CERAH BERAWAN', 2:'BERAWAN', 3:'MENDUNG', 45:'KABUT', 48:'KABUT',
+  51:'GERIMIS', 53:'GERIMIS', 55:'GERIMIS LEBAT', 61:'HUJAN RINGAN', 63:'HUJAN SEDANG',
+  65:'HUJAN LEBAT', 80:'HUJAN LOKAL', 81:'HUJAN DERAS', 82:'HUJAN SANGAT DERAS',
+  95:'BADAI PETIR', 96:'BADAI PETIR + ES', 99:'BADAI PETIR + ES'
+};
+async function fetchWeather(s){
+  const key = s.anchor.lat.toFixed(2) + ',' + s.anchor.lng.toFixed(2);
+  const hit = wxCache[key];
+  if(hit && Date.now() - hit.t < WX_TTL) return hit.txt;
+  try {
+    const u = 'https://api.open-meteo.com/v1/forecast?latitude=' + s.anchor.lat.toFixed(4) +
+      '&longitude=' + s.anchor.lng.toFixed(4) +
+      '&current=temperature_2m,weather_code,wind_speed_10m&timezone=Asia%2FMakassar';
+    const d = await (await fetch(u)).json();
+    const c = d.current;
+    const txt = c.temperature_2m.toFixed(1) + '°C · ' + (WMO[c.weather_code] || '—') +
+      ' · ANGIN ' + Math.round(c.wind_speed_10m) + ' KM/J';
+    wxCache[key] = { t: Date.now(), txt };
+    try { localStorage.setItem('farmaxis_wx', JSON.stringify(wxCache)); } catch(e){}
+    return txt;
+  } catch(e) {
+    return hit ? hit.txt + ' (CACHE)' : null; // offline: tampilkan data terakhir
+  }
+}
+
 function populateDetail(id){
   const s = sectors[id];
   const ov = getOv(s);
@@ -643,6 +694,14 @@ function populateDetail(id){
   setDpField('dpf-anggota', 'dp-anggota', ov.anggota ? ov.anggota + ' orang' : '');
   setDpField('dpf-komoditas', 'dp-komoditas', ov.komoditas || '');
   setDpField('dpf-catatan', 'dp-catatan', ov.catatan || '');
+  // cuaca menyusul async — tampilkan hanya jika sektor ini masih terpilih
+  setDpField('dpf-cuaca', 'dp-cuaca', '');
+  fetchWeather(s).then(txt => {
+    if(txt && activeId === id){
+      setDpField('dpf-cuaca', 'dp-cuaca', txt);
+      typeInto(document.getElementById('dp-cuaca'), txt, 60, 45);
+    }
+  });
   typeInto(document.getElementById('dp-tag'), s.code, 60, 30);
   typeInto(document.getElementById('dp-name'), s.name, 160, 28);
   const seq = [
@@ -818,6 +877,52 @@ document.getElementById('overview-btn').addEventListener('click', () => {
   map.flyToBounds(allBounds, { padding: [90,90], duration: 1.1 });
 });
 
+// ===== GPS POSISI SAYA =====
+const gpsBtn = document.getElementById('gps-btn');
+const gpsStatusEl = document.getElementById('gps-status');
+let gpsWatch = null, gpsDot = null, gpsAcc = null;
+
+function gpsStop(){
+  if(gpsWatch !== null){ navigator.geolocation.clearWatch(gpsWatch); gpsWatch = null; }
+  if(gpsDot){ map.removeLayer(gpsDot); gpsDot = null; }
+  if(gpsAcc){ map.removeLayer(gpsAcc); gpsAcc = null; }
+  gpsBtn.classList.remove('on');
+  gpsStatusEl.textContent = 'OFF';
+  gpsStatusEl.style.color = '';
+}
+
+gpsBtn.addEventListener('click', () => {
+  if(gpsWatch !== null){ gpsStop(); return; }
+  if(!navigator.geolocation){ gpsStatusEl.textContent = 'TIDAK DIDUKUNG'; return; }
+  gpsBtn.classList.add('on');
+  gpsStatusEl.textContent = 'MENCARI...';
+  let firstFix = true;
+  gpsWatch = navigator.geolocation.watchPosition(pos => {
+    const lat = pos.coords.latitude, lng = pos.coords.longitude, acc = pos.coords.accuracy;
+    if(!gpsDot){
+      gpsAcc = L.circle([lat, lng], { radius: acc, color: '#ffb020', weight: 1,
+        opacity: 0.5, fillColor: '#ffb020', fillOpacity: 0.08 }).addTo(map);
+      gpsDot = L.circleMarker([lat, lng], { radius: 6, color: '#ffb020', weight: 2,
+        fillColor: '#ffb020', fillOpacity: 0.9, className: 'gps-dot' }).addTo(map);
+    } else {
+      gpsDot.setLatLng([lat, lng]);
+      gpsAcc.setLatLng([lat, lng]); gpsAcc.setRadius(acc);
+    }
+    if(firstFix){
+      firstFix = false;
+      try { map.flyTo([lat, lng], Math.max(map.getZoom(), 16), { duration: 1 }); } catch(e){}
+    }
+    // sedang berdiri di lahan poktan mana?
+    const inside = sectors.find(s => pointInPoly(lat, lng, s.latlngs));
+    gpsStatusEl.textContent = inside ? 'DI ' + inside.name.toUpperCase()
+                                     : lat.toFixed(5) + ', ' + lng.toFixed(5);
+    gpsStatusEl.style.color = inside ? 'var(--green)' : '';
+  }, err => {
+    gpsStop();
+    gpsStatusEl.textContent = err.code === 1 ? 'IZIN DITOLAK' : 'SINYAL GPS GAGAL';
+  }, { enableHighAccuracy: true, maximumAge: 5000, timeout: 20000 });
+});
+
 // ===== EDIT MODAL =====
 const editModal = document.getElementById('edit-modal');
 const emSector = document.getElementById('em-sector');
@@ -837,6 +942,7 @@ function openEditModal(){
   const id = activeId !== null ? activeId : 0;
   emSector.value = id;
   fillEditForm(id);
+  document.getElementById('em-pin').value = localStorage.getItem('farmaxis_pin') || '';
   const st = document.getElementById('em-status');
   st.textContent = ''; st.style.color = 'var(--text-dim)';
   editModal.classList.add('show');
@@ -878,23 +984,31 @@ document.getElementById('em-save').addEventListener('click', async () => {
   buildList();
   if(activeId !== null) populateDetail(activeId);
 
-  // sinkron ke Supabase (tabel poktan_info)
+  // sinkron ke Supabase — lewat fungsi ber-PIN (farm-axis-pin.sql)
   if(sb){
     setEmStatus('Menyimpan ke cloud...', '');
-    const row = {
-      name: s.name,
-      ketua: ov.ketua || null,
-      anggota: ov.anggota || null,
-      komoditas: ov.komoditas || null,
-      catatan: ov.catatan || null,
-      updated_at: new Date().toISOString()
-    };
-    const { error } = await sb.from('poktan_info').upsert(row);
+    const pin = document.getElementById('em-pin').value.trim();
+    let { error } = await sb.rpc('upsert_poktan_info', {
+      p_pin: pin, p_name: s.name,
+      p_ketua: ov.ketua || null, p_anggota: ov.anggota || null,
+      p_komoditas: ov.komoditas || null, p_catatan: ov.catatan || null
+    });
+    if(error && (error.code === 'PGRST202' || /find the function/i.test(error.message || ''))){
+      // fungsi PIN belum dipasang di Supabase — pakai jalur lama tanpa PIN
+      ({ error } = await sb.from('poktan_info').upsert({
+        name: s.name, ketua: ov.ketua || null, anggota: ov.anggota || null,
+        komoditas: ov.komoditas || null, catatan: ov.catatan || null,
+        updated_at: new Date().toISOString()
+      }));
+    }
     if(error){
       syncMode = 'LOKAL'; updateSyncBadge();
-      setEmStatus('⚠ Gagal sinkron cloud — tersimpan lokal saja. (' + (error.message || 'error') + ')', 'warn');
+      setEmStatus(/PIN salah/i.test(error.message || '')
+        ? '⚠ PIN salah — perubahan hanya tersimpan lokal.'
+        : '⚠ Gagal sinkron cloud — tersimpan lokal saja. (' + (error.message || 'error') + ')', 'warn');
       return; // biarkan modal terbuka agar pesan terbaca
     }
+    localStorage.setItem('farmaxis_pin', pin); // PIN benar — ingat di perangkat ini
     syncMode = 'CLOUD'; updateSyncBadge();
   }
   editModal.classList.remove('show');

@@ -1,5 +1,5 @@
 // FARM AXIS service worker — app shell + cache tile untuk koneksi lapangan
-const VER = 'farmaxis-v1';
+const VER = 'farmaxis-v2';
 const SHELL_CACHE = VER + '-shell';
 const TILE_CACHE = VER + '-tiles';
 const TILE_LIMIT = 400; // batas jumlah tile tersimpan
@@ -13,7 +13,11 @@ const SHELL = [
   '/vendor/fonts/orbitron-500-latin.woff2',
   '/vendor/fonts/orbitron-700-latin.woff2',
   '/vendor/fonts/orbitron-900-latin.woff2',
-  '/vendor/fonts/share-tech-mono-400-latin.woff2'
+  '/vendor/fonts/share-tech-mono-400-latin.woff2',
+  '/manifest-peta.webmanifest',
+  '/icons/farmaxis-192.png',
+  '/icons/farmaxis-512.png',
+  '/icons/farmaxis-180.png'
 ];
 
 const TILE_HOSTS = ['server.arcgisonline.com', 'basemaps.cartocdn.com'];
