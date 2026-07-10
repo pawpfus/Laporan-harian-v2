@@ -1,5 +1,5 @@
 // FARM AXIS service worker — app shell + cache tile untuk koneksi lapangan
-const VER = 'farmaxis-v2';
+const VER = 'farmaxis-v3';
 const SHELL_CACHE = VER + '-shell';
 const TILE_CACHE = VER + '-tiles';
 const TILE_LIMIT = 400; // batas jumlah tile tersimpan
@@ -17,7 +17,9 @@ const SHELL = [
   '/manifest-peta.webmanifest',
   '/icons/farmaxis-192.png',
   '/icons/farmaxis-512.png',
-  '/icons/farmaxis-180.png'
+  '/icons/farmaxis-180.png',
+  '/icons/icon-192.png',
+  '/icons/apple-touch-icon.png'
 ];
 
 const TILE_HOSTS = ['server.arcgisonline.com', 'basemaps.cartocdn.com'];
