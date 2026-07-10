@@ -13,3 +13,6 @@
 Thumbs.db
 .DS_Store
 *.tmp
+
+# dependencies
+/node_modules/

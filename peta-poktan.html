@@ -200,7 +200,8 @@
   #detail-panel.open .dp-field:nth-child(7){transition-delay:0.66s;}
   #detail-panel.open .dp-field:nth-child(8){transition-delay:0.74s;}
   #detail-panel.open .dp-field:nth-child(9){transition-delay:0.82s;}
-  #detail-panel.open .dp-foot{opacity:1;transform:none;transition-delay:0.90s;}
+  #detail-panel.open .dp-field:nth-child(10){transition-delay:0.88s;}
+  #detail-panel.open .dp-foot{opacity:1;transform:none;transition-delay:0.95s;}
   #detail-panel .dp-head{padding:14px 16px 10px;border-bottom:1px solid var(--line);position:relative;}
   #detail-panel .dp-head .tag{font-size:9.5px;letter-spacing:3px;color:var(--cyan);}
   #detail-panel .dp-head h2{font-family:'Orbitron',sans-serif;font-size:16px;margin:6px 0 0;color:var(--green);
@@ -419,6 +420,10 @@
     <div class="dp-field" id="dpf-cuaca" style="display:none">
       <div class="lbl">CUACA SEKTOR</div>
       <div class="val mono" id="dp-cuaca">&mdash;</div>
+    </div>
+    <div class="dp-field" id="dpf-ndvi" style="display:none">
+      <div class="lbl">INDEKS VEGETASI &middot; NDVI</div>
+      <div class="val mono" id="dp-ndvi">&mdash;</div>
     </div>
     <div class="dp-field" id="dpf-catatan" style="display:none">
       <div class="lbl">CATATAN</div>
@@ -685,6 +690,40 @@ async function fetchWeather(s){
   }
 }
 
+// --- NDVI per sektor (Sentinel-2 via /api/ndvi, cache 3 hari + tren antar-citra) ---
+const NDVI_TTL = 3 * 24 * 3600 * 1000;
+let ndviCache = {};
+try { ndviCache = JSON.parse(localStorage.getItem('farmaxis_ndvi')) || {}; } catch(e){}
+const BLN = ['JAN','FEB','MAR','APR','MEI','JUN','JUL','AGU','SEP','OKT','NOV','DES'];
+
+function fmtNdvi(e){
+  const arrow = e.prev == null ? ''
+    : e.ndvi > e.prev + 0.02 ? ' ▲' : e.ndvi < e.prev - 0.02 ? ' ▼' : ' ▬';
+  const d = new Date(e.date + 'T00:00:00');
+  let txt = e.ndvi.toFixed(2) + arrow +
+    ' · CITRA ' + d.getDate() + ' ' + BLN[d.getMonth()] + ' · AWAN ' + e.cloud + '%';
+  if(e.low) txt += ' ⚠'; // sebagian besar poligon tertutup awan — angka kurang meyakinkan
+  return txt;
+}
+
+async function fetchNdvi(s){
+  const hit = ndviCache[s.name];
+  if(hit && Date.now() - hit.t < NDVI_TTL) return fmtNdvi(hit);
+  try {
+    const d = await (await fetch('/api/ndvi?name=' + encodeURIComponent(s.name))).json();
+    if(!d || d.error || d.ndvi == null) return hit ? fmtNdvi(hit) + ' (CACHE)' : null;
+    const entry = { t: Date.now(), ndvi: d.ndvi, date: d.sceneDate,
+                    cloud: d.cloudCover, low: !!d.lowConfidence };
+    // tren dihitung hanya antar citra yang tanggalnya berbeda
+    if(hit) entry.prev = hit.date !== d.sceneDate ? hit.ndvi : hit.prev;
+    ndviCache[s.name] = entry;
+    try { localStorage.setItem('farmaxis_ndvi', JSON.stringify(ndviCache)); } catch(e){}
+    return fmtNdvi(entry);
+  } catch(e) {
+    return hit ? fmtNdvi(hit) + ' (CACHE)' : null; // offline / API mati: data terakhir
+  }
+}
+
 function populateDetail(id){
   const s = sectors[id];
   const ov = getOv(s);
@@ -694,12 +733,19 @@ function populateDetail(id){
   setDpField('dpf-anggota', 'dp-anggota', ov.anggota ? ov.anggota + ' orang' : '');
   setDpField('dpf-komoditas', 'dp-komoditas', ov.komoditas || '');
   setDpField('dpf-catatan', 'dp-catatan', ov.catatan || '');
-  // cuaca menyusul async — tampilkan hanya jika sektor ini masih terpilih
+  // cuaca & NDVI menyusul async — tampilkan hanya jika sektor ini masih terpilih
   setDpField('dpf-cuaca', 'dp-cuaca', '');
   fetchWeather(s).then(txt => {
     if(txt && activeId === id){
       setDpField('dpf-cuaca', 'dp-cuaca', txt);
       typeInto(document.getElementById('dp-cuaca'), txt, 60, 45);
+    }
+  });
+  setDpField('dpf-ndvi', 'dp-ndvi', '');
+  fetchNdvi(s).then(txt => {
+    if(txt && activeId === id){
+      setDpField('dpf-ndvi', 'dp-ndvi', txt);
+      typeInto(document.getElementById('dp-ndvi'), txt, 60, 45);
     }
   });
   typeInto(document.getElementById('dp-tag'), s.code, 60, 30);
