@@ -469,7 +469,7 @@
     <span class="cursor-info">KURSOR: <b id="cursor-coord">--.-----, --.-----</b></span>
     <span>ZOOM: <b id="zoom-level">--</b></span>
     <span id="legend-water" class="legend-grp">
-      <span><b style="color:var(--amber)">&#9473;</b> IRIGASI</span>
+      <span><b style="color:var(--amber)">&#9548;</b> IRIGASI</span>
       <span><b style="color:#a855f7">&#9548;</b> DRAINASE</span>
     </span>
     <span id="legend-road" class="legend-grp">
@@ -1030,7 +1030,7 @@ gpsBtn.addEventListener('click', () => {
 // Data OSM (kanal/parit/sungai) sengaja tidak dipakai — semua garis air
 // digambar lewat mode gambar. Grup kosong ini jadi wadah garis manual.
 const WATER_STYLE = {
-  irigasi:  { color: '#ffb020', weight: 3,   opacity: 0.9 },
+  irigasi:  { color: '#ffb020', weight: 3,   opacity: 0.9,  dashArray: '6 6' },
   drainase: { color: '#a855f7', weight: 2.5, opacity: 0.95, dashArray: '6 6' }
 };
 const waterGroup = L.layerGroup([]);
