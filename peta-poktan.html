@@ -1091,8 +1091,24 @@ document.getElementById('road-btn').addEventListener('click', () =>
 
 // ===== TITIK POI: pompa, pintu air, gudang, kios (sinkron Supabase) =====
 const poiGroup = L.layerGroup([]);
-document.getElementById('poi-btn').addEventListener('click', () =>
-  setLayerVis(poiGroup, 'poi-btn', 'legend-poi', !map.hasLayer(poiGroup)));
+document.getElementById('poi-btn').addEventListener('click', () => {
+  const on = !map.hasLayer(poiGroup);
+  setLayerVis(poiGroup, 'poi-btn', 'legend-poi', on);
+  if(drawMode) return;
+  // layer kosong membingungkan — beri jalan pintas langsung ke mode gambar titik
+  if(on && !Object.keys(manualPois).length){
+    drawBar.innerHTML = `
+      <span style="color:var(--cyan)">TITIK PENTING</span>
+      <span>belum ada titik tersimpan</span>
+      <button id="db-add-poi">+ TAMBAH TITIK</button>
+      <button id="db-close">TUTUP</button>`;
+    document.getElementById('db-add-poi').addEventListener('click', () => startDraw(null, 'pompa'));
+    document.getElementById('db-close').addEventListener('click', closeDrawBar);
+    drawBar.classList.add('show');
+  } else if(!on && document.getElementById('db-add-poi')){
+    closeDrawBar();
+  }
+});
 
 // ===== MODE GAMBAR MANUAL (garis & titik, sinkron Supabase) =====
 // Garis/titik yang digambar bergabung ke grup layer sesuai jenisnya, jadi ikut
@@ -1300,8 +1316,9 @@ function stopDraw(){
   closeDrawBar();
 }
 
-// startDraw() = gambar baru; startDraw(row) = edit ulang garis tersimpan
-function startDraw(editRow){
+// startDraw() = gambar baru; startDraw(row) = edit ulang garis tersimpan;
+// startDraw(null, jenis) = gambar baru dengan jenis terpilih
+function startDraw(editRow, presetJenis){
   deselectAll(); closeDrawBar();
   drawMode = true;
   editTarget = editRow || null;
@@ -1333,6 +1350,8 @@ function startDraw(editRow){
     document.getElementById('db-jenis').value = editRow.jenis;
     document.getElementById('db-nama').value = editRow.nama || '';
     if(manualLines[editRow.id]) manualLines[editRow.id].layer.setStyle({ opacity: 0.12 });
+  } else if(presetJenis && DRAW_KIND[presetJenis]){
+    document.getElementById('db-jenis').value = presetJenis;
   }
   document.getElementById('db-pin').value = localStorage.getItem('farmaxis_pin') || '';
   const hint = () => setDbStatus(currentKind().point
