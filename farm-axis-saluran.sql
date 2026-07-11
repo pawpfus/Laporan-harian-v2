@@ -1,5 +1,5 @@
 -- FARM AXIS: fitur manual di atas peta — garis (irigasi, drainase, jalan desa,
--- jalan tani) + titik POI (pompa, pintu air, gudang, kios) + edit garis
+-- jalan tani) + titik POI (pompa, pintu air, sekretariat) + edit garis
 -- + edit batas poligon poktan
 -- PRASYARAT: farm-axis-pin.sql sudah dijalankan (butuh app_config + pgcrypto).
 -- Jalankan SEKALI di Supabase: Dashboard -> SQL Editor -> Run
@@ -71,15 +71,20 @@ begin
   if not found then raise exception 'garis tidak ditemukan'; end if;
 end $$;
 
--- ===== TITIK POI: pompa air, pintu air, gudang, kios saprodi =====
+-- ===== TITIK POI: pompa air, pintu air, sekretariat =====
 create table if not exists public.poktan_poi (
   id uuid primary key default gen_random_uuid(),
-  jenis text not null check (jenis in ('pompa','pintu','gudang','kios')),
+  jenis text not null,
   nama text,
   lat double precision not null,
   lng double precision not null,
   created_at timestamptz default now()
 );
+-- perbarui daftar jenis: gudang & kios diganti sekretariat (data lama dimigrasi)
+alter table public.poktan_poi drop constraint if exists poktan_poi_jenis_check;
+update public.poktan_poi set jenis = 'sekretariat' where jenis in ('gudang','kios');
+alter table public.poktan_poi add constraint poktan_poi_jenis_check
+  check (jenis in ('pompa','pintu','sekretariat'));
 alter table public.poktan_poi enable row level security;
 drop policy if exists "poi read" on public.poktan_poi;
 create policy "poi read" on public.poktan_poi for select using (true);
@@ -94,7 +99,7 @@ begin
                  where key = 'poktan_pin' and value = crypt(p_pin, value)) then
     raise exception 'PIN salah';
   end if;
-  if p_jenis not in ('pompa','pintu','gudang','kios') then
+  if p_jenis not in ('pompa','pintu','sekretariat') then
     raise exception 'jenis tidak valid';
   end if;
   insert into public.poktan_poi(jenis, nama, lat, lng)

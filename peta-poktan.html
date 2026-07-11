@@ -509,8 +509,7 @@
     <span id="legend-poi" class="legend-grp">
       <span><b style="color:var(--cyan)">&#9679;</b> POMPA</span>
       <span><b style="color:#4d8dff">&#9679;</b> PINTU AIR</span>
-      <span><b style="color:var(--green)">&#9679;</b> GUDANG</span>
-      <span><b style="color:var(--red)">&#9679;</b> KIOS</span>
+      <span><b style="color:var(--green)">&#9679;</b> SEKRETARIAT</span>
     </span>
   </div>
   <div class="seg">
@@ -619,7 +618,7 @@ const HudCtrl = L.Control.extend({
       <a id="road-btn" role="button" title="Jalan desa &amp; jalan tani" aria-label="Jaringan jalan">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 22 10 2M19 22 14 2"/><path d="M12 5v3M12 12v3M12 19v3"/></svg>
       </a>
-      <a id="poi-btn" role="button" title="Titik penting (pompa, pintu air, gudang, kios)" aria-label="Titik penting">
+      <a id="poi-btn" role="button" title="Titik penting (pompa, pintu air, sekretariat)" aria-label="Titik penting">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 10c0 6-8 12-8 12S4 16 4 10a8 8 0 1 1 16 0z"/><circle cx="12" cy="10" r="3"/></svg>
       </a>
       <a id="draw-btn" role="button" title="Gambar saluran / jalan / titik manual" aria-label="Mode gambar">
@@ -1101,7 +1100,7 @@ const roadGroup = L.layerGroup(JALAN_DATA.map(r =>
 document.getElementById('road-btn').addEventListener('click', () =>
   setLayerVis(roadGroup, 'road-btn', 'legend-road', !map.hasLayer(roadGroup)));
 
-// ===== TITIK POI: pompa, pintu air, gudang, kios (sinkron Supabase) =====
+// ===== TITIK POI: pompa, pintu air, sekretariat (sinkron Supabase) =====
 const poiGroup = L.layerGroup([]);
 document.getElementById('poi-btn').addEventListener('click', () => {
   const on = !map.hasLayer(poiGroup);
@@ -1137,10 +1136,8 @@ const DRAW_KIND = {
              svg: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 3c3.5 4.5 6 7.6 6 10.5A6 6 0 0 1 6 13.5C6 10.6 8.5 7.5 12 3z"/></svg>' },
   pintu:   { point: true, style: { color: '#4d8dff' }, group: poiGroup, btn: 'poi-btn', legend: 'legend-poi', label: 'PINTU AIR',
              svg: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 4v16M19 4v16M5 6h14M9 6v9M15 6v9M12 6v12"/></svg>' },
-  gudang:  { point: true, style: { color: '#22ee88' }, group: poiGroup, btn: 'poi-btn', legend: 'legend-poi', label: 'GUDANG',
-             svg: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 9.5 12 4l9 5.5V20H3zM8 20v-6h8v6"/></svg>' },
-  kios:    { point: true, style: { color: '#ff3b5c' }, group: poiGroup, btn: 'poi-btn', legend: 'legend-poi', label: 'KIOS SAPRODI',
-             svg: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M4.5 8 6 4h12l1.5 4M4.5 8h15v3h-15zM6 11v9h12v-9M10 20v-5h4v5"/></svg>' }
+  sekretariat: { point: true, style: { color: '#22ee88' }, group: poiGroup, btn: 'poi-btn', legend: 'legend-poi', label: 'SEKRETARIAT',
+             svg: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M4 21V9l8-6 8 6v12M3 21h18M10 21v-5h4v5M9.5 12h5"/></svg>' }
 };
 const drawBtn = document.getElementById('draw-btn');
 const drawBar = document.getElementById('draw-bar');
@@ -1489,7 +1486,7 @@ function startDraw(editRow, presetJenis){
       </optgroup>
       <optgroup label="TITIK">
         <option value="pompa">POMPA AIR</option><option value="pintu">PINTU AIR</option>
-        <option value="gudang">GUDANG</option><option value="kios">KIOS SAPRODI</option>
+        <option value="sekretariat">SEKRETARIAT</option>
       </optgroup>
     </select>
     <input id="db-nama" type="text" maxlength="60" placeholder="nama (opsional)" style="width:140px">
