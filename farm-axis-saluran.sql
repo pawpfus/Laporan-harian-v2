@@ -1,5 +1,6 @@
 -- FARM AXIS: fitur manual di atas peta — garis (irigasi, drainase, jalan desa,
 -- jalan tani) + titik POI (pompa, pintu air, gudang, kios) + edit garis
+-- + edit batas poligon poktan
 -- PRASYARAT: farm-axis-pin.sql sudah dijalankan (butuh app_config + pgcrypto).
 -- Jalankan SEKALI di Supabase: Dashboard -> SQL Editor -> Run
 -- Aman dijalankan ulang, juga bila versi lama (hanya irigasi/drainase) pernah dipasang.
@@ -112,6 +113,45 @@ begin
   end if;
   delete from public.poktan_poi where id = p_id;
 end $$;
+
+-- ===== EDIT BATAS POLIGON: override koordinat poktan (asli tetap di aplikasi) =====
+create table if not exists public.poktan_poly (
+  kode text primary key,           -- kode sektor, mis. SEC-01
+  coords jsonb not null,           -- [[lat,lng], ...] tanpa titik penutup
+  updated_at timestamptz default now()
+);
+alter table public.poktan_poly enable row level security;
+drop policy if exists "poly read" on public.poktan_poly;
+create policy "poly read" on public.poktan_poly for select using (true);
+
+create or replace function public.simpan_poligon(p_pin text, p_kode text, p_coords jsonb)
+returns void
+language plpgsql security definer set search_path = public, extensions as $$
+begin
+  if not exists (select 1 from public.app_config
+                 where key = 'poktan_pin' and value = crypt(p_pin, value)) then
+    raise exception 'PIN salah';
+  end if;
+  if jsonb_array_length(p_coords) < 3 then raise exception 'minimal 3 titik'; end if;
+  insert into public.poktan_poly(kode, coords) values (p_kode, p_coords)
+  on conflict (kode) do update set coords = excluded.coords, updated_at = now();
+end $$;
+
+create or replace function public.reset_poligon(p_pin text, p_kode text)
+returns void
+language plpgsql security definer set search_path = public, extensions as $$
+begin
+  if not exists (select 1 from public.app_config
+                 where key = 'poktan_pin' and value = crypt(p_pin, value)) then
+    raise exception 'PIN salah';
+  end if;
+  delete from public.poktan_poly where kode = p_kode;
+end $$;
+
+revoke all on function public.simpan_poligon(text,text,jsonb) from public;
+revoke all on function public.reset_poligon(text,text) from public;
+grant execute on function public.simpan_poligon(text,text,jsonb) to anon, authenticated;
+grant execute on function public.reset_poligon(text,text) to anon, authenticated;
 
 revoke all on function public.simpan_saluran(text,text,text,jsonb) from public;
 revoke all on function public.hapus_saluran(text,uuid) from public;

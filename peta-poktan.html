@@ -259,11 +259,13 @@
   .status-row .sdot{width:8px;height:8px;border-radius:50%;background:var(--green);
     box-shadow:0 0 6px var(--green);animation:blink 1.6s ease-in-out infinite;}
   .status-row span{font-size:12px;color:var(--green);letter-spacing:1.5px;}
-  #dp-edit{display:flex;align-items:center;gap:5px;flex:none;
+  #dp-edit,#dp-edit-poly{display:flex;align-items:center;gap:5px;flex:none;
     font-family:'Orbitron',sans-serif;font-size:8.5px;letter-spacing:1.5px;padding:5px 9px;
     background:transparent;border:1px solid rgba(255,176,32,0.35);color:var(--amber);cursor:pointer;}
   #dp-edit:hover{background:rgba(255,176,32,0.12);}
-  #dp-edit svg{width:10px;height:10px;}
+  #dp-edit svg,#dp-edit-poly svg{width:10px;height:10px;}
+  #dp-edit-poly{border-color:rgba(255,46,136,0.35);color:var(--pink);}
+  #dp-edit-poly:hover{background:rgba(255,46,136,0.12);}
   #detail-panel .dp-foot{padding:8px 16px;border-top:1px solid var(--line);font-size:9px;
     color:var(--text-dim);letter-spacing:1px;display:flex;align-items:center;
     justify-content:space-between;gap:10px;}
@@ -477,10 +479,16 @@
     </div>
   </div>
   <div class="dp-foot"><span>DATA PRIMER &middot; SURVEI GPS</span>
-    <button id="dp-edit">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5z"/></svg>
-      EDIT DATA
-    </button>
+    <div style="display:flex;gap:6px">
+      <button id="dp-edit-poly">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3 21 8.5v7L12 21l-9-5.5v-7z"/><circle cx="12" cy="3" r="1.6" fill="currentColor"/><circle cx="21" cy="8.5" r="1.6" fill="currentColor"/><circle cx="3" cy="8.5" r="1.6" fill="currentColor"/></svg>
+        BATAS
+      </button>
+      <button id="dp-edit">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5z"/></svg>
+        EDIT DATA
+      </button>
+    </div>
   </div>
 </div>
 
@@ -1136,7 +1144,11 @@ let manualLines = {};  // id -> { layer, row, kind }  (garis dari saluran_air)
 let manualPois = {};   // id -> { layer, row, kind }  (titik dari poktan_poi)
 let drawMode = false, drawPts = [], drawLine = null, drawDots = [];
 let editTarget = null; // row saluran_air yang sedang diedit ulang
+let polyTarget = null; // sektor yang batas poligonnya sedang diedit
+let polyOverrides = {}; // kode sektor -> true bila memakai batas hasil edit
 let selectedManual = null, selectedPoi = null;
+const POLY_EDIT_KIND = { style: { color: '#ff2e88', weight: 2.5, opacity: 0.95,
+  dashArray: '4 6', fillColor: '#ff2e88', fillOpacity: 0.06 } };
 
 function showKindLayer(jenis){
   const k = DRAW_KIND[jenis];
@@ -1241,9 +1253,14 @@ function clearTempDraw(){
 }
 
 function updateDrawMeta(){
-  const kind = currentKind();
   const c = document.getElementById('db-count');
   if(!c) return;
+  if(polyTarget){
+    c.textContent = drawPts.length + ' TITIK' + (drawPts.length >= 3
+      ? ' · ' + (ringArea(drawPts.map(q => [q[1], q[0]])) / 10000).toFixed(2) + ' Ha' : '');
+    return;
+  }
+  const kind = currentKind();
   if(kind.point){
     c.textContent = drawPts.length ? 'TITIK DIPILIH' : '0 TITIK';
   } else {
@@ -1270,20 +1287,46 @@ function makeDot(p, i, kind){
   m.on('click', e => {
     L.DomEvent.stopPropagation(e);
     if(m._moved) return;
-    if(!kind.point){ drawPts.splice(i, 1); updateTempLine(); }
+    if(!kind.point){
+      if(polyTarget && drawPts.length <= 3){ setDbStatus('minimal 3 titik batas', 'warn'); return; }
+      drawPts.splice(i, 1); updateTempLine();
+    }
   });
   return m;
 }
 
 function updateTempLine(){
-  const kind = currentKind();
+  const kind = polyTarget ? POLY_EDIT_KIND : currentKind();
   clearTempDraw();
-  if(kind.point && drawPts.length > 1) drawPts = drawPts.slice(-1); // titik POI: satu saja
-  if(!kind.point && drawPts.length){
-    drawLine = L.polyline(drawPts, Object.assign({}, kind.style, { dashArray: '4 6', weight: 2.5 })).addTo(map);
+  if(polyTarget){
+    if(drawPts.length >= 2) drawLine = L.polygon(drawPts, POLY_EDIT_KIND.style).addTo(map);
+  } else {
+    if(kind.point && drawPts.length > 1) drawPts = drawPts.slice(-1); // titik POI: satu saja
+    if(!kind.point && drawPts.length)
+      drawLine = L.polyline(drawPts, Object.assign({}, kind.style, { dashArray: '4 6', weight: 2.5 })).addTo(map);
   }
   drawPts.forEach((p, i) => drawDots.push(makeDot(p, i, kind)));
   updateDrawMeta();
+}
+
+// sisipkan titik baru di sisi poligon terdekat (bukan selalu di ujung)
+function insertNearestEdge(p){
+  if(drawPts.length < 3){ drawPts.push(p); return; }
+  let best = 0, bestD = Infinity;
+  const k = Math.cos(p[0] * Math.PI / 180); // koreksi skala bujur
+  for(let i = 0; i < drawPts.length; i++){
+    const a = drawPts[i], b = drawPts[(i + 1) % drawPts.length];
+    const ax = (a[1] - p[1]) * k, ay = a[0] - p[0];
+    const bx = (b[1] - p[1]) * k, by = b[0] - p[0];
+    const dx = bx - ax, dy = by - ay;
+    const l2 = dx * dx + dy * dy;
+    let t = l2 ? -(ax * dx + ay * dy) / l2 : 0;
+    t = Math.max(0, Math.min(1, t));
+    const ex = ax + t * dx, ey = ay + t * dy;
+    const d = ex * ex + ey * ey;
+    if(d < bestD){ bestD = d; best = i + 1; }
+  }
+  drawPts.splice(best, 0, p);
 }
 
 function clearManualSel(){
@@ -1312,8 +1355,114 @@ function stopDraw(){
   if(editTarget && manualLines[editTarget.id])
     manualLines[editTarget.id].layer.setStyle(manualLines[editTarget.id].kind.style);
   editTarget = null;
+  if(polyTarget){
+    layerById[polyTarget.id].setStyle({ opacity: 0.9, fillOpacity: 0.14 });
+    polyTarget = null;
+  }
   drawPts = []; clearTempDraw();
   closeDrawBar();
+}
+
+// ===== EDIT BATAS POLIGON (override tersimpan di Supabase, asli tetap ada) =====
+function applyPolyGeom(s, coords){
+  if(!s.orig) s.orig = s.latlngs;      // simpan batas GPS asli untuk RESET
+  s.latlngs = coords.map(q => [q[0], q[1]]);
+  s.areaHa = ringArea(s.latlngs.map(q => [q[1], q[0]])) / 10000;
+  s.anchor = polygonAnchor(s.latlngs);
+  s.vertexCount = s.latlngs.length;
+  layerById[s.id].setLatLngs(s.latlngs);
+}
+
+function cachePolyRow(kode, coords){
+  let rows = [];
+  try { rows = JSON.parse(localStorage.getItem('farmaxis_poly')) || []; } catch(e){}
+  rows = rows.filter(r => r.kode !== kode);
+  if(coords) rows.push({ kode, coords });
+  localStorage.setItem('farmaxis_poly', JSON.stringify(rows));
+}
+
+async function loadPolyOverrides(){
+  let rows = [];
+  try { rows = JSON.parse(localStorage.getItem('farmaxis_poly')) || []; } catch(e){}
+  if(sb){
+    try {
+      const { data, error } = await sb.from('poktan_poly').select('*');
+      if(error) throw error;
+      rows = data;
+      localStorage.setItem('farmaxis_poly', JSON.stringify(rows));
+    } catch(e){ /* offline / tabel belum dibuat — pakai cache lokal */ }
+  }
+  let applied = 0;
+  rows.forEach(r => {
+    const s = sectors.find(x => x.code === r.kode);
+    if(s && Array.isArray(r.coords) && r.coords.length >= 3){
+      polyOverrides[r.kode] = true;
+      applyPolyGeom(s, r.coords);
+      applied++;
+    }
+  });
+  if(applied) refreshSectorMeta();
+}
+
+function refreshSectorMeta(){
+  buildList();
+  document.getElementById('total-ha').textContent =
+    sectors.reduce((a, s) => a + s.areaHa, 0).toFixed(2) + ' Ha';
+}
+
+function startPolyEdit(s){
+  deselectAll(); closeDrawBar();
+  drawMode = true; polyTarget = s;
+  document.body.classList.add('drawing');
+  drawBtn.classList.add('on');
+  map.doubleClickZoom.disable();
+  const ring = s.latlngs.map(q => [q[0], q[1]]);
+  if(ring.length > 1 && ring[0][0] === ring[ring.length-1][0] &&
+     ring[0][1] === ring[ring.length-1][1]) ring.pop(); // buang titik penutup ganda
+  drawPts = ring;
+  layerById[s.id].setStyle({ opacity: 0.15, fillOpacity: 0.03 });
+  drawBar.innerHTML = `
+    <span style="color:var(--pink)">EDIT POLIGON</span>
+    <span style="color:var(--text)">${s.code} — ${escHtml(s.name)}</span>
+    <input id="db-pin" type="password" inputmode="numeric" maxlength="12" placeholder="PIN" style="width:56px">
+    <span id="db-count"></span>
+    ${polyOverrides[s.code] ? '<button id="db-reset">RESET GPS</button>' : ''}
+    <button id="db-save">SIMPAN</button>
+    <button id="db-close" class="warn">BATAL</button>
+    <span id="db-status">seret titik batas · klik peta sisip titik · klik titik hapus</span>`;
+  document.getElementById('db-pin').value = localStorage.getItem('farmaxis_pin') || '';
+  document.getElementById('db-close').addEventListener('click', stopDraw);
+  document.getElementById('db-save').addEventListener('click', async () => {
+    if(drawPts.length < 3){ setDbStatus('minimal 3 titik', 'warn'); return; }
+    if(!sb){ setDbStatus('perlu koneksi internet untuk menyimpan', 'warn'); return; }
+    const pin = document.getElementById('db-pin').value.trim();
+    setDbStatus('menyimpan...');
+    const coords = drawPts.map(q => [q[0], q[1]]);
+    const { error } = await sb.rpc('simpan_poligon', { p_pin: pin, p_kode: s.code, p_coords: coords });
+    if(error){ setDbStatus(sqlHint(error), 'warn'); return; }
+    localStorage.setItem('farmaxis_pin', pin);
+    applyPolyGeom(s, coords);
+    polyOverrides[s.code] = true;
+    cachePolyRow(s.code, coords);
+    refreshSectorMeta();
+    stopDraw();
+  });
+  const resetBtn = document.getElementById('db-reset');
+  if(resetBtn) resetBtn.addEventListener('click', async () => {
+    if(!sb){ setDbStatus('perlu koneksi internet', 'warn'); return; }
+    const pin = document.getElementById('db-pin').value.trim();
+    setDbStatus('mengembalikan batas GPS asli...');
+    const { error } = await sb.rpc('reset_poligon', { p_pin: pin, p_kode: s.code });
+    if(error){ setDbStatus(sqlHint(error), 'warn'); return; }
+    localStorage.setItem('farmaxis_pin', pin);
+    if(s.orig) applyPolyGeom(s, s.orig);
+    delete polyOverrides[s.code];
+    cachePolyRow(s.code, null);
+    refreshSectorMeta();
+    stopDraw();
+  });
+  drawBar.classList.add('show');
+  updateTempLine();
 }
 
 // startDraw() = gambar baru; startDraw(row) = edit ulang garis tersimpan;
@@ -1462,8 +1611,10 @@ function selectPoi(id){
 
 map.on('click', e => {
   if(!drawMode) return;
-  if(currentKind().point) drawPts = [[e.latlng.lat, e.latlng.lng]];
-  else drawPts.push([e.latlng.lat, e.latlng.lng]);
+  const p = [e.latlng.lat, e.latlng.lng];
+  if(polyTarget) insertNearestEdge(p);
+  else if(currentKind().point) drawPts = [p];
+  else drawPts.push(p);
   updateTempLine();
 });
 drawBtn.addEventListener('click', () => { drawMode ? stopDraw() : startDraw(); });
@@ -1504,6 +1655,9 @@ document.querySelectorAll('.num-btn').forEach(btn => btn.addEventListener('click
   inp.value = Math.min(9999, Math.max(0, v));
 }));
 document.getElementById('dp-edit').addEventListener('click', openEditModal);
+document.getElementById('dp-edit-poly').addEventListener('click', () => {
+  if(activeId !== null) startPolyEdit(sectors[activeId]);
+});
 document.getElementById('em-cancel').addEventListener('click', () => editModal.classList.remove('show'));
 editModal.addEventListener('click', e => { if(e.target === editModal) editModal.classList.remove('show'); });
 
@@ -1582,6 +1736,7 @@ buildList();
 document.getElementById('list-count').textContent = sectors.length;
 document.getElementById('boot-count').textContent = sectors.length;
 document.getElementById('total-ha').textContent = sectors.reduce((a,s)=>a+s.areaHa,0).toFixed(2) + ' Ha';
+loadPolyOverrides(); // terapkan batas poligon hasil edit (bila ada) setelah daftar siap
 
 // cursor coordinate readout — di-update maksimal sekali per frame
 const cursorEl = document.getElementById('cursor-coord');
