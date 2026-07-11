@@ -111,6 +111,8 @@
     box-shadow:0 0 24px rgba(0,0,0,0.5);}
   .hud-btn:hover{background:rgba(46,224,255,0.1);}
   .hud-btn svg{width:13px;height:13px;}
+  .hud-btn.icon-btn{padding:9px;}
+  .hud-btn.icon-btn svg{width:16px;height:16px;}
   .hud-btn.on{background:rgba(34,238,136,0.12);color:var(--green);
     border-color:rgba(34,238,136,0.5);}
   .gps-dot{animation:blink 1.6s ease-in-out infinite;}
@@ -237,6 +239,9 @@
     font-size:10px;color:var(--text-dim);letter-spacing:1.5px;pointer-events:none;}
   #bottombar .seg{display:flex;gap:22px;}
   #bottombar b{color:var(--cyan);}
+  /* legenda muncul hanya saat layer terkait diaktifkan lewat tombolnya */
+  .legend-grp{display:none;gap:22px;}
+  .legend-grp.show{display:flex;}
 
   /* ===== BOOT SCREEN ===== */
   #boot{position:fixed;inset:0;z-index:1000;background:#04080a;color:var(--green);
@@ -291,8 +296,11 @@
       transform:perspective(900px) rotateX(14deg) translateY(105%);}
     #detail-panel.open{transform:perspective(900px) rotateX(4deg) translateY(0);}
 
+    /* bar bawah mobile: buang info yang tak relevan di layar sentuh, sisanya rapat & bisa wrap */
     #bottombar{padding:7px 12px;font-size:8.5px;flex-direction:column;gap:4px;align-items:flex-start;}
-    #bottombar .seg{gap:14px;}
+    #bottombar .seg{gap:6px 14px;flex-wrap:wrap;}
+    #bottombar .cursor-info, #bottombar .src-info{display:none;}
+    .legend-grp{gap:14px;}
   }
 </style>
 </head>
@@ -326,9 +334,8 @@
   </div>
 </div>
 
-<button id="sector-toggle" class="hud-btn">
+<button id="sector-toggle" class="hud-btn icon-btn" title="Daftar sektor" aria-label="Daftar sektor">
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
-  SEKTOR
 </button>
 
 <div id="sector-list">
@@ -344,9 +351,8 @@
 </div>
 
 <div id="topright-btns">
-  <div id="overview-btn" class="hud-btn">
+  <div id="overview-btn" class="hud-btn icon-btn" title="Tampilan awal (overview)" aria-label="Overview">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-6 9 6v10a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg>
-    OVERVIEW
   </div>
 </div>
 
@@ -446,18 +452,22 @@
 
 <div id="bottombar">
   <div class="seg">
-    <span>KURSOR: <b id="cursor-coord">--.-----, --.-----</b></span>
+    <span class="cursor-info">KURSOR: <b id="cursor-coord">--.-----, --.-----</b></span>
     <span>ZOOM: <b id="zoom-level">--</b></span>
-    <span><b style="color:var(--cyan)">&#9473;</b> IRIGASI</span>
-    <span><b style="color:var(--amber)">&#9548;</b> DRAINASE</span>
-    <span><b style="color:#4d8dff">&#9473;</b> SUNGAI</span>
-    <span><b style="color:#e8f4ff">&#9473;</b> JL DESA</span>
-    <span><b style="color:#e8f4ff">&#9548;</b> JL TANI</span>
+    <span id="legend-water" class="legend-grp">
+      <span><b style="color:var(--cyan)">&#9473;</b> IRIGASI</span>
+      <span><b style="color:var(--amber)">&#9548;</b> DRAINASE</span>
+      <span><b style="color:#4d8dff">&#9473;</b> SUNGAI</span>
+    </span>
+    <span id="legend-road" class="legend-grp">
+      <span><b style="color:#e8f4ff">&#9473;</b> JL DESA</span>
+      <span><b style="color:#e8f4ff">&#9548;</b> JL TANI</span>
+    </span>
   </div>
   <div class="seg">
     <span>SEKTOR AKTIF: <b id="active-sector">NONE</b></span>
     <span>GPS: <b id="gps-status">OFF</b></span>
-    <span>SUMBER PETA: <b>ESRI SATELIT</b></span>
+    <span class="src-info">SUMBER PETA: <b>ESRI SATELIT</b></span>
     <span>SYNC: <b id="sync-mode" style="color:var(--amber)">LOKAL</b></span>
   </div>
 </div>
@@ -1009,15 +1019,17 @@ const WATER_STYLE = {
   drainase: { color: '#ffb020', weight: 2.5, opacity: 0.9, dashArray: '6 6' },
   sungai:   { color: '#4d8dff', weight: 3.5, opacity: 0.8 }
 };
-// interactive:false — garis tidak menghalangi klik ke poligon poktan
+// interactive:false — garis tidak menghalangi klik ke poligon poktan.
+// Default tersembunyi: tampilan awal hanya poligon; legenda ikut tombolnya.
 const waterGroup = L.layerGroup(SALURAN_DATA.map(r =>
-  L.polyline(r.c, Object.assign({ interactive: false }, WATER_STYLE[r.j])))).addTo(map);
+  L.polyline(r.c, Object.assign({ interactive: false }, WATER_STYLE[r.j]))));
 
 const waterBtn = document.getElementById('water-btn');
-waterBtn.classList.add('on');
 waterBtn.addEventListener('click', () => {
-  if(map.hasLayer(waterGroup)){ map.removeLayer(waterGroup); waterBtn.classList.remove('on'); }
-  else { waterGroup.addTo(map); waterBtn.classList.add('on'); }
+  const on = !map.hasLayer(waterGroup);
+  if(on) waterGroup.addTo(map); else map.removeLayer(waterGroup);
+  waterBtn.classList.toggle('on', on);
+  document.getElementById('legend-water').classList.toggle('show', on);
 });
 
 // ===== JARINGAN JALAN: jalan desa & jalan tani dekat poligon (OpenStreetMap) =====
@@ -1033,8 +1045,10 @@ const roadGroup = L.layerGroup(JALAN_DATA.map(r =>
 
 const roadBtn = document.getElementById('road-btn');
 roadBtn.addEventListener('click', () => {
-  if(map.hasLayer(roadGroup)){ map.removeLayer(roadGroup); roadBtn.classList.remove('on'); }
-  else { roadGroup.addTo(map); roadBtn.classList.add('on'); }
+  const on = !map.hasLayer(roadGroup);
+  if(on) roadGroup.addTo(map); else map.removeLayer(roadGroup);
+  roadBtn.classList.toggle('on', on);
+  document.getElementById('legend-road').classList.toggle('show', on);
 });
 
 // ===== EDIT MODAL =====
