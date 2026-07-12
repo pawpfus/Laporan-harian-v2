@@ -685,7 +685,9 @@ function loadOverrides(){
   try { return JSON.parse(localStorage.getItem(OVERRIDES_KEY)) || {}; }
   catch(e){ return {}; }
 }
-function saveOverrides(o){ localStorage.setItem(OVERRIDES_KEY, JSON.stringify(o)); }
+// setItem bisa melempar (mode privat / kuota penuh) — jangan memutus alur simpan
+function lsSet(k, v){ try { localStorage.setItem(k, v); } catch(e){} }
+function saveOverrides(o){ lsSet(OVERRIDES_KEY, JSON.stringify(o)); }
 const escHtml = t => String(t).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 let overrides = loadOverrides();
 function getOv(s){ return overrides[s.name] || {}; }
@@ -1112,6 +1114,7 @@ document.getElementById('poi-btn').addEventListener('click', () => {
   if(drawMode) return;
   // layer kosong membingungkan — beri jalan pintas langsung ke mode gambar titik
   if(on && !Object.keys(manualPois).length){
+    clearManualSel(); // bar akan ditimpa — lepas dulu sorotan garis/titik terpilih
     drawBar.innerHTML = `
       <span style="color:var(--cyan)">TITIK PENTING</span>
       <span>belum ada titik tersimpan</span>
@@ -1170,6 +1173,7 @@ function fmtLen(m){ return m < 1000 ? Math.round(m) + ' m' : (m/1000).toFixed(2)
 
 // --- render garis tersimpan ---
 function renderManualRow(row){
+  if(!row || !Array.isArray(row.coords) || row.coords.length < 2) return; // baris korup dari cache/DB
   const kind = DRAW_KIND[row.jenis] || DRAW_KIND.irigasi;
   const layer = L.polyline(row.coords, Object.assign({ baseWeight: kind.style.weight }, kind.style));
   layer.on('click', e => {
@@ -1181,9 +1185,11 @@ function renderManualRow(row){
   manualLines[row.id] = { layer, row, kind };
 }
 
+// token urutan: dua pemuatan yang tumpang-tindih (simpan beruntun) jangan
+// sampai merender layer ganda — hanya pemanggilan terakhir yang menggambar
+let loadManualSeq = 0;
 async function loadManual(){
-  Object.values(manualLines).forEach(w => w.kind.group.removeLayer(w.layer));
-  manualLines = {}; selectedManual = null;
+  const seq = ++loadManualSeq;
   let rows = [];
   try { rows = JSON.parse(localStorage.getItem('farmaxis_saluran')) || []; } catch(e){}
   if(sb){
@@ -1191,9 +1197,13 @@ async function loadManual(){
       const { data, error } = await sb.from('saluran_air').select('*');
       if(error) throw error;
       rows = data;
-      localStorage.setItem('farmaxis_saluran', JSON.stringify(rows));
+      lsSet('farmaxis_saluran', JSON.stringify(rows));
     } catch(e){ /* offline / tabel belum dibuat — pakai cache lokal */ }
   }
+  if(seq !== loadManualSeq) return;
+  Object.values(manualLines).forEach(w => w.kind.group.removeLayer(w.layer));
+  manualLines = {}; selectedManual = null;
+  if(!Array.isArray(rows)) rows = [];
   rows.forEach(renderManualRow);
 }
 
@@ -1205,6 +1215,7 @@ function poiIcon(kind){
 }
 
 function renderPoiRow(row){
+  if(!row || !isFinite(row.lat) || !isFinite(row.lng)) return; // baris korup dari cache/DB
   const kind = DRAW_KIND[row.jenis] || DRAW_KIND.pompa;
   const layer = L.marker([row.lat, row.lng], { icon: poiIcon(kind), keyboard: false });
   layer.bindTooltip(kind.label + (row.nama ? ' — ' + escHtml(row.nama) : ''),
@@ -1218,9 +1229,9 @@ function renderPoiRow(row){
   manualPois[row.id] = { layer, row, kind };
 }
 
+let loadPoiSeq = 0;
 async function loadPoi(){
-  Object.values(manualPois).forEach(w => w.kind.group.removeLayer(w.layer));
-  manualPois = {}; selectedPoi = null;
+  const seq = ++loadPoiSeq;
   let rows = [];
   try { rows = JSON.parse(localStorage.getItem('farmaxis_poi')) || []; } catch(e){}
   if(sb){
@@ -1228,9 +1239,13 @@ async function loadPoi(){
       const { data, error } = await sb.from('poktan_poi').select('*');
       if(error) throw error;
       rows = data;
-      localStorage.setItem('farmaxis_poi', JSON.stringify(rows));
+      lsSet('farmaxis_poi', JSON.stringify(rows));
     } catch(e){ /* offline / tabel belum dibuat — pakai cache lokal */ }
   }
+  if(seq !== loadPoiSeq) return;
+  Object.values(manualPois).forEach(w => w.kind.group.removeLayer(w.layer));
+  manualPois = {}; selectedPoi = null;
+  if(!Array.isArray(rows)) rows = [];
   rows.forEach(renderPoiRow);
 }
 
@@ -1245,6 +1260,17 @@ function sqlHint(error){
   return error.code === 'PGRST202' || /find the function/i.test(error.message || '')
     ? 'jalankan farm-axis-saluran.sql (versi baru) di Supabase dulu'
     : /PIN salah/i.test(error.message || '') ? 'PIN salah' : ('gagal: ' + (error.message || 'error'));
+}
+
+// klik ganda pada tombol SIMPAN/HAPUS (async) jangan mengirim RPC dua kali;
+// exception tak terduga ditampilkan sebagai status, bukan tombol mati diam-diam
+let dbBusy = false;
+async function guardBusy(fn, statusFn){
+  if(dbBusy) return;
+  dbBusy = true;
+  try { await fn(); }
+  catch(e){ (statusFn || setDbStatus)('gagal: ' + (e && e.message || e), 'warn'); }
+  finally { dbBusy = false; }
 }
 
 function currentKind(){
@@ -1334,12 +1360,15 @@ function insertNearestEdge(p){
   drawPts.splice(best, 0, p);
 }
 
+// kembalikan gaya garis manual sesuai jenisnya, ikut menipis bila zoom jauh
+function restoreLineStyle(w){
+  w.layer.setStyle(w.kind.style);
+  if(isFarZoom()) w.layer.setStyle({ weight: Math.max(1, (w.kind.style.weight || 3) * 0.6) });
+}
+
 function clearManualSel(){
-  if(selectedManual && manualLines[selectedManual]){
-    const w = manualLines[selectedManual];
-    w.layer.setStyle(w.kind.style);
-    if(isFarZoom()) w.layer.setStyle({ weight: Math.max(1, (w.kind.style.weight || 3) * 0.6) });
-  }
+  if(selectedManual && manualLines[selectedManual])
+    restoreLineStyle(manualLines[selectedManual]);
   selectedManual = null;
   if(selectedPoi && manualPois[selectedPoi]){
     manualPois[selectedPoi].layer.setOpacity(1);
@@ -1359,11 +1388,12 @@ function stopDraw(){
   drawBtn.classList.remove('on');
   map.doubleClickZoom.enable();
   if(editTarget && manualLines[editTarget.id])
-    manualLines[editTarget.id].layer.setStyle(manualLines[editTarget.id].kind.style);
+    restoreLineStyle(manualLines[editTarget.id]);
   editTarget = null;
   if(polyTarget){
-    layerById[polyTarget.id].setStyle({ opacity: 0.9, fillOpacity: 0.14 });
+    const pid = polyTarget.id;
     polyTarget = null;
+    restorePolyStyle(pid); // gaya dasar sesuai warna sektor & level zoom saat ini
   }
   drawPts = []; clearTempDraw();
   closeDrawBar();
@@ -1382,9 +1412,10 @@ function applyPolyGeom(s, coords){
 function cachePolyRow(kode, coords){
   let rows = [];
   try { rows = JSON.parse(localStorage.getItem('farmaxis_poly')) || []; } catch(e){}
-  rows = rows.filter(r => r.kode !== kode);
+  if(!Array.isArray(rows)) rows = [];
+  rows = rows.filter(r => r && r.kode !== kode);
   if(coords) rows.push({ kode, coords });
-  localStorage.setItem('farmaxis_poly', JSON.stringify(rows));
+  lsSet('farmaxis_poly', JSON.stringify(rows));
 }
 
 async function loadPolyOverrides(){
@@ -1395,11 +1426,13 @@ async function loadPolyOverrides(){
       const { data, error } = await sb.from('poktan_poly').select('*');
       if(error) throw error;
       rows = data;
-      localStorage.setItem('farmaxis_poly', JSON.stringify(rows));
+      lsSet('farmaxis_poly', JSON.stringify(rows));
     } catch(e){ /* offline / tabel belum dibuat — pakai cache lokal */ }
   }
+  if(!Array.isArray(rows)) rows = [];
   let applied = 0;
   rows.forEach(r => {
+    if(!r) return;
     const s = sectors.find(x => x.code === r.kode);
     if(s && Array.isArray(r.coords) && r.coords.length >= 3){
       polyOverrides[r.kode] = true;
@@ -1438,7 +1471,7 @@ function startPolyEdit(s){
     <span id="db-status">seret titik batas · klik peta sisip titik · klik titik hapus</span>`;
   document.getElementById('db-pin').value = localStorage.getItem('farmaxis_pin') || '';
   document.getElementById('db-close').addEventListener('click', stopDraw);
-  document.getElementById('db-save').addEventListener('click', async () => {
+  document.getElementById('db-save').addEventListener('click', () => guardBusy(async () => {
     if(drawPts.length < 3){ setDbStatus('minimal 3 titik', 'warn'); return; }
     if(!sb){ setDbStatus('perlu koneksi internet untuk menyimpan', 'warn'); return; }
     const pin = document.getElementById('db-pin').value.trim();
@@ -1446,27 +1479,27 @@ function startPolyEdit(s){
     const coords = drawPts.map(q => [q[0], q[1]]);
     const { error } = await sb.rpc('simpan_poligon', { p_pin: pin, p_kode: s.code, p_coords: coords });
     if(error){ setDbStatus(sqlHint(error), 'warn'); return; }
-    localStorage.setItem('farmaxis_pin', pin);
+    lsSet('farmaxis_pin', pin);
     applyPolyGeom(s, coords);
     polyOverrides[s.code] = true;
     cachePolyRow(s.code, coords);
     refreshSectorMeta();
     stopDraw();
-  });
+  }));
   const resetBtn = document.getElementById('db-reset');
-  if(resetBtn) resetBtn.addEventListener('click', async () => {
+  if(resetBtn) resetBtn.addEventListener('click', () => guardBusy(async () => {
     if(!sb){ setDbStatus('perlu koneksi internet', 'warn'); return; }
     const pin = document.getElementById('db-pin').value.trim();
     setDbStatus('mengembalikan batas GPS asli...');
     const { error } = await sb.rpc('reset_poligon', { p_pin: pin, p_kode: s.code });
     if(error){ setDbStatus(sqlHint(error), 'warn'); return; }
-    localStorage.setItem('farmaxis_pin', pin);
+    lsSet('farmaxis_pin', pin);
     if(s.orig) applyPolyGeom(s, s.orig);
     delete polyOverrides[s.code];
     cachePolyRow(s.code, null);
     refreshSectorMeta();
     stopDraw();
-  });
+  }));
   drawBar.classList.add('show');
   updateTempLine();
 }
@@ -1518,7 +1551,7 @@ function startDraw(editRow, presetJenis){
   });
   document.getElementById('db-undo').addEventListener('click', () => { drawPts.pop(); updateTempLine(); });
   document.getElementById('db-close').addEventListener('click', stopDraw);
-  document.getElementById('db-save').addEventListener('click', async () => {
+  document.getElementById('db-save').addEventListener('click', () => guardBusy(async () => {
     const kind = currentKind();
     const jenis = document.getElementById('db-jenis').value;
     if(kind.point && drawPts.length !== 1){ setDbStatus('klik peta untuk menempatkan titik', 'warn'); return; }
@@ -1539,7 +1572,7 @@ function startDraw(editRow, presetJenis){
         { p_pin: pin, p_jenis: jenis, p_nama: nama, p_coords: drawPts }));
     }
     if(error){ setDbStatus(sqlHint(error), 'warn'); return; }
-    localStorage.setItem('farmaxis_pin', pin);
+    lsSet('farmaxis_pin', pin);
     if(editTarget){
       stopDraw();
       await loadManual();
@@ -1551,7 +1584,7 @@ function startDraw(editRow, presetJenis){
     setDbStatus('tersimpan ✓ — lanjut gambar berikutnya', 'ok');
     if(kind.point) await loadPoi(); else await loadManual();
     showKindLayer(jenis);
-  });
+  }));
   drawBar.classList.add('show');
   updateTempLine();
 }
@@ -1574,16 +1607,16 @@ function selectManual(id){
   document.getElementById('db-pin').value = localStorage.getItem('farmaxis_pin') || '';
   document.getElementById('db-close').addEventListener('click', closeDrawBar);
   document.getElementById('db-edit-line').addEventListener('click', () => startDraw(w.row));
-  document.getElementById('db-del').addEventListener('click', async () => {
+  document.getElementById('db-del').addEventListener('click', () => guardBusy(async () => {
     if(!sb){ setDbStatus('perlu koneksi internet', 'warn'); return; }
     const pin = document.getElementById('db-pin').value.trim();
     setDbStatus('menghapus...');
     const { error } = await sb.rpc('hapus_saluran', { p_pin: pin, p_id: id });
     if(error){ setDbStatus(sqlHint(error), 'warn'); return; }
-    localStorage.setItem('farmaxis_pin', pin);
+    lsSet('farmaxis_pin', pin);
     closeDrawBar();
     loadManual();
-  });
+  }));
   drawBar.classList.add('show');
 }
 
@@ -1602,16 +1635,16 @@ function selectPoi(id){
     <span id="db-status"></span>`;
   document.getElementById('db-pin').value = localStorage.getItem('farmaxis_pin') || '';
   document.getElementById('db-close').addEventListener('click', closeDrawBar);
-  document.getElementById('db-del').addEventListener('click', async () => {
+  document.getElementById('db-del').addEventListener('click', () => guardBusy(async () => {
     if(!sb){ setDbStatus('perlu koneksi internet', 'warn'); return; }
     const pin = document.getElementById('db-pin').value.trim();
     setDbStatus('menghapus...');
     const { error } = await sb.rpc('hapus_poi', { p_pin: pin, p_id: id });
     if(error){ setDbStatus(sqlHint(error), 'warn'); return; }
-    localStorage.setItem('farmaxis_pin', pin);
+    lsSet('farmaxis_pin', pin);
     closeDrawBar();
     loadPoi();
-  });
+  }));
   drawBar.classList.add('show');
 }
 
@@ -1655,6 +1688,8 @@ function applyZoomStyling(){
     layerById[s.id].setStyle(s.id === activeId ? activePinkStyle() : base);
   });
   [waterGroup, roadGroup].forEach(g => g.eachLayer(l => {
+    if(selectedManual && manualLines[selectedManual] &&
+       manualLines[selectedManual].layer === l) return; // garis terpilih: pertahankan sorotan
     const bw = l.options.baseWeight || l.options.weight;
     l.setStyle({ weight: far ? Math.max(1, bw * 0.6) : bw });
   }));
@@ -1709,7 +1744,7 @@ function setEmStatus(msg, tone){
   el.style.color = tone === 'ok' ? 'var(--green)' : tone === 'warn' ? 'var(--amber)' : 'var(--text-dim)';
 }
 
-document.getElementById('em-save').addEventListener('click', async () => {
+async function saveEditModal(){
   const id = parseInt(emSector.value, 10);
   const s = sectors[id];
   const ov = {};
@@ -1751,11 +1786,12 @@ document.getElementById('em-save').addEventListener('click', async () => {
         : '⚠ Gagal sinkron cloud — tersimpan lokal saja. (' + (error.message || 'error') + ')', 'warn');
       return; // biarkan modal terbuka agar pesan terbaca
     }
-    localStorage.setItem('farmaxis_pin', pin); // PIN benar — ingat di perangkat ini
+    lsSet('farmaxis_pin', pin); // PIN benar — ingat di perangkat ini
     syncMode = 'CLOUD'; updateSyncBadge();
   }
   editModal.classList.remove('show');
-});
+}
+document.getElementById('em-save').addEventListener('click', () => guardBusy(saveEditModal, setEmStatus));
 
 loadCloudOverrides();
 
