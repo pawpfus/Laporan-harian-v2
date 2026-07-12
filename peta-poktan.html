@@ -972,7 +972,7 @@ function selectSector(id){
   const s = sectors[id];
   const layer = layerById[id];
   if(activeId !== null && activeId !== id) restorePolyStyle(activeId);
-  layer.setStyle({ color: PINK, fillColor: PINK, weight: 3.5, opacity: 1, fillOpacity: 0.22 });
+  layer.setStyle(activePinkStyle());
   if(layer._path) layer._path.classList.add('active-poly');
   activeId = id;
   activeCenter = s.anchor;
@@ -1641,13 +1641,18 @@ function polyBaseStyle(){
     : { weight: 2, opacity: 0.9, fillOpacity: 0.14 };
 }
 
+// poligon terpilih (pink) ikut menipis di zoom jauh
+function activePinkStyle(){
+  return { color: PINK, fillColor: PINK, weight: isFarZoom() ? 1.5 : 3.5,
+    opacity: 1, fillOpacity: 0.22 };
+}
+
 function applyZoomStyling(){
   const far = isFarZoom();
   const base = polyBaseStyle();
   sectors.forEach(s => {
-    if(s.id === activeId) return;                    // gaya pink terpilih dipertahankan
     if(polyTarget && s.id === polyTarget.id) return; // sedang diedit (diredupkan)
-    layerById[s.id].setStyle(base);
+    layerById[s.id].setStyle(s.id === activeId ? activePinkStyle() : base);
   });
   [waterGroup, roadGroup].forEach(g => g.eachLayer(l => {
     const bw = l.options.baseWeight || l.options.weight;
