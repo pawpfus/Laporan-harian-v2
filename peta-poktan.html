@@ -218,14 +218,19 @@
   .sector-poly.active-poly{filter:drop-shadow(0 0 7px rgba(255,46,136,0.75));}
 
   /* ===== DETAIL PANEL (right, isometrik) ===== */
-  #detail-panel{position:absolute;top:128px;right:16px;bottom:64px;width:320px;z-index:490;
+  /* tab info melayang "orbital" di atas poligon terpilih (desktop):
+     left/top diatur per-frame dari JS, titik tengah-bawah panel menempel
+     ke sisi utara poligon; translate(-50%,-100%) menjadikan (left,top)
+     tepat = titik tambat tersebut */
+  #detail-panel{position:absolute;left:50%;top:40%;width:300px;max-height:46vh;z-index:490;
     background:var(--panel-bg);border:1px solid var(--cyan);will-change:transform,opacity;
     box-shadow:0 0 30px rgba(46,224,255,0.15), 0 0 40px rgba(0,0,0,0.6);
-    transform-origin:right center;
-    transform:perspective(1100px) rotateY(-30deg) translateX(380px);opacity:0;
+    transform-origin:center bottom;pointer-events:none;
+    transform:translate(-50%,-100%) perspective(900px) rotateX(10deg) scale(0.7);opacity:0;
     transition:transform 0.5s cubic-bezier(.2,.9,.25,1), opacity 0.35s;
     display:flex;flex-direction:column;}
-  #detail-panel.open{transform:perspective(1100px) rotateY(-12deg) translateX(0);opacity:1;}
+  #detail-panel.open{transform:translate(-50%,-100%) perspective(900px) rotateX(10deg) scale(1);
+    opacity:1;pointer-events:auto;}
 
   /* isi panel muncul bertahap setelah garis callout */
   #detail-panel .dp-head, #detail-panel .dp-field, #detail-panel .dp-foot{
@@ -674,7 +679,9 @@ sectors.forEach(s => {
 function panelPadding(){
   const w = window.innerWidth, h = window.innerHeight;
   if(w <= 820) return { paddingTopLeft: L.point(20,70), paddingBottomRight: L.point(20, h*0.58 + 70) };
-  return { paddingTopLeft: L.point(300,120), paddingBottomRight: L.point(360,90) };
+  // desktop: poligon ditaruh di pita bawah layar — separuh atas jadi ruang
+  // panel info orbital yang melayang di atasnya
+  return { paddingTopLeft: L.point(300, Math.round(h * 0.48)), paddingBottomRight: L.point(70, 80) };
 }
 
 // --- data tambahan per sektor ---
@@ -872,18 +879,19 @@ function populateDetail(id){
 const calloutSvg = document.getElementById('callout-svg');
 let panelTimer = null;
 let activeCenter = null; // pusat poligon aktif (cache; getBounds tiap frame mahal)
+let activeNorth = null;  // titik tambat panel: sisi utara poligon aktif
 let coNodes = null;
 
 const detailPanel = document.getElementById('detail-panel');
 
 function calloutTarget(){
-  // Tujuan akhir dihitung dari kotak LAYOUT panel (offset*, tak terpengaruh
-  // transform) — diketahui sejak awal, jadi garis langsung digambar sekali ke
-  // titik ~45px di dalam area panel tanpa berhenti/menyesuaikan ulang.
-  // Svg (z 460) di bawah panel (z 490): ujung garis tertutup panel saat muncul.
+  // Desktop: panel melayang dengan translate(-50%,-100%), sehingga
+  // (offsetLeft, offsetTop) = titik tengah-bawah panel secara visual —
+  // ujung garis callout tepat menyentuh dasar panel orbital.
+  // Mobile: bottom-sheet — garis menuju ~44px di dalam panel seperti semula.
   const px = detailPanel.offsetLeft, py = detailPanel.offsetTop, pw = detailPanel.offsetWidth;
   if(window.innerWidth <= 820) return { x: px + pw / 2, y: py + 44 };
-  return { x: px + 46, y: py + 52 };
+  return { x: px, y: py };
 }
 
 // Titik target di atas adalah posisi LAYAR. Saat mode oblique, #callout-svg ikut
@@ -903,6 +911,38 @@ function screenToSvg(sx, sy){
   const det = A * E - B * D;
   if(Math.abs(det) < 1e-9) return { x: sx, y: sy };
   return { x: (C * E - B * F) / det + ox, y: (A * F - C * D) / det + oy };
+}
+
+// proyeksi maju (kebalikan screenToSvg): titik lokal peta/svg → posisi LAYAR.
+// Dipakai panel info melayang yang berada di luar ruang ter-transform oblique.
+function svgToScreen(x, y){
+  const cs = getComputedStyle(calloutSvg);
+  if(!cs.transform || cs.transform === 'none') return { x, y };
+  const m = new DOMMatrix(cs.transform);
+  if(m.isIdentity) return { x, y };
+  const [ox, oy] = cs.transformOrigin.split(' ').map(parseFloat);
+  const p = m.transformPoint(new DOMPoint(x - ox, y - oy, 0, 1));
+  if(!p.w) return { x, y };
+  return { x: p.x / p.w + ox, y: p.y / p.w + oy };
+}
+
+// panel info "orbital": tengah-bawah panel menempel ~16px di atas sisi utara
+// poligon terpilih, di-clamp agar tidak keluar layar / menabrak topbar.
+// Mobile (≤820px) tetap bottom-sheet dari CSS — inline left/top dibersihkan.
+function positionPanel(){
+  if(window.innerWidth <= 820){
+    detailPanel.style.left = ''; detailPanel.style.top = '';
+    return;
+  }
+  if(activeId === null || !activeNorth) return;
+  let cp;
+  try { cp = map.latLngToContainerPoint(activeNorth); } catch(e){ return; }
+  const sp = svgToScreen(cp.x, cp.y);
+  const pw = detailPanel.offsetWidth || 300, ph = detailPanel.offsetHeight || 240;
+  const x = Math.max(pw / 2 + 10, Math.min(window.innerWidth - pw / 2 - 10, sp.x));
+  const y = Math.max(ph + 66, Math.min(window.innerHeight - 24, sp.y - 16));
+  detailPanel.style.left = x + 'px';
+  detailPanel.style.top = y + 'px';
 }
 
 function ensureCalloutNodes(){
@@ -952,7 +992,7 @@ function drawCallout(animate){
 let coRaf = 0;
 function scheduleCallout(){
   if(coRaf || activeId === null) return;
-  coRaf = requestAnimationFrame(() => { coRaf = 0; drawCallout(false); });
+  coRaf = requestAnimationFrame(() => { coRaf = 0; positionPanel(); drawCallout(false); });
 }
 map.on('move zoom', scheduleCallout);
 window.addEventListener('resize', scheduleCallout);
@@ -978,6 +1018,7 @@ function selectSector(id){
   if(layer._path) layer._path.classList.add('active-poly');
   activeId = id;
   activeCenter = s.anchor;
+  activeNorth = L.latLng(layer.getBounds().getNorth(), s.anchor.lng);
   layer.bringToFront();
 
   document.querySelectorAll('.sector-item').forEach(el => el.classList.toggle('active', el.dataset.id == id));
@@ -990,11 +1031,13 @@ function selectSector(id){
   document.body.classList.add('oblique');
   const panel = document.getElementById('detail-panel');
   panel.classList.remove('open'); // supaya animasi bertahap terulang saat ganti sektor
+  positionPanel(); // tambatkan panel di atas poligon SEBELUM garis digambar
   drawCallout(true);
   clearTimeout(panelTimer);
   panelTimer = setTimeout(() => {
     populateDetail(id);
     panel.classList.add('open');
+    positionPanel(); // tinggi panel berubah setelah diisi — clamp ulang
     const pad = panelPadding();
     try {
       map.flyToBounds(layer.getBounds(), { paddingTopLeft: pad.paddingTopLeft, paddingBottomRight: pad.paddingBottomRight, maxZoom: 17.5, duration: 1.1 });
@@ -1004,7 +1047,7 @@ function selectSector(id){
 
 function deselectAll(){
   if(activeId !== null) restorePolyStyle(activeId);
-  activeId = null; activeCenter = null;
+  activeId = null; activeCenter = null; activeNorth = null;
   clearTimeout(panelTimer);
   if(coRaf){ cancelAnimationFrame(coRaf); coRaf = 0; }
   clearTyping();
