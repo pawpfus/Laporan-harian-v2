@@ -7,7 +7,7 @@
    - Tile peta (Esri/CARTO): cache-first, maks 400 entri (offline di lapangan)
    - Supabase / /api/ / POST: TIDAK di-cache (selalu jaringan)
 */
-const VERSION = 'v2.0.0';
+const VERSION = 'v2.0.1';
 const SHELL_CACHE = `shell-${VERSION}`;
 const RUNTIME_CACHE = `runtime-${VERSION}`;
 const TILE_CACHE = `tiles-${VERSION}`;
@@ -26,6 +26,7 @@ const SHELL_ASSETS = [
   './manifest-peta.webmanifest',
   './vendor/leaflet/leaflet.css',
   './vendor/leaflet/leaflet.js',
+  './vendor/leaflet-rotate/leaflet-rotate.js',
   './vendor/supabase.js',
   './vendor/fonts.css',
   './vendor/fonts/orbitron-500-latin.woff2',
