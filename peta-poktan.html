@@ -616,10 +616,12 @@ const sectors = POKTAN_DATA.map((d, i) => {
 
 // maxZoom 21: dua level di atas tile asli (19) — tile diperbesar agar bisa
 // zoom sampai skala ~10-30 m untuk menempatkan titik/batas dengan presisi
-// rotate/touchRotate/shiftKeyRotate dari leaflet-rotate: dua jari (HP) atau
-// Shift+geser (desktop) memutar peta; opsi diabaikan bila plugin gagal dimuat
+// rotate/shiftKeyRotate dari leaflet-rotate; touchRotate:false — rotasi dua
+// jari BARU aktif saat mode putar dinyalakan lewat ikon kompas, supaya gestur
+// dua jari sehari-hari tetap pinch zoom biasa. Opsi diabaikan bila plugin
+// gagal dimuat.
 const map = L.map('map', { zoomControl:false, attributionControl:true, minZoom:12, maxZoom:21,
-  rotate:true, touchRotate:true, shiftKeyRotate:true, rotateControl:false, bearing:0 });
+  rotate:true, touchRotate:false, shiftKeyRotate:true, rotateControl:false, bearing:0 });
 // langsung ke cakupan seluruh poligon SEBELUM layer tile dipasang — setView
 // sementara memicu puluhan request tile yang langsung dibatalkan oleh fitBounds
 const allBounds = L.latLngBounds(sectors.flatMap(s => s.latlngs));
@@ -632,7 +634,7 @@ const HudCtrl = L.Control.extend({
   onAdd(){
     const div = L.DomUtil.create('div', 'leaflet-bar hud-ctrl');
     div.innerHTML = `
-      <a id="compass-btn" role="button" title="Arah utara — klik untuk reset (dua jari / Shift+geser memutar peta)" aria-label="Reset arah utara">
+      <a id="compass-btn" role="button" title="Mode putar peta — ketuk: aktif/selesai (kembali utara) &middot; seret: memutar langsung" aria-label="Mode putar peta">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="9"/><path d="M12 4.5 15 12l-3-1.4L9 12z" fill="currentColor" stroke="none"/><path d="M12 19.5 9 12l3 1.4 3-1.4z" fill="currentColor" stroke="none" opacity="0.35"/></svg>
       </a>
       <a id="poi-btn" role="button" title="Titik penting (pompa, pintu air, sekretariat)" aria-label="Titik penting">
@@ -660,12 +662,17 @@ map.addControl(new HudCtrl());
 const compassBtn = document.getElementById('compass-btn');
 if(typeof map.setBearing === 'function'){
   const needle = compassBtn.querySelector('svg');
+  let rotMode = false; // mode putar: rotasi dua jari hanya aktif saat ini nyala
+  function syncCompassBtn(){
+    compassBtn.classList.toggle('on', rotMode || Math.abs(map.getBearing()) > 0.5);
+  }
   map.on('rotate', () => {
     needle.style.transform = 'rotate(' + map.getBearing() + 'deg)';
-    compassBtn.classList.toggle('on', Math.abs(map.getBearing()) > 0.5);
+    syncCompassBtn();
   });
-  // SERET kompas = memutar peta (satu jari — cara paling mudah di HP);
-  // KETUK = kembali ke utara; ketuk saat sudah utara = tampilkan petunjuk.
+  // KETUK kompas = nyalakan/matikan MODE PUTAR (dua jari memutar peta);
+  // saat mati, dua jari kembali jadi pinch zoom biasa & peta kembali utara.
+  // SERET kompas = memutar peta langsung (satu jari), kapan pun.
   // Sudut dihitung mengelilingi PUSAT layar peta supaya kontrolnya stabil.
   const mapEl = document.getElementById('map');
   function centerAngle(e){
@@ -673,14 +680,14 @@ if(typeof map.setBearing === 'function'){
     const cx = rect.left + rect.width / 2, cy = rect.top + rect.height / 2;
     return Math.atan2(e.clientX - cx, -(e.clientY - cy)) * 180 / Math.PI;
   }
-  function showCompassHint(){
+  function showCompassHint(text){
     let h = document.getElementById('compass-hint');
     if(!h){
       h = document.createElement('div');
       h.id = 'compass-hint';
       document.body.appendChild(h);
     }
-    h.textContent = 'PUTAR PETA: seret ikon kompas ini — atau dua jari (HP) / Shift+geser (desktop)';
+    h.textContent = text;
     h.classList.add('show');
     clearTimeout(showCompassHint._t);
     showCompassHint._t = setTimeout(() => h.classList.remove('show'), 4000);
@@ -702,10 +709,17 @@ if(typeof map.setBearing === 'function'){
     if(!cDrag) return;
     const tapped = !cDrag.moved;
     cDrag = null;
-    if(tapped){
-      if(Math.abs(map.getBearing()) > 0.5) map.setBearing(0);
-      else showCompassHint();
+    if(!tapped) return;
+    rotMode = !rotMode;
+    if(rotMode){
+      if(map.touchRotate) map.touchRotate.enable();
+      showCompassHint('MODE PUTAR AKTIF: dua jari / seret kompas memutar peta — ketuk lagi untuk selesai & kembali utara');
+    } else {
+      if(map.touchRotate) map.touchRotate.disable();
+      map.setBearing(0); // keluar mode: dua jari kembali pinch zoom, peta utara
+      showCompassHint('MODE PUTAR MATI — dua jari kembali jadi zoom');
     }
+    syncCompassBtn();
   });
   compassBtn.addEventListener('pointercancel', () => { cDrag = null; });
 } else {
