@@ -312,6 +312,14 @@
   .hud-ctrl a:hover{background:rgba(46,224,255,0.1);color:var(--cyan);}
   .hud-ctrl a.on{color:var(--pink);background:rgba(255,46,136,0.12);}
   .hud-ctrl a svg{width:16px;height:16px;}
+  /* kompas: seret = putar peta — touch-action none agar pointermove tetap
+     terkirim saat jari bergerak (tanpa ini browser mengambil alih gestur) */
+  #compass-btn{touch-action:none;}
+  #compass-hint{position:absolute;right:56px;bottom:210px;z-index:520;max-width:210px;
+    background:var(--panel-bg);border:1px solid var(--line);color:var(--text-dim);
+    font-size:9.5px;letter-spacing:1px;line-height:1.6;padding:8px 10px;text-align:right;
+    opacity:0;pointer-events:none;transition:opacity 0.3s;}
+  #compass-hint.show{opacity:1;}
 
   /* leaflet control restyle */
   .leaflet-control-zoom{border:1px solid var(--line) !important;}
@@ -656,7 +664,50 @@ if(typeof map.setBearing === 'function'){
     needle.style.transform = 'rotate(' + map.getBearing() + 'deg)';
     compassBtn.classList.toggle('on', Math.abs(map.getBearing()) > 0.5);
   });
-  compassBtn.addEventListener('click', () => map.setBearing(0));
+  // SERET kompas = memutar peta (satu jari — cara paling mudah di HP);
+  // KETUK = kembali ke utara; ketuk saat sudah utara = tampilkan petunjuk.
+  // Sudut dihitung mengelilingi PUSAT layar peta supaya kontrolnya stabil.
+  const mapEl = document.getElementById('map');
+  function centerAngle(e){
+    const rect = mapEl.getBoundingClientRect();
+    const cx = rect.left + rect.width / 2, cy = rect.top + rect.height / 2;
+    return Math.atan2(e.clientX - cx, -(e.clientY - cy)) * 180 / Math.PI;
+  }
+  function showCompassHint(){
+    let h = document.getElementById('compass-hint');
+    if(!h){
+      h = document.createElement('div');
+      h.id = 'compass-hint';
+      document.body.appendChild(h);
+    }
+    h.textContent = 'PUTAR PETA: seret ikon kompas ini — atau dua jari (HP) / Shift+geser (desktop)';
+    h.classList.add('show');
+    clearTimeout(showCompassHint._t);
+    showCompassHint._t = setTimeout(() => h.classList.remove('show'), 4000);
+  }
+  let cDrag = null;
+  compassBtn.addEventListener('pointerdown', e => {
+    cDrag = { a0: centerAngle(e), b0: map.getBearing(), moved: false };
+    try { compassBtn.setPointerCapture(e.pointerId); } catch(err){}
+    e.preventDefault();
+  });
+  compassBtn.addEventListener('pointermove', e => {
+    if(!cDrag) return;
+    let da = centerAngle(e) - cDrag.a0;
+    if(da > 180) da -= 360; else if(da < -180) da += 360;
+    if(Math.abs(da) > 4) cDrag.moved = true;
+    if(cDrag.moved) map.setBearing(cDrag.b0 + da);
+  });
+  compassBtn.addEventListener('pointerup', () => {
+    if(!cDrag) return;
+    const tapped = !cDrag.moved;
+    cDrag = null;
+    if(tapped){
+      if(Math.abs(map.getBearing()) > 0.5) map.setBearing(0);
+      else showCompassHint();
+    }
+  });
+  compassBtn.addEventListener('pointercancel', () => { cDrag = null; });
 } else {
   compassBtn.style.display = 'none';
 }
