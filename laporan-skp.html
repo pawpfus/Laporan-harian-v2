@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>SKP FORGE // Generator Laporan Bulanan</title>
+<meta name="theme-color" content="#04080a" />
+<link rel="icon" type="image/png" href="icons/icon-192.png" />
+<link rel="stylesheet" href="vendor/fonts.css">
+<script src="vendor/jszip.min.js"></script><!-- JSZip 3.10.1 (pinned, self-hosted) -->
+<style>
+  :root{
+    color-scheme:dark;
+    --pink:#ff2e88; --green:#22ee88; --cyan:#2ee0ff; --amber:#ffb020; --red:#ff3b5c;
+    --bg:#04080a; --panel-bg:rgba(5,14,16,0.92);
+    --line:rgba(46,224,255,0.28); --text:#c9ffe6; --text-dim:#5f9c8a;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;min-height:100%;background:var(--bg);
+    font-family:'Share Tech Mono',monospace;color:var(--text);}
+  body{background-image:
+    linear-gradient(rgba(46,224,255,0.045) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(46,224,255,0.045) 1px, transparent 1px);
+    background-size:44px 44px;padding:0 16px 60px;}
+  .hud-font{font-family:'Orbitron',sans-serif;}
+
+  header{max-width:860px;margin:34px auto 22px;display:flex;align-items:center;gap:14px;}
+  header .dot{width:10px;height:10px;border-radius:50%;background:var(--green);
+    box-shadow:0 0 8px var(--green),0 0 16px var(--green);animation:blink 1.6s ease-in-out infinite;}
+  @keyframes blink{0%,100%{opacity:1;}50%{opacity:0.25;}}
+  header h1{font-family:'Orbitron',sans-serif;font-size:19px;letter-spacing:3px;margin:0;color:var(--green);
+    text-shadow:0 0 10px rgba(34,238,136,0.6);}
+  header small{display:block;font-size:10px;letter-spacing:2px;color:var(--text-dim);margin-top:3px;}
+
+  .panel{position:relative;max-width:860px;margin:0 auto 18px;background:var(--panel-bg);
+    border:1px solid var(--line);box-shadow:0 0 24px rgba(0,0,0,0.5);padding:18px;}
+  .corner{position:absolute;width:18px;height:18px;border-color:var(--cyan);opacity:0.85;pointer-events:none;}
+  .corner.tl{top:-1px;left:-1px;border-top:2px solid;border-left:2px solid;}
+  .corner.tr{top:-1px;right:-1px;border-top:2px solid;border-right:2px solid;}
+  .corner.bl{bottom:-1px;left:-1px;border-bottom:2px solid;border-left:2px solid;}
+  .corner.br{bottom:-1px;right:-1px;border-bottom:2px solid;border-right:2px solid;}
+  .panel h2{font-family:'Orbitron',sans-serif;font-size:11px;letter-spacing:2.5px;color:var(--cyan);
+    margin:0 0 14px;display:flex;align-items:center;gap:8px;}
+  .panel h2 .step{display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;
+    border:1px solid var(--cyan);font-size:10px;flex:none;}
+
+  #dropzone{border:1.5px dashed rgba(46,224,255,0.45);padding:34px 16px;text-align:center;cursor:pointer;
+    transition:background 0.15s, border-color 0.15s;font-size:12.5px;color:var(--text-dim);letter-spacing:1px;line-height:1.9;}
+  #dropzone:hover,#dropzone.over{background:rgba(46,224,255,0.06);border-color:var(--cyan);color:var(--text);}
+  #dropzone b{color:var(--cyan);font-size:14px;letter-spacing:2px;display:block;margin-bottom:4px;}
+  #dropzone .sub{font-size:10.5px;}
+
+  table{width:100%;border-collapse:collapse;font-size:11.5px;margin-top:4px;}
+  th,td{border:1px solid rgba(46,224,255,0.18);padding:7px 9px;text-align:left;vertical-align:top;}
+  th{color:var(--cyan);font-size:9.5px;letter-spacing:1.5px;background:rgba(46,224,255,0.05);}
+  td .src{color:var(--amber);}
+  td .ok{color:var(--green);} td .warn{color:var(--amber);} td .err{color:var(--red);}
+  .del-btn{background:transparent;border:1px solid rgba(255,59,92,0.4);color:var(--red);cursor:pointer;
+    font-family:'Share Tech Mono',monospace;font-size:10px;padding:2px 7px;}
+  .del-btn:hover{background:rgba(255,59,92,0.12);}
+
+  .controls{display:flex;flex-wrap:wrap;gap:14px;align-items:flex-end;}
+  .controls label{display:flex;flex-direction:column;gap:6px;font-size:9.5px;letter-spacing:2px;color:var(--text-dim);}
+  select,input[type=number]{background:rgba(10,24,28,0.9);border:1px solid var(--line);color:var(--text);
+    font-family:'Share Tech Mono',monospace;font-size:14px;padding:9px 10px;outline:none;min-width:150px;}
+  select:focus,input:focus{border-color:var(--cyan);}
+  select option{background:#0a181c;}
+  #btn-generate{font-family:'Orbitron',sans-serif;font-size:12px;letter-spacing:2px;font-weight:bold;
+    padding:12px 26px;cursor:pointer;border:1px solid var(--green);background:var(--green);color:#04121a;}
+  #btn-generate:hover{background:#3dff9f;border-color:#3dff9f;}
+  #btn-generate:disabled{opacity:0.35;cursor:not-allowed;}
+  #status{margin-top:12px;font-size:11.5px;letter-spacing:0.5px;color:var(--text-dim);min-height:16px;}
+
+  .howto{font-size:11.5px;line-height:2;color:var(--text-dim);letter-spacing:0.4px;}
+  .howto b{color:var(--text);}
+  .howto .n{color:var(--cyan);}
+  .note{margin-top:10px;padding:10px 12px;border-left:2px solid var(--amber);background:rgba(255,176,32,0.06);
+    font-size:10.5px;line-height:1.9;color:var(--text-dim);}
+  .note b{color:var(--amber);}
+  footer{max-width:860px;margin:26px auto 0;font-size:9.5px;letter-spacing:1.5px;color:var(--text-dim);
+    display:flex;justify-content:space-between;flex-wrap:wrap;gap:6px;}
+  footer a{color:var(--cyan);text-decoration:none;}
+  @media (max-width:600px){ header h1{font-size:15px;} .controls label{flex:1;} select,input[type=number]{min-width:0;width:100%;} }
+</style>
+</head>
+<body>
+
+<header>
+  <span class="dot"></span>
+  <div>
+    <h1>SKP FORGE</h1>
+    <small>GENERATOR LAPORAN BULANAN SKP &middot; PENYULUH PERTANIAN</small>
+  </div>
+</header>
+
+<div class="panel">
+  <div class="corner tl"></div><div class="corner tr"></div><div class="corner bl"></div><div class="corner br"></div>
+  <h2><span class="step">1</span> MASUKKAN LAPORAN BULAN LALU (.docx)</h2>
+  <div id="dropzone">
+    <b>SERET FILE KE SINI / KETUK UNTUK MEMILIH</b>
+    <span class="sub">semua laporan .docx bulan sebelumnya (bisa sekaligus 8–11 file) &middot;
+    diproses 100% di perangkat ini — tidak ada file yang diunggah ke server</span>
+  </div>
+  <input type="file" id="file-input" accept=".docx" multiple style="display:none">
+  <div id="file-list"></div>
+</div>
+
+<div class="panel">
+  <div class="corner tl"></div><div class="corner tr"></div><div class="corner bl"></div><div class="corner br"></div>
+  <h2><span class="step">2</span> PILIH BULAN LAPORAN BARU</h2>
+  <div class="controls">
+    <label>BULAN
+      <select id="sel-bulan"></select>
+    </label>
+    <label>TAHUN
+      <input type="number" id="sel-tahun" min="2024" max="2099">
+    </label>
+    <button id="btn-generate" disabled>&#9889; GENERATE &rarr; ZIP</button>
+  </div>
+  <div id="status"></div>
+</div>
+
+<div class="panel">
+  <div class="corner tl"></div><div class="corner tr"></div><div class="corner bl"></div><div class="corner br"></div>
+  <h2><span class="step">?</span> CARA KERJA</h2>
+  <div class="howto">
+    <span class="n">01</span> &mdash; Masukkan file laporan bulan sebelumnya; bulan asalnya terdeteksi otomatis.<br>
+    <span class="n">02</span> &mdash; Pilih bulan &amp; tahun laporan baru, lalu tekan GENERATE.<br>
+    <span class="n">03</span> &mdash; Satu file ZIP terunduh berisi semua laporan baru: nama bulan, periode
+    (mis. <b>01-30 &rarr; 01-31</b>), tanggal tanda tangan, tahun, dan tabel realisasi harian
+    (tanggal + hari, baris ditambah/dikurangi sesuai jumlah hari) sudah disesuaikan &mdash; format, logo,
+    dan tanda tangan tetap persis seperti aslinya.
+  </div>
+  <div class="note"><b>PERHATIAN:</b> angka target/realisasi &amp; uraian kegiatan masih berisi
+    data bulan sumber &mdash; buka hasilnya di Word dan sesuaikan isi datanya sebelum dikumpulkan.
+    Laporan adalah dokumen resmi; pastikan isinya menggambarkan kegiatan yang benar-benar dilaksanakan.</div>
+</div>
+
+<footer>
+  <span>SKP FORGE v1.0 &middot; OFFLINE-CAPABLE &middot; CLIENT-SIDE ONLY</span>
+  <span><a href="peta-poktan.html">FARM AXIS &rarr;</a></span>
+</footer>
+
+<script>
+const BULAN = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
+const HARI_EN = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+const lastDay = (y, m) => new Date(y, m + 1, 0).getDate(); // m = 0-11
+const escHtml = t => String(t).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+// ===== deteksi bulan & tahun sumber dari isi dokumen (fallback: nama file) =====
+function detectSource(xml, filename){
+  let mIdx = -1, year = null;
+  const up = xml.toUpperCase();
+  for(let i = 0; i < 12; i++){
+    if(up.includes('BULAN ' + BULAN[i].toUpperCase())){ mIdx = i; break; }
+  }
+  if(mIdx < 0){
+    for(let i = 0; i < 12; i++) if(filename.toLowerCase().includes(BULAN[i].toLowerCase())){ mIdx = i; break; }
+  }
+  if(mIdx >= 0){
+    const m = xml.match(new RegExp(BULAN[mIdx] + '\\s+(20\\d\\d)'));
+    if(m) year = parseInt(m[1], 10);
+  }
+  if(year === null){
+    // tahun yang paling sering muncul
+    const freq = {};
+    (xml.match(/20\d\d/g) || []).forEach(y => freq[y] = (freq[y] || 0) + 1);
+    let best = null, bn = 0;
+    Object.keys(freq).forEach(y => { if(freq[y] > bn){ bn = freq[y]; best = y; } });
+    if(best) year = parseInt(best, 10);
+  }
+  return (mIdx >= 0 && year) ? { mIdx, year } : null;
+}
+
+// ===== transformasi isi document.xml dari periode sumber ke periode target =====
+// Urutan penting: operasi baris tabel & tanggal dd/mm/yyyy memakai tanggal
+// SUMBER, jadi harus jalan sebelum nama bulan/tahun ditukar.
+function transformXml(xml, src, dst){
+  const sName = BULAN[src.mIdx], dName = BULAN[dst.mIdx];
+  const sLast = lastDay(src.year, src.mIdx), dLast = lastDay(dst.year, dst.mIdx);
+  const sMM = String(src.mIdx + 1).padStart(2, '0'), dMM = String(dst.mIdx + 1).padStart(2, '0');
+
+  // -- 1. tabel harian: tambah/kurangi baris <w:tr> sesuai jumlah hari target --
+  const dateTag = dd => String(dd).padStart(2, '0') + '/' + sMM + '/' + src.year;
+  // cari awal tag baris; '<w:tr' saja juga cocok dengan '<w:trPr' — pastikan
+  // karakter berikutnya spasi atau '>'
+  function trStart(before){
+    let i = before;
+    while((i = xml.lastIndexOf('<w:tr', i - 1)) >= 0){
+      const c = xml[i + 5];
+      if(c === ' ' || c === '>') return i;
+    }
+    return -1;
+  }
+  function trBounds(needle){
+    const at = xml.indexOf(needle);
+    if(at < 0) return null;
+    const start = trStart(at);
+    const end = xml.indexOf('</w:tr>', at);
+    if(start < 0 || end < 0) return null;
+    return { start, end: end + 7 };
+  }
+  if(dLast < sLast){
+    for(let dd = dLast + 1; dd <= sLast; dd++){
+      const b = trBounds(dateTag(dd));
+      if(b) xml = xml.slice(0, b.start) + xml.slice(b.end);
+    }
+  } else if(dLast > sLast){
+    const b = trBounds(dateTag(sLast));
+    if(b){
+      const rowTpl = xml.slice(b.start, b.end);
+      let extra = '';
+      for(let dd = sLast + 1; dd <= dLast; dd++)
+        extra += rowTpl.split(dateTag(sLast)).join(dateTag(dd));
+      xml = xml.slice(0, b.end) + extra + xml.slice(b.end);
+    }
+  }
+
+  // -- 2. tanggal tabel harian dd/mm/yyyy (Www): hitung ulang untuk bulan target --
+  xml = xml.replace(/(\d{2})\/(\d{2})\/(\d{4})(\s*\((?:Mon|Tue|Wed|Thu|Fri|Sat|Sun)\))?/g,
+    (all, dd, mm, yyyy, wd) => {
+      if(mm !== sMM || parseInt(yyyy, 10) !== src.year) return all;
+      const d = parseInt(dd, 10);
+      if(d < 1 || d > dLast) return all;
+      const nw = wd ? ' (' + HARI_EN[new Date(dst.year, dst.mIdx, d).getDay()] + ')' : '';
+      return dd + '/' + dMM + '/' + dst.year + nw;
+    });
+
+  // -- 3. nama bulan & tahun: aman per-run karena kata muncul utuh --
+  xml = xml.replace(/(<w:t(?:\s[^>]*)?>)([\s\S]*?)(<\/w:t>)/g, (all, open, txt, close) => {
+    let t = txt.split(sName).join(dName)
+               .split(sName.toUpperCase()).join(dName.toUpperCase());
+    if(src.year !== dst.year) t = t.split(String(src.year)).join(String(dst.year));
+    return open + t + close;
+  });
+
+  // -- 4. hari terakhir periode (01-30 -> 01-31, "Pitu Riawa, 30 ..." -> 31).
+  // Word memecah teks jadi run kecil — bahkan angkanya bisa terbelah ("3"|"0"),
+  // jadi pola dicari di teks GABUNGAN per-paragraf, lalu kedua digitnya
+  // diganti karakter-per-karakter lewat peta indeks gabungan→run. Panjang
+  // selalu 2 digit (28–31) sehingga struktur run tidak berubah.
+  if(sLast !== dLast){
+    const sStr = String(sLast), dStr = String(dLast);
+    const finders = [
+      new RegExp('01\\s*[-–]\\s*' + sStr + '(?=\\s+' + dName + ')', 'g'),
+      new RegExp('s/d\\s+' + sStr + '(?=\\s+' + dName + ')', 'g'),
+      new RegExp(',\\s*' + sStr + '(?=\\s+' + dName + '\\s+' + dst.year + ')', 'g')
+    ];
+    xml = xml.replace(/<w:p[ >][\s\S]*?<\/w:p>/g, para => {
+      const runs = [];
+      let joined = '';
+      for(const m of para.matchAll(/<w:t(?:\s[^>]*)?>([\s\S]*?)<\/w:t>/g)){
+        runs.push({ t: m[1], at: joined.length });
+        joined += m[1];
+      }
+      const hits = [];
+      finders.forEach(re => {
+        let m; re.lastIndex = 0;
+        while((m = re.exec(joined))) hits.push(m.index + m[0].length - sStr.length);
+      });
+      if(!hits.length) return para;
+      hits.forEach(pos => {
+        for(let i = 0; i < dStr.length; i++){
+          const g = pos + i;
+          const r = runs.find(q => g >= q.at && g < q.at + q.t.length);
+          if(r) r.t = r.t.slice(0, g - r.at) + dStr[i] + r.t.slice(g - r.at + 1);
+        }
+      });
+      let k = 0;
+      return para.replace(/(<w:t(?:\s[^>]*)?>)([\s\S]*?)(<\/w:t>)/g,
+        (a, o, t, c) => o + runs[k++].t + c);
+    });
+  }
+
+  return xml;
+}
+
+function transformName(name, src, dst){
+  let n = name.split(BULAN[src.mIdx]).join(BULAN[dst.mIdx])
+              .split(BULAN[src.mIdx].toUpperCase()).join(BULAN[dst.mIdx].toUpperCase())
+              .split(BULAN[src.mIdx].toLowerCase()).join(BULAN[dst.mIdx].toLowerCase());
+  if(src.year !== dst.year) n = n.split(String(src.year)).join(String(dst.year));
+  return n;
+}
+
+// ===== UI =====
+const files = []; // { file, name, src, status }
+const listEl = document.getElementById('file-list');
+const drop = document.getElementById('dropzone');
+const input = document.getElementById('file-input');
+const btn = document.getElementById('btn-generate');
+const statusEl = document.getElementById('status');
+const selBulan = document.getElementById('sel-bulan');
+const selTahun = document.getElementById('sel-tahun');
+
+BULAN.forEach((b, i) => {
+  const o = document.createElement('option');
+  o.value = i; o.textContent = b.toUpperCase();
+  selBulan.appendChild(o);
+});
+// default: bulan berjalan
+const now = new Date();
+selBulan.value = now.getMonth();
+selTahun.value = now.getFullYear();
+
+function setStatus(msg, tone){
+  statusEl.textContent = msg;
+  statusEl.style.color = tone === 'ok' ? 'var(--green)' : tone === 'warn' ? 'var(--amber)'
+    : tone === 'err' ? 'var(--red)' : 'var(--text-dim)';
+}
+
+function renderList(){
+  if(!files.length){ listEl.innerHTML = ''; btn.disabled = true; return; }
+  let html = '<table><tr><th>#</th><th>FILE</th><th>BULAN ASAL</th><th></th></tr>';
+  files.forEach((f, i) => {
+    html += `<tr><td>${i + 1}</td><td>${escHtml(f.name)}</td>
+      <td>${f.src ? '<span class="src">' + BULAN[f.src.mIdx].toUpperCase() + ' ' + f.src.year + '</span>'
+                  : '<span class="err">TIDAK TERDETEKSI</span>'}</td>
+      <td><button class="del-btn" data-i="${i}">HAPUS</button></td></tr>`;
+  });
+  html += '</table>';
+  listEl.innerHTML = html;
+  listEl.querySelectorAll('.del-btn').forEach(b => b.addEventListener('click', () => {
+    files.splice(parseInt(b.dataset.i, 10), 1); renderList();
+  }));
+  btn.disabled = !files.some(f => f.src);
+}
+
+async function addFiles(fileList){
+  for(const file of fileList){
+    if(!/\.docx$/i.test(file.name)){ setStatus('dilewati (bukan .docx): ' + file.name, 'warn'); continue; }
+    try {
+      const zip = await JSZip.loadAsync(file);
+      const doc = zip.file('word/document.xml');
+      if(!doc){ setStatus('bukan dokumen Word yang valid: ' + file.name, 'err'); continue; }
+      const xml = await doc.async('string');
+      files.push({ file, name: file.name, src: detectSource(xml, file.name) });
+    } catch(e){
+      setStatus('gagal membaca ' + file.name + ' — ' + (e.message || e), 'err');
+    }
+  }
+  renderList();
+  const ok = files.filter(f => f.src).length;
+  if(ok) setStatus(ok + ' file siap digenerate.', 'ok');
+}
+
+drop.addEventListener('click', () => input.click());
+input.addEventListener('change', () => { addFiles([...input.files]); input.value = ''; });
+['dragover','dragenter'].forEach(t => drop.addEventListener(t, e => { e.preventDefault(); drop.classList.add('over'); }));
+['dragleave','drop'].forEach(t => drop.addEventListener(t, e => { e.preventDefault(); drop.classList.remove('over'); }));
+drop.addEventListener('drop', e => addFiles([...e.dataTransfer.files]));
+
+let busy = false;
+btn.addEventListener('click', async () => {
+  if(busy) return;
+  busy = true; btn.disabled = true;
+  try {
+    const dst = { mIdx: parseInt(selBulan.value, 10), year: parseInt(selTahun.value, 10) };
+    if(!(dst.year >= 2024 && dst.year <= 2099)){ setStatus('tahun tidak valid', 'err'); return; }
+    const out = new JSZip();
+    let done = 0;
+    for(const f of files){
+      if(!f.src) continue;
+      if(f.src.mIdx === dst.mIdx && f.src.year === dst.year){
+        setStatus('bulan target sama dengan bulan asal: ' + f.name, 'warn'); continue;
+      }
+      setStatus('memproses ' + f.name + ' ...');
+      const zip = await JSZip.loadAsync(f.file);
+      const xml = await zip.file('word/document.xml').async('string');
+      zip.file('word/document.xml', transformXml(xml, f.src, dst));
+      const blob = await zip.generateAsync({ type: 'blob',
+        compression: 'DEFLATE', mimeType: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' });
+      out.file(transformName(f.name, f.src, dst), blob);
+      done++;
+    }
+    if(!done){ setStatus('tidak ada file yang diproses.', 'warn'); return; }
+    setStatus('membungkus ZIP ...');
+    const zipBlob = await out.generateAsync({ type: 'blob', compression: 'DEFLATE' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(zipBlob);
+    a.download = 'Laporan SKP ' + BULAN[parseInt(selBulan.value, 10)] + ' ' + selTahun.value + '.zip';
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(a.href), 30000);
+    setStatus('✓ ' + done + ' laporan digenerate — periksa & sesuaikan angka realisasinya di Word.', 'ok');
+  } catch(e){
+    setStatus('gagal: ' + (e.message || e), 'err');
+  } finally {
+    busy = false; btn.disabled = !files.some(f => f.src);
+  }
+});
+
+// dipakai pengujian otomatis
+window._skp = { detectSource, transformXml, transformName, lastDay };
+
+if('serviceWorker' in navigator){
+  navigator.serviceWorker.register('sw.js').catch(() => {});
+}
+</script>
+</body>
+</html>
