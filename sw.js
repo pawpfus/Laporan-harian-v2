@@ -7,7 +7,7 @@
    - Tile peta (Esri/CARTO): cache-first, maks 400 entri (offline di lapangan)
    - Supabase / /api/ / POST: TIDAK di-cache (selalu jaringan)
 */
-const VERSION = 'v2.0.2';
+const VERSION = 'v2.0.3';
 const SHELL_CACHE = `shell-${VERSION}`;
 const RUNTIME_CACHE = `runtime-${VERSION}`;
 const TILE_CACHE = `tiles-${VERSION}`;
@@ -21,9 +21,6 @@ const SHELL_ASSETS = [
   './icons/icon-512.png',
   './icons/icon-maskable-512.png',
   './icons/apple-touch-icon.png',
-  // SKP FORGE (generator laporan bulanan)
-  './laporan-skp.html',
-  './vendor/jszip.min.js',
   // FARM AXIS (peta-poktan)
   './peta-poktan.html',
   './manifest-peta.webmanifest',
