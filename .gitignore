@@ -9,6 +9,10 @@
 /drum-seeder-pm-aas/
 /laporan_diseminasi/
 
+# Berkas kerja pribadi — disimpan lokal saja, jangan masuk git
+/skp/
+/vote-mobil22/
+
 # Local dev / editor config (contains other projects' launch configs)
 /.claude/
 
