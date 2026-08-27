@@ -7,7 +7,7 @@
    - Tile peta (Esri/CARTO): cache-first, maks 400 entri (offline di lapangan)
    - Supabase / /api/ / POST: TIDAK di-cache (selalu jaringan)
 */
-const VERSION = 'v2.0.3';
+const VERSION = 'v2.0.6';
 const SHELL_CACHE = `shell-${VERSION}`;
 const RUNTIME_CACHE = `runtime-${VERSION}`;
 const TILE_CACHE = `tiles-${VERSION}`;
@@ -16,6 +16,7 @@ const TILE_LIMIT = 400;
 const SHELL_ASSETS = [
   './',
   './index.html',
+  './ruang.html',
   './manifest.webmanifest',
   './icons/icon-192.png',
   './icons/icon-512.png',
@@ -67,10 +68,14 @@ function isSupabaseOrApi(url) {
          url.pathname.startsWith('/api/');
 }
 
-// kunci cache navigasi per halaman — dulu semua navigasi ditimpa ke index.html,
-// sehingga membuka peta-poktan merusak shell offline aplikasi Laporan
+// kunci cache navigasi per halaman — hanya halaman root yang dikenal; navigasi
+// ke sub-aplikasi (eviden_lcs/, ksa_pendampingan/, dll.) TIDAK boleh dipetakan ke
+// index.html: dulu itu membuat konten index tersaji di URL tool lain saat offline
+// (dan konten tool menimpa cache index)
 function shellKeyFor(url) {
-  return url.pathname === '/peta-poktan.html' ? './peta-poktan.html' : './index.html';
+  const PAGES = ['/index.html', '/peta-poktan.html', '/ruang.html', '/laporan-skp.html'];
+  if (url.pathname === '/') return './index.html';
+  return PAGES.includes(url.pathname) ? '.' + url.pathname : null;
 }
 
 // tile peta: cache-first + batas entri; fetch ulang pakai CORS supaya response
@@ -118,13 +123,23 @@ self.addEventListener('fetch', (event) => {
   if (req.mode === 'navigate') {
     event.respondWith((async () => {
       const cache = await caches.open(SHELL_CACHE);
+      const key = shellKeyFor(url);
       try {
         const res = await fetch(req.url, { cache: 'no-cache' });
-        if (res.ok) cache.put(shellKeyFor(url), res.clone());
+        if (res.ok && key) cache.put(key, res.clone());
+        if (res.ok && !key) {
+          const copy = res.clone();
+          caches.open(RUNTIME_CACHE).then((c) => c.put(req.url, copy));
+        }
         return res;
       } catch (err) {
-        const hit = await cache.match(shellKeyFor(url), { ignoreSearch: true });
-        return hit || cache.match('./');
+        if (key) {
+          const hit = await cache.match(key, { ignoreSearch: true });
+          if (hit) return hit;
+        }
+        // sub-aplikasi: pakai salinan halamannya sendiri, jangan index.html
+        const own = await caches.match(req.url, { ignoreSearch: true });
+        return own || cache.match('./');
       }
     })());
     return;

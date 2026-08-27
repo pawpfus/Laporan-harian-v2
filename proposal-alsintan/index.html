@@ -1,0 +1,1199 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<title>PROJECT ROPS</title>
+<meta name="theme-color" content="#0e1116">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><text y='26' font-size='26'>🌾</text></svg>">
+<style>
+  /* ===== COCKPIT — light (counterpart) ===== */
+  :root{
+    color-scheme:light;
+    --bg:#eef1f5; --card:#ffffff; --soft:#f1f4f8;
+    --line:#e2e7ee; --line-2:#cdd5df;
+    --ink:#0f141a; --ink-2:#3b444f; --ink-3:#6a7480; --ink-4:#a6afba;
+    --accent:#4c7a00; --accent-ink:#ffffff; --accent-soft:rgba(76,122,0,.10); --accent-line:rgba(76,122,0,.35);
+    --excel:#12915d; --pdf:#d8493a; --danger:#d8493a;
+    --glow:rgba(76,122,0,.10);
+    --spine:#0f141a; --spine-ink:#ffffff;
+    --shadow:0 1px 2px rgba(15,25,40,.05), 0 10px 26px rgba(15,25,40,.06);
+    --radius:7px;
+    --stage:#e5e9ef;
+  }
+  /* ===== COCKPIT — dark (default / hero) ===== */
+  body.dark{
+    color-scheme:dark;
+    --bg:#0e1116; --card:#161b22; --soft:#1b212a;
+    --line:#242c36; --line-2:#323b47;
+    --ink:#e6ecf3; --ink-2:#aab4c1; --ink-3:#6b7686; --ink-4:#454f5c;
+    --accent:#c2f24a; --accent-ink:#12160a; --accent-soft:rgba(194,242,74,.13); --accent-line:rgba(194,242,74,.38);
+    --excel:#2fbd7e; --pdf:#ff6a5a; --danger:#ff6a5a;
+    --glow:rgba(194,242,74,.10);
+    --spine:#c2f24a; --spine-ink:#12160a;
+    --shadow:0 1px 0 rgba(0,0,0,.5), 0 12px 34px rgba(0,0,0,.4);
+    --stage:#0a0d11;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    font-family:'Instrument Sans',system-ui,-apple-system,Segoe UI,sans-serif;
+    background:var(--bg); color:var(--ink);
+    -webkit-font-smoothing:antialiased; line-height:1.5;
+    transition:background .3s,color .3s;
+  }
+  ::selection{background:var(--accent-soft)}
+
+  /* ---------- Top bar ---------- */
+  .topbar{position:sticky;top:0;z-index:50;background:var(--card);color:var(--ink);
+    border-top:2px solid var(--accent);border-bottom:1px solid var(--line)}
+  .topbar-inner{max-width:1680px;margin:0 auto;padding:12px 22px;display:flex;align-items:center;gap:9px}
+  .brand{display:flex;align-items:center;gap:12px;min-width:0}
+  .logo{width:38px;height:38px;border-radius:9px;flex:0 0 auto;overflow:hidden;
+    background:var(--soft);border:1px solid var(--line);display:grid;place-items:center;box-shadow:0 0 0 3px var(--accent-soft);color:var(--accent)}
+  .logo svg{width:22px;height:22px}
+  .brand h1{font-size:16px;margin:0;font-weight:700;letter-spacing:-.01em;line-height:.96;white-space:nowrap}
+  .spacer{flex:1}
+  .save-pill{font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--ink-3);display:flex;align-items:center;gap:7px;white-space:nowrap;letter-spacing:.02em;text-transform:uppercase}
+  .save-dot{width:7px;height:7px;border-radius:50%;background:var(--accent)}
+  .save-dot.saving{animation:pulse 1.2s infinite}
+  @keyframes pulse{0%{box-shadow:0 0 0 0 var(--accent-line)}70%{box-shadow:0 0 0 7px transparent}100%{box-shadow:0 0 0 0 transparent}}
+  .btn{appearance:none;border:1px solid transparent;cursor:pointer;font:inherit;font-weight:600;font-size:12.5px;
+    padding:9px 14px;border-radius:var(--radius);display:inline-flex;align-items:center;gap:8px;
+    transition:transform .08s ease,filter .15s ease,background .15s,border-color .15s;white-space:nowrap}
+  .btn:active{transform:translateY(1px)}
+  .btn svg{width:16px;height:16px}
+  .btn-line{background:transparent;border:1px solid var(--line);color:var(--ink-2)}
+  .btn-line:hover{background:var(--soft);color:var(--ink);border-color:var(--line-2)}
+  .btn-emerald{background:var(--accent);color:var(--accent-ink)}
+  .btn-emerald:hover{filter:brightness(1.06)}
+  .btn-sm{padding:7px 12px;font-size:12px;border-radius:6px}
+  .btn-toggle{appearance:none;cursor:pointer;width:34px;height:34px;flex:0 0 auto;padding:0;border-radius:8px;
+    display:inline-flex;align-items:center;justify-content:center;
+    background:var(--soft);border:1px solid var(--line);color:var(--ink-2);transition:.15s}
+  .btn-toggle:hover{background:var(--card);color:var(--ink);border-color:var(--line-2)}
+  .btn-toggle:active{transform:scale(.94)}
+  .btn-toggle svg{width:16px;height:16px}
+
+  /* ---------- Shell ---------- */
+  .shell{display:grid;grid-template-columns:minmax(400px,500px) 1fr;height:calc(100vh - 63px)}
+  .wrap{overflow-y:auto;padding:20px 18px 90px}
+  .stage{overflow-y:auto;background:var(--stage);border-left:1px solid var(--line);
+    padding:22px 18px 90px;display:flex;flex-direction:column;align-items:center;gap:20px}
+  .wrap::-webkit-scrollbar,.stage::-webkit-scrollbar{width:10px}
+  .wrap::-webkit-scrollbar-thumb,.stage::-webkit-scrollbar-thumb{background:var(--line-2);border-radius:8px}
+
+  /* ---------- Card ---------- */
+  .card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);margin-bottom:16px;overflow:hidden}
+  .card-head{display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:1px solid var(--line);cursor:pointer;user-select:none}
+  .card-head .ic{width:34px;height:34px;flex:0 0 auto;border-radius:8px;background:var(--accent-soft);border:1px solid var(--accent-line);display:grid;place-items:center;color:var(--accent)}
+  .card-head .ic svg{width:18px;height:18px}
+  .card-head h2{margin:0;font-size:14.5px;font-weight:700;letter-spacing:-.01em}
+  .card-head p{margin:2px 0 0;font-size:11.5px;color:var(--ink-3)}
+  .step{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;color:var(--ink-3);letter-spacing:.16em;
+    border:1px solid var(--line);border-radius:6px;padding:4px 8px}
+  .card-body{padding:16px}
+  .card.collapsed .card-body{display:none}
+  .card.collapsed .card-head{border-bottom:none}
+
+  /* ---------- Form ---------- */
+  .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:13px}
+  .grid.three{grid-template-columns:repeat(3,1fr)}
+  .field{display:flex;flex-direction:column;gap:6px}
+  .field.full{grid-column:1/-1}
+  label{font-size:11px;font-weight:600;color:var(--ink-2);letter-spacing:.02em}
+  input[type=text],input[type=date],input[type=number],textarea,select{
+    font:inherit;font-size:13.5px;color:var(--ink);background:var(--soft);
+    border:1px solid var(--line);border-radius:var(--radius);padding:10px 12px;width:100%;
+    transition:border .15s,box-shadow .15s,background .15s}
+  input::placeholder,textarea::placeholder{color:var(--ink-4)}
+  input:focus,textarea:focus,select:focus{outline:none;border-color:var(--accent-line);box-shadow:0 0 0 3px var(--accent-soft);background:var(--card)}
+  select{cursor:pointer;-webkit-appearance:menulist;appearance:auto}
+  textarea{resize:vertical;min-height:110px;line-height:1.6;font-family:'JetBrains Mono',ui-monospace,Menlo,Consolas,monospace;font-size:12px}
+  .hint{font-size:11px;color:var(--ink-3);line-height:1.45}
+  .lblrow{display:flex;align-items:center;justify-content:space-between;gap:8px}
+  .lock{font-family:'JetBrains Mono',monospace;font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;
+    color:var(--ink-3);border:1px solid var(--line);border-radius:5px;padding:2px 6px}
+  .lock.on{color:var(--accent);border-color:var(--accent-line);background:var(--accent-soft)}
+  .checkrow{display:flex;flex-wrap:wrap;gap:14px}
+  .checkrow label{display:flex;align-items:center;gap:7px;font-size:12.5px;font-weight:500;color:var(--ink-2);cursor:pointer}
+  .checkrow input{width:auto;accent-color:var(--accent)}
+
+  /* ---------- Image slots ---------- */
+  .slots{display:grid;grid-template-columns:repeat(3,1fr);gap:11px}
+  .slot{border:1.5px dashed var(--line-2);border-radius:var(--radius);background:var(--soft);min-height:104px;position:relative;
+    overflow:hidden;cursor:pointer;transition:.15s;display:grid;place-items:center;padding:8px}
+  .slot:hover{border-color:var(--accent-line);background:var(--accent-soft)}
+  .slot.filled{border-style:solid;border-color:var(--line);background:var(--card)}
+  .slot img{max-width:100%;max-height:86px;object-fit:contain;display:block}
+  .slot .ph{display:flex;flex-direction:column;align-items:center;gap:6px;color:var(--ink-3);
+    font-family:'JetBrains Mono',monospace;font-size:9.5px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;text-align:center;pointer-events:none}
+  .slot .ph svg{width:17px;height:17px;opacity:.7}
+  .slot .tag{position:absolute;top:5px;left:5px;font-family:'JetBrains Mono',monospace;font-size:8px;font-weight:700;letter-spacing:.1em;
+    text-transform:uppercase;background:var(--spine);color:var(--spine-ink);padding:2px 6px;border-radius:5px;z-index:2}
+  .slot .rm{position:absolute;top:4px;right:4px;z-index:3;width:22px;height:22px;border-radius:5px;border:1px solid var(--line);
+    background:var(--card);color:var(--danger);cursor:pointer;font-size:13px;line-height:1;display:none}
+  .slot.filled .rm{display:block}
+
+  /* ---------- Anggota ---------- */
+  table.anggota{width:100%;border-collapse:collapse}
+  table.anggota th{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3);text-align:left;padding:0 4px 7px;font-weight:700}
+  table.anggota td{padding:2px 3px}
+  table.anggota input{padding:7px 9px;font-size:12.5px}
+  .xbtn{background:transparent;border:1px solid var(--line);color:var(--ink-3);border-radius:6px;width:28px;height:32px;cursor:pointer;font-size:14px;transition:.15s}
+  .xbtn:hover{color:var(--danger);border-color:var(--danger);background:var(--soft)}
+  .count{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--ink-3);font-weight:600;
+    background:var(--soft);border:1px solid var(--line);border-radius:6px;padding:5px 9px}
+  .toolbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:12px}
+  .toolbar .count{margin-left:auto}
+  .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--ink);color:var(--bg);
+    padding:11px 18px;border-radius:var(--radius);font-size:12.5px;font-weight:600;box-shadow:0 12px 32px rgba(0,0,0,.35);
+    opacity:0;pointer-events:none;transition:.25s;z-index:100}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+  /* ═══════════ DOKUMEN A4 ═══════════ */
+  .sheetwrap{flex:0 0 auto}
+  .pgmark{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-3);
+    margin-bottom:5px;display:block}
+  .page{
+    width:210mm;min-height:297mm;background:#fff;color:#000;
+    padding:18mm 20mm 16mm;box-shadow:0 10px 34px rgba(0,0,0,.22);
+    font-family:"Times New Roman",Times,serif;font-size:12pt;line-height:1.45;
+    position:relative;flex:0 0 auto;
+  }
+  .pgbody{display:flow-root}
+  .page p{margin:0 0 8pt;text-align:justify;text-indent:1.1cm}
+  .page p.noind{text-indent:0}
+
+  /* sampul */
+  .page.sampul{padding:12mm}
+  .cvframe{border:2.2pt solid #000;min-height:273mm;padding:16mm 12mm 14mm;display:flex;flex-direction:column;align-items:center;text-align:center}
+  .cv-t1{font-size:36pt;line-height:1.1}
+  .cv-t2{font-size:15pt;font-weight:bold;margin-top:7mm;letter-spacing:.4pt}
+  .cv-t3{font-size:15pt;font-weight:bold;margin-top:4mm;letter-spacing:.4pt}
+  .cv-img{margin-top:9mm;max-height:72mm;max-width:74%;object-fit:contain}
+  .cv-gap{flex:1;min-height:6mm}
+  .cv-oleh{font-size:16pt;margin-top:6mm}
+  .cv-idn{margin-top:10mm;display:grid;grid-template-columns:auto auto;column-gap:3mm;row-gap:2.6mm;font-size:13pt;text-align:left}
+
+  /* kop */
+  .kop{position:relative;text-align:center;padding-bottom:3pt}
+  .kop .emblem{position:absolute;left:2mm;top:-1mm;height:19mm}
+  .kop .k1{font-size:14pt;font-weight:bold;letter-spacing:.3pt}
+  .kop .k2{font-size:11.5pt;font-weight:bold;letter-spacing:.2pt}
+  .kop .rule{border-top:2.6pt solid #000;margin-top:3pt}
+  .doc-title{text-align:center;font-size:11.5pt;font-weight:bold;margin:7pt 0 11pt;letter-spacing:.3pt}
+  h3.bab{font-size:12pt;font-weight:bold;margin:11pt 0 5pt}
+
+  /* surat */
+  .suratkop{display:grid;grid-template-columns:1.05fr 1fr;gap:6pt;margin:10pt 0 16pt}
+  .suratkop .kiri > div{display:grid;grid-template-columns:2.3cm auto;column-gap:3pt;margin-bottom:3pt}
+  .suratkop .kanan{padding-left:12pt}
+  .suratkop .kanan .yth{font-weight:bold;display:grid;grid-template-columns:1.15cm auto;column-gap:2pt;margin-bottom:3pt}
+  .suratkop .kanan .plain{margin-bottom:3pt}
+  .suratkop .kanan .kota{padding-left:1.7cm}
+
+  /* tanda tangan */
+  .sig{display:grid;grid-template-columns:1fr 1fr;margin-top:8pt;column-gap:8pt}
+  .sig.one{grid-template-columns:1fr;justify-items:center}
+  .sig .c{text-align:center}
+  .ttdspace{height:19mm;display:flex;align-items:center;justify-content:center;overflow:hidden}
+  .ttdspace img{max-height:19mm;max-width:60mm;object-fit:contain}
+  .nm{font-weight:bold;text-decoration:underline}
+  .nip{font-size:11pt}
+  .rightblok{margin-top:12pt;text-align:right}
+  .center{text-align:center}
+
+  /* daftar isi */
+  .dot{display:flex;align-items:baseline;gap:5pt;margin-bottom:7pt}
+  .dot .dots{flex:1;border-bottom:1.4pt dotted #444;transform:translateY(-3px)}
+  .dot.sub{padding-left:1.2cm}
+  .dot .lbl{display:grid;grid-template-columns:.85cm auto;column-gap:2pt}
+
+  /* tabel */
+  table.doc{width:100%;border-collapse:collapse;font-size:11pt;margin:8pt 0}
+  table.doc th,table.doc td{border:1px solid #000;padding:3pt 5pt}
+  table.doc th{background:#efefef;text-align:center;font-weight:bold}
+  table.doc td.c{text-align:center}
+
+  .identitas{margin:10pt 0 12pt}
+  .identitas > div{display:grid;grid-template-columns:5cm 8pt auto;margin-bottom:3pt}
+  .identitas.indent{margin-left:2cm}
+
+  /* ktp */
+  .ktp-slot{margin-bottom:6mm}
+  .ktp-slot .lbl{text-align:center;font-size:11pt;margin-bottom:3mm}
+  .ktp-slot .box{height:52mm;display:flex;align-items:center;justify-content:center;overflow:hidden}
+  .ktp-slot .box img{max-height:52mm;max-width:88%;object-fit:contain}
+
+  /* lampiran */
+  .lamp{min-height:250mm;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:20pt;line-height:2.35}
+  .pgno{position:absolute;bottom:10mm;left:0;right:0;text-align:center;font-size:11pt}
+
+  @media print{
+    body{background:#fff}
+    .topbar,.wrap,.toast,.pgmark{display:none!important}
+    .shell{display:block;height:auto}
+    .stage{display:block;padding:0;border:none;background:#fff;overflow:visible}
+    .page{box-shadow:none;margin:0;width:auto;min-height:auto;page-break-after:always}
+    .sheetwrap:last-child .page{page-break-after:auto}
+    table.doc thead{display:table-header-group}
+    table.doc tr,.sig,.ktp-slot{page-break-inside:avoid}
+    @page{size:A4;margin:0}
+  }
+  @media(max-width:1100px){
+    .shell{grid-template-columns:1fr;height:auto}
+    .wrap{overflow:visible;padding:16px 12px 30px}
+    .stage{overflow:visible;border-left:none;border-top:1px solid var(--line);padding:18px 8px 60px}
+    .page{width:100%;min-height:auto;padding:12mm 9mm}
+    .cvframe{min-height:auto;padding:10mm 6mm}
+    input,select,textarea{font-size:16px}
+    textarea{font-size:13px}
+    .grid,.grid.three{grid-template-columns:1fr}
+    .topbar-inner{padding:10px 12px;gap:7px;flex-wrap:wrap}
+  }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-inner">
+    <div class="brand">
+      <div class="logo">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 22V9"/><path d="M12 13c-3 0-5-2-5-5 3 0 5 2 5 5Z"/><path d="M12 13c3 0 5-2 5-5-3 0-5 2-5 5Z"/>
+          <path d="M12 8c-2.6 0-4.3-1.7-4.3-4.3C10.3 3.7 12 5.4 12 8Z"/><path d="M12 8c2.6 0 4.3-1.7 4.3-4.3C13.7 3.7 12 5.4 12 8Z"/>
+          <path d="M5 22h14"/></svg>
+      </div>
+      <div><h1>PROJECT ROPS</h1></div>
+    </div>
+    <div class="spacer"></div>
+    <div class="save-pill"><span class="save-dot" id="dot"></span><span id="saveTxt">Siap</span></div>
+    <button class="btn-toggle" onclick="toggleTheme()" title="Ganti tema">
+      <svg id="sun" style="display:none" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
+      <svg id="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
+    </button>
+    <button class="btn-toggle" onclick="resetAll()" title="Mulai dari awal">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg>
+    </button>
+    <button class="btn btn-line" onclick="contohData()">Contoh</button>
+    <button class="btn btn-line" onclick="exportJSON()">Ekspor</button>
+    <button class="btn btn-line" onclick="document.getElementById('impor').click()">Impor</button>
+    <button class="btn btn-emerald" onclick="window.print()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><path d="M6 14h12v8H6z"/></svg>
+      Cetak / PDF
+    </button>
+    <input type="file" id="impor" accept=".json" hidden onchange="importJSON(this)">
+  </div>
+</div>
+
+<div class="shell">
+<div class="wrap">
+
+  <div class="card" id="c1">
+    <div class="card-head" onclick="tog('c1')">
+      <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg></div>
+      <div><h2>Identitas Kelompok &amp; Wilayah</h2><p>Muncul pada sampul dan kop surat</p></div>
+      <div class="step">01</div>
+    </div>
+    <div class="card-body">
+      <div class="grid">
+        <div class="field full"><label>Nama Kelompok Tani</label><input type="text" id="poktan" placeholder="GALIMPUA I"></div>
+        <div class="field"><label>Desa / Kelurahan</label><input type="text" id="desa" placeholder="Otting"></div>
+        <div class="field"><label>Kecamatan</label><input type="text" id="kecamatan" placeholder="Pitu Riawa"></div>
+        <div class="field"><label>Kabupaten</label><input type="text" id="kabupaten" placeholder="Sidenreng Rappang"></div>
+        <div class="field"><label>Provinsi</label><input type="text" id="provinsi" placeholder="Sulawesi Selatan"></div>
+      </div>
+      <div class="grid three" style="margin-top:13px">
+        <div class="field"><label>Komoditas</label><input type="text" id="komoditas" placeholder="Padi"></div>
+        <div class="field"><label>Luas Hamparan (Ha)</label><input type="text" id="hamparan" placeholder="1.110"></div>
+        <div class="field"><label>Tahun</label><input type="text" id="tahun" placeholder="2026"></div>
+      </div>
+      <div class="grid" style="margin-top:13px">
+        <div class="field"><label>Titik Koordinat</label><input type="text" id="koordinat" placeholder="-3.845458, 119.938127"></div>
+        <div class="field"><label>Alamat Lengkap (opsional)</label><input type="text" id="alamat" placeholder="otomatis dari desa/kecamatan"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" id="c2">
+    <div class="card-head" onclick="tog('c2')">
+      <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="7" cy="17" r="3"/><circle cx="17" cy="17" r="3"/><path d="M10 17h4M4 17V7h6l3 5h4l1 5"/></svg></div>
+      <div><h2>Jenis Alsintan</h2><p>Menentukan judul, isi surat, dan seluruh narasi</p></div>
+      <div class="step">02</div>
+    </div>
+    <div class="card-body">
+      <div class="field"><label>Jenis Alsin</label><select id="alsin"></select></div>
+      <div id="wrapCustom" style="display:none;margin-top:13px">
+        <div class="grid">
+          <div class="field"><label>Nama Alsin (isi sendiri)</label><input type="text" id="alsinNama" placeholder="Nama alat mesin pertanian"></div>
+          <div class="field"><label>Tahap Usaha Tani</label><input type="text" id="alsinTahap" placeholder="mis. pascapanen"></div>
+          <div class="field full"><label>Fungsi Utama Alat</label><input type="text" id="alsinFungsi" placeholder="mis. mengeringkan gabah hasil panen secara merata"></div>
+        </div>
+      </div>
+      <div class="grid three" style="margin-top:13px">
+        <div class="field"><label>Volume</label><input type="number" id="volume" min="1" value="1"></div>
+        <div class="field"><label>Satuan</label><input type="text" id="satuan" placeholder="unit"></div>
+        <div class="field"><label>Spesifikasi (opsional)</label><input type="text" id="spek" placeholder="diesel 8,5 HP"></div>
+      </div>
+      <div class="grid" style="margin-top:13px">
+        <div class="field full"><label>Judul Alsin pada Sampul</label><input type="text" id="judulSampul" placeholder="HANDTRAKTOR — kosongkan untuk memakai nama lengkap"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card collapsed" id="c3">
+    <div class="card-head" onclick="tog('c3')">
+      <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16v16H4z"/><path d="M4 8h16M8 12h8M8 16h5"/></svg></div>
+      <div><h2>Surat Permohonan</h2><p>Nomor, tanggal, tujuan, dan tembusan</p></div>
+      <div class="step">03</div>
+    </div>
+    <div class="card-body">
+      <div class="grid">
+        <div class="field"><label>Nomor Surat</label><input type="text" id="nomor" placeholder="001/KT-GLMI XVIII/IV/2026"></div>
+        <div class="field"><label>Lampiran</label><input type="text" id="lampiran" placeholder="1 (satu) bundel Proposal"></div>
+        <div class="field"><label>Tanggal Surat</label><input type="date" id="tanggal"></div>
+        <div class="field"><label>Kota Penandatanganan</label><input type="text" id="kota" placeholder="otomatis dari nama desa"></div>
+        <div class="field full"><label>Ditujukan Kepada</label><textarea id="tujuan" style="min-height:92px"></textarea>
+          <div class="hint">Awali baris dengan <b>*</b> untuk dicetak tebal (Yth. / Cq.), dengan <b>&gt;</b> untuk dijorokkan (nama kota).</div></div>
+        <div class="field full"><label>Tembusan</label><textarea id="tembusan" style="min-height:64px"></textarea></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" id="c4">
+    <div class="card-head" onclick="tog('c4')">
+      <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/></svg></div>
+      <div><h2>Pengurus &amp; Penandatangan</h2><p>Ketua, sekretaris, bendahara, kades, penyuluh, BPP</p></div>
+      <div class="step">04</div>
+    </div>
+    <div class="card-body">
+      <div class="grid three">
+        <div class="field"><label>Ketua</label><input type="text" id="ketua" placeholder="LACACCING"></div>
+        <div class="field"><label>Sekretaris</label><input type="text" id="sekretaris" placeholder="FIRMAN"></div>
+        <div class="field"><label>Bendahara</label><input type="text" id="bendahara" placeholder="FIRNANDA"></div>
+      </div>
+      <div class="grid" style="margin-top:13px">
+        <div class="field full"><label>Kepala Desa</label><input type="text" id="kades" placeholder="PALLAWAGAU"></div>
+        <div class="field"><label>Penyuluh Pertanian</label><input type="text" id="penyuluh" placeholder="MUHAMMAD FACHRURI, S.TP"></div>
+        <div class="field"><label>NIP Penyuluh</label><input type="text" id="nipPenyuluh" placeholder="19940702 202012 1 002"></div>
+        <div class="field"><label>Kepala / Koordinator BPP</label><input type="text" id="koordinator" placeholder="HARYANA HATTA SP, MP"></div>
+        <div class="field"><label>NIP Kepala BPP</label><input type="text" id="nipKoordinator" placeholder="19870220 202012 2 003"></div>
+        <div class="field"><label>Sebutan BPP</label><input type="text" id="bpp" placeholder="BPP Pitu Riawa"></div>
+        <div class="field"><label>Sebutan pada Tembusan</label><input type="text" id="bppTembusan" placeholder="Koordinator BPP Pitu Riawa di Betao"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card collapsed" id="c5">
+    <div class="card-head" onclick="tog('c5')">
+      <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg></div>
+      <div><h2>Narasi Proposal</h2><p>Otomatis menyesuaikan jenis alsin — bisa disunting</p></div>
+      <div class="step">05</div>
+    </div>
+    <div class="card-body">
+      <div class="grid">
+        <div class="field"><label>Variasi Narasi</label>
+          <select id="variasi">
+            <option value="A">Gaya A — formal administratif</option>
+            <option value="B">Gaya B — naratif teknis</option>
+            <option value="C">Gaya C — ringkas lugas</option>
+            <option value="R">Acak setiap susun ulang</option>
+          </select></div>
+        <div class="field" style="justify-content:flex-end">
+          <button class="btn btn-line" onclick="susunUlangSemua()">↻ Susun ulang semua</button></div>
+      </div>
+      <div id="narasiBox" style="margin-top:14px;display:grid;gap:14px"></div>
+    </div>
+  </div>
+
+  <div class="card collapsed" id="c6">
+    <div class="card-head" onclick="tog('c6')">
+      <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 5h18M3 12h18M3 19h18"/></svg></div>
+      <div><h2>Daftar Anggota (CPCL)</h2><p>Nama, jabatan, dan luas lahan garapan</p></div>
+      <div class="step">06</div>
+    </div>
+    <div class="card-body">
+      <table class="anggota">
+        <thead><tr><th style="width:24px">#</th><th>Nama</th><th style="width:92px">Jabatan</th><th style="width:66px">Luas</th><th style="width:32px"></th></tr></thead>
+        <tbody id="tbAnggota"></tbody>
+      </table>
+      <div class="toolbar">
+        <button class="btn btn-line btn-sm" onclick="tambahAnggota()">+ Baris</button>
+        <button class="btn btn-line btn-sm" onclick="tambahAnggota(5)">+ 5 Baris</button>
+        <button class="btn btn-line btn-sm" onclick="togglePaste()">Tempel dari Excel</button>
+        <span class="count"><b id="sumJml">0</b> orang · <b id="sumLuas">0</b> Ha</span>
+      </div>
+      <div id="pasteWrap" style="display:none;margin-top:12px">
+        <div class="field"><label>Tempel data (Nama · Jabatan · Luas)</label>
+          <textarea id="pasteBox" placeholder="LACACCING&#9;Ketua&#9;2&#10;FIRMAN&#9;Sekretaris&#9;1,8"></textarea></div>
+        <div class="toolbar"><button class="btn btn-line btn-sm" onclick="prosesPaste(false)">Ganti semua</button>
+          <button class="btn btn-line btn-sm" onclick="prosesPaste(true)">Tambahkan</button></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card collapsed" id="c7">
+    <div class="card-head" onclick="tog('c7')">
+      <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/></svg></div>
+      <div><h2>Gambar &amp; Halaman</h2><p>Logo kop, gambar alsin, tanda tangan, scan KTP</p></div>
+      <div class="step">07</div>
+    </div>
+    <div class="card-body">
+      <label style="display:block;margin-bottom:9px">Logo kop, gambar sampul, tanda tangan penyuluh</label>
+      <div class="slots">
+        <div class="slot" data-k="logo"></div>
+        <div class="slot" data-k="alsinImg"></div>
+        <div class="slot" data-k="ttdPenyuluh"></div>
+      </div>
+      <label style="display:block;margin:16px 0 9px">Tanda tangan lain (opsional)</label>
+      <div class="slots">
+        <div class="slot" data-k="ttdKetua"></div>
+        <div class="slot" data-k="ttdKades"></div>
+        <div class="slot" data-k="ttdBpp"></div>
+      </div>
+      <label style="display:block;margin:16px 0 9px">Scan KTP pengurus</label>
+      <div class="slots">
+        <div class="slot" data-k="ktp0"></div>
+        <div class="slot" data-k="ktp1"></div>
+        <div class="slot" data-k="ktp2"></div>
+      </div>
+      <label style="display:block;margin:18px 0 9px">Halaman yang disertakan</label>
+      <div class="checkrow">
+        <label><input type="checkbox" id="pgDaftar" checked>Daftar isi</label>
+        <label><input type="checkbox" id="pgPengurus" checked>Susunan pengurus</label>
+        <label><input type="checkbox" id="pgKtp" checked>KTP pengurus</label>
+        <label><input type="checkbox" id="pgLamp" checked>Pembatas LAMPIRAN</label>
+        <label><input type="checkbox" id="pgCpcl" checked>Daftar CPCL</label>
+        <label><input type="checkbox" id="pgNomor">Nomor halaman</label>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div class="stage" id="stage"></div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ══════════════ BASIS DATA ALSINTAN ══════════════ */
+const ALSIN = {
+  handtraktor:{
+    nama:"Hand Traktor (Traktor Roda Dua)", singkat:"Hand Traktor", sampul:"HANDTRAKTOR", satuan:"unit", tahap:"pengolahan lahan",
+    fungsi:"mengolah tanah sawah maupun lahan kering secara cepat, merata, dan tepat waktu",
+    masalah:"pengolahan tanah pada sebagian besar lahan anggota masih dikerjakan secara manual maupun dengan menyewa alat dari luar kelompok, sehingga biaya usaha tani menjadi tinggi dan jadwal tanam kerap terlambat",
+    manfaat:["mempercepat proses pengolahan tanah sehingga tanam dapat dilakukan serentak","menekan biaya sewa alat pengolahan tanah yang selama ini memberatkan anggota","meningkatkan indeks pertanaman (IP) dan produktivitas lahan"],
+    kategori:"sarana pengolahan tanah"},
+  traktor4:{
+    nama:"Traktor Roda Empat", singkat:"Traktor Roda Empat", sampul:"TRAKTOR RODA EMPAT", satuan:"unit", tahap:"pengolahan lahan",
+    fungsi:"mengolah lahan hamparan luas dengan kapasitas kerja tinggi dalam waktu singkat",
+    masalah:"hamparan lahan kelompok cukup luas sementara alat pengolah tanah berkapasitas besar belum tersedia, sehingga percepatan tanam sulit dicapai pada awal musim",
+    manfaat:["meningkatkan kapasitas kerja pengolahan tanah pada hamparan luas","mempercepat percepatan tanam pada awal musim","menekan biaya dan waktu olah tanah per hektar"],
+    kategori:"sarana pengolahan tanah"},
+  cultivator:{
+    nama:"Cultivator", singkat:"Cultivator", sampul:"CULTIVATOR", satuan:"unit", tahap:"pengolahan lahan dan pemeliharaan",
+    fungsi:"menggemburkan tanah, membuat guludan, serta mengendalikan gulma pada lahan kering dan hortikultura",
+    masalah:"pengolahan lahan kering dan penyiangan gulma masih dilakukan secara manual sehingga menyerap banyak tenaga kerja dan biaya",
+    manfaat:["mempermudah penyiapan lahan kering dan hortikultura","mengurangi kebutuhan tenaga kerja penyiangan","menjaga kondisi perakaran tanaman tetap optimal"],
+    kategori:"sarana pengolahan tanah"},
+  pompa:{
+    nama:"Pompa Air", singkat:"Pompa Air", sampul:"POMPA AIR", satuan:"unit", tahap:"pengairan",
+    fungsi:"mengalirkan air dari sumber air ke petakan sawah pada saat ketersediaan air terbatas",
+    masalah:"pada musim kemarau maupun saat giliran air irigasi tidak mencukupi, sebagian lahan anggota mengalami kekeringan dan terancam gagal panen",
+    manfaat:["mengamankan pertanaman dari risiko kekeringan dan puso","memungkinkan penambahan musim tanam pada lahan tadah hujan","menjamin ketersediaan air pada fase kritis pertumbuhan tanaman"],
+    kategori:"sarana pengairan"},
+  combine:{
+    nama:"Combine Harvester", singkat:"Combine Harvester", sampul:"COMBINE HARVESTER", satuan:"unit", tahap:"panen",
+    fungsi:"memanen, merontok, dan membersihkan gabah dalam satu rangkaian kerja",
+    masalah:"pemanenan masih dilakukan secara manual sehingga kehilangan hasil (losses) cukup tinggi, biaya panen besar, dan waktu panen berkepanjangan",
+    manfaat:["menekan kehilangan hasil panen secara signifikan","mempercepat waktu panen sehingga lahan segera siap untuk musim berikutnya","mengurangi biaya panen yang selama ini ditanggung petani"],
+    kategori:"sarana panen"},
+  transplanter:{
+    nama:"Rice Transplanter", singkat:"Rice Transplanter", sampul:"RICE TRANSPLANTER", satuan:"unit", tahap:"penanaman",
+    fungsi:"menanam bibit padi secara serentak dengan jarak tanam yang teratur",
+    masalah:"kegiatan tanam masih bergantung pada tenaga kerja tanam yang semakin langka dan mahal, sehingga jadwal tanam sering mundur",
+    manfaat:["mempercepat dan menyerentakkan waktu tanam","menghasilkan jarak tanam teratur yang mendukung populasi optimal","mengurangi ketergantungan pada tenaga kerja tanam yang terbatas"],
+    kategori:"sarana penanaman"},
+  thresher:{
+    nama:"Power Thresher", singkat:"Power Thresher", sampul:"POWER THRESHER", satuan:"unit", tahap:"panen dan pascapanen",
+    fungsi:"merontokkan gabah dari malai padi secara cepat dan bersih",
+    masalah:"perontokan gabah yang masih dilakukan secara manual menyebabkan kehilangan hasil tinggi dan memerlukan waktu serta tenaga yang besar",
+    manfaat:["menekan kehilangan hasil pada tahap perontokan","mempercepat penanganan gabah setelah panen","meningkatkan mutu gabah yang dihasilkan"],
+    kategori:"sarana pascapanen"},
+  cornsheller:{
+    nama:"Corn Sheller (Pemipil Jagung)", singkat:"Corn Sheller", sampul:"CORN SHELLER", satuan:"unit", tahap:"pascapanen",
+    fungsi:"memipil jagung dari tongkolnya dengan kapasitas besar dan tingkat kebersihan tinggi",
+    masalah:"pemipilan jagung masih dilakukan secara manual maupun menyewa alat dari luar desa sehingga biaya pascapanen tinggi dan mutu jagung menurun",
+    manfaat:["mempercepat proses pemipilan hasil panen jagung","menekan biaya jasa pemipilan yang selama ini ditanggung petani","memperbaiki mutu jagung pipilan sehingga harga jual meningkat"],
+    kategori:"sarana pascapanen"},
+  drumseeder:{
+    nama:"Drum Seeder (Alat Tanam Benih Langsung)", singkat:"Drum Seeder", sampul:"DRUM SEEDER", satuan:"unit", tahap:"penanaman",
+    fungsi:"menabur benih padi secara langsung dalam barisan yang teratur tanpa melalui persemaian",
+    masalah:"biaya dan waktu penyemaian serta tanam pindah cukup besar, sementara tenaga kerja tanam semakin sulit diperoleh",
+    manfaat:["memangkas biaya persemaian dan tanam pindah","mempersingkat umur tanaman di lapangan sehingga mendukung percepatan tanam","menghasilkan barisan tanaman teratur yang memudahkan pemeliharaan"],
+    kategori:"sarana penanaman"},
+  cornplanter:{
+    nama:"Alat Tanam Jagung (Corn Planter)", singkat:"Alat Tanam Jagung", sampul:"ALAT TANAM JAGUNG", satuan:"unit", tahap:"penanaman",
+    fungsi:"menanam benih jagung dengan jarak dan kedalaman yang seragam",
+    masalah:"penanaman jagung secara manual dengan tugal memerlukan waktu dan tenaga kerja yang besar dengan populasi tanaman yang sering tidak seragam",
+    manfaat:["mempercepat penanaman dengan populasi tanaman yang seragam","menghemat penggunaan benih","mengurangi biaya tenaga kerja tanam"],
+    kategori:"sarana penanaman"},
+  sprayer:{
+    nama:"Power Sprayer", singkat:"Power Sprayer", sampul:"POWER SPRAYER", satuan:"unit", tahap:"pemeliharaan tanaman",
+    fungsi:"mengaplikasikan pupuk cair dan pestisida secara merata pada pertanaman",
+    masalah:"pengendalian organisme pengganggu tumbuhan masih menggunakan alat semprot sederhana sehingga aplikasi tidak merata dan penanganan serangan hama menjadi terlambat",
+    manfaat:["mempercepat pengendalian organisme pengganggu tumbuhan","menghasilkan aplikasi yang lebih merata dan efisien","menekan kehilangan hasil akibat serangan hama dan penyakit"],
+    kategori:"sarana perlindungan tanaman"},
+  dryer:{
+    nama:"Mesin Pengering (Vertical Dryer)", singkat:"Mesin Pengering", sampul:"MESIN PENGERING", satuan:"unit", tahap:"pascapanen",
+    fungsi:"menurunkan kadar air gabah secara terkendali tanpa bergantung pada cuaca",
+    masalah:"pengeringan gabah masih mengandalkan sinar matahari sehingga pada musim hujan mutu gabah menurun dan harga jual anjlok",
+    manfaat:["menjaga mutu gabah meskipun panen jatuh pada musim hujan","mempersingkat waktu pengeringan hasil panen","meningkatkan posisi tawar dan harga jual hasil petani"],
+    kategori:"sarana pascapanen"},
+  rmu:{
+    nama:"Rice Milling Unit (RMU)", singkat:"RMU", sampul:"RICE MILLING UNIT", satuan:"unit", tahap:"pengolahan hasil",
+    fungsi:"menggiling gabah menjadi beras dengan rendemen dan mutu yang lebih baik",
+    masalah:"kelompok belum memiliki unit penggilingan sendiri sehingga nilai tambah hasil panen dinikmati pihak lain di luar kelompok",
+    manfaat:["meningkatkan nilai tambah hasil panen di tingkat kelompok","memperbaiki rendemen dan mutu beras yang dihasilkan","membuka peluang usaha bersama bagi kelompok tani"],
+    kategori:"sarana pengolahan hasil"},
+  excavator:{
+    nama:"Excavator Mini", singkat:"Excavator Mini", sampul:"EXCAVATOR MINI", satuan:"unit", tahap:"perbaikan infrastruktur lahan",
+    fungsi:"melakukan normalisasi saluran irigasi, pencetakan dan perbaikan petakan, serta penataan lahan",
+    masalah:"pendangkalan saluran irigasi dan kerusakan pematang menghambat distribusi air ke petakan anggota, sedangkan perbaikan manual tidak sebanding dengan luas kerusakan",
+    manfaat:["melancarkan distribusi air irigasi ke seluruh hamparan","mempercepat perbaikan dan penataan lahan usaha tani","mendukung peningkatan indeks pertanaman"],
+    kategori:"sarana prasarana lahan dan air"},
+  panen:{
+    nama:"Alat Panen Multiguna", singkat:"Alat Panen", sampul:"ALAT PANEN MULTIGUNA", satuan:"unit", tahap:"panen",
+    fungsi:"mempercepat kegiatan panen dan penanganan hasil di tingkat kelompok",
+    masalah:"kegiatan panen masih mengandalkan tenaga kerja manual sehingga waktu panen panjang dan kehilangan hasil tinggi",
+    manfaat:["mempercepat kegiatan panen kelompok","menekan kehilangan hasil di lapangan","menurunkan biaya panen per hektar"],
+    kategori:"sarana panen"},
+  custom:{nama:"",singkat:"",sampul:"",satuan:"unit",tahap:"usaha tani",fungsi:"",masalah:"",manfaat:[],kategori:"alat mesin pertanian"}
+};
+const ALSIN_LABEL = {
+  handtraktor:"Hand Traktor (Traktor Roda Dua)", traktor4:"Traktor Roda Empat", cultivator:"Cultivator",
+  pompa:"Pompa Air", combine:"Combine Harvester", transplanter:"Rice Transplanter",
+  thresher:"Power Thresher (Perontok Padi)", cornsheller:"Corn Sheller (Pemipil Jagung)",
+  drumseeder:"Drum Seeder", cornplanter:"Alat Tanam Jagung (Corn Planter)", sprayer:"Power Sprayer",
+  dryer:"Mesin Pengering (Vertical Dryer)", rmu:"Rice Milling Unit (RMU)", excavator:"Excavator Mini",
+  panen:"Alat Panen Multiguna", custom:"— Alsin lainnya (isi sendiri) —"
+};
+const SLOT_LABEL = {
+  logo:["Logo Kop","Logo instansi"], alsinImg:["Gambar Alsin","Foto di sampul"],
+  ttdPenyuluh:["TTD Penyuluh","Tanda tangan"], ttdKetua:["TTD Ketua","Tanda tangan"],
+  ttdKades:["TTD Kades","Tanda tangan"], ttdBpp:["TTD Ka. BPP","Tanda tangan"],
+  ktp0:["KTP Ketua","Hasil scan"], ktp1:["KTP Sekretaris","Hasil scan"], ktp2:["KTP Bendahara","Hasil scan"]
+};
+const NARASI = [
+  ["nSurat","Isi Surat Permohonan"],["nPengantar","Kata Pengantar"],["nLatar","A. Latar Belakang"],
+  ["nTujuan","B. Tujuan dan Manfaat"],["nSasaran","C. Sasaran dan Lokasi"],
+  ["nJenis","D. Jenis dan Volume Bantuan"],["nPenutup","E. Penutup"]
+];
+const NKEY = NARASI.map(n=>n[0]);
+
+/* ══════════════ UTIL ══════════════ */
+const $ = id => document.getElementById(id);
+const BULAN = ["Januari","Februari","Maret","April","Mei","Juni","Juli","Agustus","September","Oktober","November","Desember"];
+const esc = s => String(s==null?"":s).replace(/[&<>]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[c]));
+const up  = s => String(s||"").toUpperCase();
+const rxq = s => String(s).replace(/[.*+?^${}()|[\]\\]/g,"\\$&");
+function tglID(v){ if(!v) return ""; const d=new Date(v+"T00:00:00"); if(isNaN(d)) return v; return d.getDate()+" "+BULAN[d.getMonth()]+" "+d.getFullYear(); }
+function terbilang(n){
+  n=Math.floor(Math.abs(Number(n)||0));
+  const s=["nol","satu","dua","tiga","empat","lima","enam","tujuh","delapan","sembilan","sepuluh","sebelas"];
+  if(n<12) return s[n];
+  if(n<20) return terbilang(n-10)+" belas";
+  if(n<100) return (terbilang(Math.floor(n/10))+" puluh "+(n%10?terbilang(n%10):"")).trim();
+  if(n<200) return ("seratus "+(n%100?terbilang(n%100):"")).trim();
+  if(n<1000) return (terbilang(Math.floor(n/100))+" ratus "+(n%100?terbilang(n%100):"")).trim();
+  return String(n);
+}
+function lines(t){ return String(t||"").split("\n").filter(x=>x.trim()); }
+/* nama alsin dicetak miring di dalam teks, seperti dokumen aslinya */
+function ital(txt,a){
+  let h=esc(txt);
+  const kata=[...new Set([a.nama,a.singkat].filter(x=>x&&x.length>3))].sort((x,y)=>y.length-x.length);
+  kata.forEach(k=>{ h=h.replace(new RegExp(rxq(esc(k)),"gi"),m=>"@@i@@"+m+"@@/i@@"); });
+  return h.split("@@i@@").join("<i>").split("@@/i@@").join("</i>");
+}
+function paras(t,a){ return lines(t).map(x=>"<p>"+ital(x.trim(),a)+"</p>").join(""); }
+
+/* ══════════════ STATE ══════════════ */
+let dirty={}, anggota=[], img={};
+const KEY="project-rops-v1";
+/* localStorage tidak selalu tersedia (mis. dibuka lewat data: URL) */
+const LS={
+  get(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } },
+  set(k,v){ try{ localStorage.setItem(k,v); return true; }catch(e){ return false; } }
+};
+
+function alsinAktif(){
+  const k=$("alsin").value, a=Object.assign({},ALSIN[k]);
+  if(k==="custom"){
+    a.nama=$("alsinNama").value.trim()||"Alat Mesin Pertanian";
+    a.singkat=a.nama; a.sampul=up(a.nama);
+    a.tahap=$("alsinTahap").value.trim()||"usaha tani";
+    a.fungsi=$("alsinFungsi").value.trim()||("mendukung kegiatan "+a.tahap+" anggota kelompok");
+    a.masalah="sarana "+a.tahap+" yang dimiliki kelompok belum memadai sehingga kegiatan usaha tani anggota belum berjalan optimal";
+    a.manfaat=["memperlancar kegiatan "+a.tahap+" anggota kelompok","menekan biaya usaha tani","meningkatkan produksi dan pendapatan petani"];
+    a.kategori="alat mesin pertanian";
+  }
+  const sp=$("spek").value.trim();
+  a.namaSpek = sp ? a.nama+" ("+sp+")" : a.nama;
+  a.judulSampul = $("judulSampul").value.trim() ? up($("judulSampul").value.trim()) : (a.sampul||up(a.nama));
+  const m=a.nama.match(/\(([^)]+)\)/);
+  a.kurung = m ? m[1] : "";
+  return a;
+}
+function D(){
+  const a=alsinAktif(), vol=Number($("volume").value)||1;
+  const d={
+    poktan:$("poktan").value.trim()||"........................",
+    desa:$("desa").value.trim()||"........................",
+    kec:$("kecamatan").value.trim()||"........................",
+    kab:$("kabupaten").value.trim()||"........................",
+    prov:$("provinsi").value.trim()||"........................",
+    komoditas:$("komoditas").value.trim()||"padi",
+    hamparan:$("hamparan").value.trim(),
+    tahun:$("tahun").value.trim()||String(new Date().getFullYear()),
+    koordinat:$("koordinat").value.trim(),
+    alsin:a, vol:vol, satuan:$("satuan").value.trim()||a.satuan||"unit",
+    nomor:$("nomor").value.trim(), lampiran:$("lampiran").value.trim(),
+    tanggal:tglID($("tanggal").value),
+    ketua:$("ketua").value.trim(), sekretaris:$("sekretaris").value.trim(), bendahara:$("bendahara").value.trim(),
+    kades:$("kades").value.trim(), penyuluh:$("penyuluh").value.trim(), nipPenyuluh:$("nipPenyuluh").value.trim(),
+    koordinator:$("koordinator").value.trim(), nipKoordinator:$("nipKoordinator").value.trim(),
+    bpp:$("bpp").value.trim()||"BPP", bppTembusan:$("bppTembusan").value.trim(),
+    tujuan:$("tujuan").value, tembusan:$("tembusan").value, variasi:$("variasi").value
+  };
+  d.alamat=$("alamat").value.trim()||("Desa "+d.desa+", Kecamatan "+d.kec+", Kabupaten "+d.kab);
+  d.volTeks=d.vol+" ("+terbilang(d.vol)+") "+d.satuan;
+  d.kota=$("kota").value.trim()||d.desa;
+  d.kotaTgl=d.kota+", "+(d.tanggal||"...............");
+  return d;
+}
+const V=(d,arr)=> d.variasi==="R" ? arr[Math.floor(Math.random()*arr.length)] : (arr[{A:0,B:1,C:2}[d.variasi]??0]||arr[0]);
+
+/* ══════════════ GENERATOR NARASI ══════════════ */
+const GEN = {
+  nSurat(d){ const a=d.alsin; return V(d,[
+`Sebagaimana diketahui bahwa Kabupaten ${d.kab} adalah salah satu daerah lumbung ${d.komoditas} yang terbesar di ${d.prov} dimana mayoritas pekerjaan masyarakatnya adalah petani tanaman pangan. Namun sarana ${a.tahap} belum memadai sehingga mutu yang dihasilkan kurang baik sehingga berdampak pada pendapatan petani.
+
+Jadi salah satu upaya meningkatkan mutu dan produksi hasil pertanian khususnya meningkatkan pendapatan masyarakat petani adalah maka perlu penyediaan Alat Mesin Pertanian (Alsintan) yang memadai termasuk dengan menyediakan ${a.singkat}. Pengadaan ini sangat berguna dan manfaatnya langsung dirasakan oleh petani, seperti ${a.fungsi}.
+
+Maka dari itu kami dalam hal ini Kelompok Tani ${up(d.poktan)} yang berlokasi di Desa ${d.desa} memohon kepada bapak sudilah kiranya dapat membantu kami dalam pengadaan ${a.namaSpek} sebanyak ${d.volTeks}.
+
+Demikian permohonan kami atas perhatian Bapak diucapkan banyak terima kasih.`,
+`Bersama surat ini kami sampaikan bahwa Kelompok Tani ${up(d.poktan)} Desa ${d.desa} Kecamatan ${d.kec} Kabupaten ${d.kab} mengelola usaha tani ${d.komoditas} dengan dukungan ${a.kategori} yang masih sangat terbatas. Kondisi di lapangan menunjukkan bahwa ${a.masalah}.
+
+Untuk mengatasi keadaan tersebut, kelompok kami sangat membutuhkan ${a.nama} yang berfungsi ${a.fungsi}. Ketersediaan alat ini akan berdampak langsung terhadap kelancaran kegiatan ${a.tahap}, penurunan biaya usaha tani, serta peningkatan produksi anggota kelompok.
+
+Sehubungan dengan hal tersebut, kami mengajukan permohonan bantuan ${a.namaSpek} sebanyak ${d.volTeks} untuk dimanfaatkan secara bersama oleh seluruh anggota kelompok.
+
+Demikian permohonan ini kami buat dengan sebenarnya, atas perhatian dan bantuan Bapak kami ucapkan terima kasih.`,
+`Dalam rangka mendukung peningkatan produksi ${d.komoditas} dan kesejahteraan petani di Desa ${d.desa} Kecamatan ${d.kec} Kabupaten ${d.kab}, dengan ini kami Kelompok Tani ${up(d.poktan)} mengajukan permohonan bantuan ${a.namaSpek} sebanyak ${d.volTeks}.
+
+Permohonan ini kami sampaikan mengingat ${a.masalah}, sementara alat yang dimohonkan berfungsi ${a.fungsi} sehingga sangat dibutuhkan oleh anggota kelompok kami.
+
+Demikian permohonan kami, atas perhatian dan bantuan Bapak kami ucapkan terima kasih.`]); },
+
+  nPengantar(d){ const a=d.alsin; return V(d,[
+`Dengan memanjatkan puji syukur kehadirat Tuhan Yang Maha Esa serta karunia-Nya, bersama ini kami kelompok tani ${up(d.poktan)} menyatakan ingin mengajukan bantuan ${a.singkat}, mengingat kelompok ${up(d.poktan)} sangat membutuhkan bantuan tersebut yang berguna untuk ${a.fungsi} sehingga dapat meningkatkan penghasilan petani khususnya pada kelompok tani kami.
+
+Dengan menyusun proposal ini mohon untuk dikaji dan dievaluasi oleh instansi yang terkait, dengan bantuan ${a.singkat} tersebut. Semoga dapat berjalan sesuai dengan yang diharapkan sehingga penghasilan petani dapat meningkat khususnya anggota kelompok tani ${up(d.poktan)} dan masyarakat Desa ${d.desa} pada umumnya.
+
+Akhirnya dengan memohon Ridho dari Tuhan Yang Maha Esa kiranya dapat mengabulkan harapan kami serta senantiasa memberikan bimbingan kepada kita. Aamiin YRA`,
+`Puji syukur kami panjatkan kehadirat Tuhan Yang Maha Esa, karena atas rahmat-Nya proposal permohonan bantuan ${a.nama} ini dapat kami susun dan sampaikan kepada instansi yang berwenang.
+
+Proposal ini disusun berdasarkan kondisi nyata usaha tani anggota kelompok tani ${up(d.poktan)} Desa ${d.desa} Kecamatan ${d.kec} Kabupaten ${d.kab}, dimana ${a.masalah}. Bantuan ${a.singkat} yang berfungsi ${a.fungsi} kami pandang sebagai kebutuhan yang mendesak untuk memperlancar kegiatan ${a.tahap} anggota kelompok.
+
+Kami menyadari penyusunan proposal ini masih jauh dari sempurna, karena itu saran dan masukan dari semua pihak sangat kami harapkan. Semoga proposal ini dapat dikaji dan dipertimbangkan sebagaimana mestinya sehingga produksi dan pendapatan anggota kelompok tani dapat meningkat.
+
+Atas perhatian dan kerja sama semua pihak, kami ucapkan terima kasih.`,
+`Puji syukur kehadirat Tuhan Yang Maha Esa atas rahmat dan karunia-Nya sehingga proposal permohonan bantuan ${a.nama} kelompok tani ${up(d.poktan)} ini dapat diselesaikan.
+
+Bantuan ${a.singkat} sangat kami butuhkan untuk ${a.fungsi}, sehingga kegiatan ${a.tahap} anggota kelompok dapat berjalan lebih efisien dan hasil usaha tani meningkat.
+
+Besar harapan kami proposal ini mendapat perhatian dan persetujuan dari instansi terkait. Atas perhatian dan bantuannya, kami ucapkan terima kasih.`]); },
+
+  nLatar(d){ const a=d.alsin; const luas=d.hamparan?` dengan hamparan lahan seluas ${d.hamparan} hektar`:""; return V(d,[
+`Berdasarkan keadaan lapangan dan luas lahan Kelompok Tani ${up(d.poktan)}${luas} yang ada, maka untuk mengelola lahan tersebut dibutuhkan alat ${a.singkat} yang baik dan mencukupi diharapkan lahan tersebut diolah sempurna akan meningkatkan produktif lahan.
+
+Kontribusi para petani pada pembangunan pertanian yang cukup besar karena posisi petani merupakan pelaku utama sebagai pengelola sektor pertanian secara luas. Tujuan pemerintah untuk menciptakan swasembada pangan harus diikuti dengan sentuhan teknologi pertanian, yang pada akhirnya meningkatkan pendapatan dan kesejahteraan petani.
+
+Salah satu alat pertanian yang sangat dibutuhkan yaitu ${a.singkat} yang berfungsi ${a.fungsi}, lebih dari itu keberadaan ${a.singkat} masih sangat terbatas di kalangan para petani, sementara ${a.masalah}.
+
+Kelompok Tani ${up(d.poktan)} sebagai kelompok tani yang berada di Desa ${d.desa} Kecamatan ${d.kec} Kabupaten ${d.kab} sangat membutuhkan ${a.singkat} untuk mendukung usaha tani khususnya petani/pekebun. Oleh karena itu, kami memohon kepada Menteri Pertanian RI, cq. Dirjen Prasarana dan Sarana untuk memberikan bantuan ${a.singkat} sehingga kegiatan pertanian kami dapat berjalan dengan baik dan petani semakin sejahtera kehidupannya.`,
+`Pembangunan pertanian diarahkan pada peningkatan produksi dan produktivitas guna mewujudkan ketahanan pangan serta meningkatkan kesejahteraan petani. Salah satu faktor penentu keberhasilan tersebut adalah ketersediaan ${a.kategori} yang memadai di tingkat kelompok tani.
+
+Kelompok Tani ${up(d.poktan)} Desa ${d.desa} Kecamatan ${d.kec} Kabupaten ${d.kab} mengusahakan komoditas ${d.komoditas}${luas}. Dari hasil identifikasi kebutuhan di lapangan diketahui bahwa ${a.masalah}.
+
+Kondisi tersebut menyebabkan biaya usaha tani menjadi tinggi, waktu kerja menjadi panjang, dan hasil yang diperoleh anggota belum optimal. ${a.nama} yang berfungsi ${a.fungsi} merupakan jawaban atas permasalahan tersebut karena mampu meningkatkan efisiensi kegiatan ${a.tahap}.
+
+Berdasarkan pertimbangan tersebut, Kelompok Tani ${up(d.poktan)} mengajukan permohonan bantuan ${a.singkat} kepada Menteri Pertanian RI cq. Dirjen Prasarana dan Sarana Pertanian agar usaha tani anggota kelompok dapat berjalan lebih baik dan pendapatan petani meningkat.`,
+`Kelompok Tani ${up(d.poktan)} Desa ${d.desa} Kecamatan ${d.kec} Kabupaten ${d.kab} merupakan kelompok tani yang mengusahakan komoditas ${d.komoditas}${luas}. Dalam menjalankan usaha taninya, anggota kelompok menghadapi kendala dimana ${a.masalah}.
+
+${a.nama} berfungsi ${a.fungsi} sehingga sangat dibutuhkan untuk memperlancar kegiatan ${a.tahap} di tingkat kelompok. Ketersediaan alat ini akan menekan biaya usaha tani sekaligus meningkatkan produksi anggota.
+
+Oleh karena itu, kami mengajukan permohonan bantuan ${a.singkat} kepada Menteri Pertanian RI cq. Dirjen Prasarana dan Sarana Pertanian.`]); },
+
+  nTujuan(d){ const a=d.alsin;
+    const m=a.manfaat.length?a.manfaat:["memperlancar kegiatan usaha tani anggota kelompok"];
+    const mList=m.map((x,i)=>(i===m.length-1&&m.length>1?"serta ":"")+x).join("; ");
+    return V(d,[
+`Tujuan pengusulan proposal alsintan ini yaitu agar petani yang secara ekonomi belum berkemampuan membeli ${a.singkat}, dapat memperoleh bantuan pemerintah berupa alsintan tersebut yang meringankan beban biaya dan mempersingkat waktu dalam kegiatan ${a.tahap}.
+
+Manfaat yang dapat dirasakan petani, yaitu ${mList}. Hal tersebut berimbas pada meningkatnya indeks pertanaman dan peningkatan produksi hasil pertanian, yang secara langsung dapat meningkatkan kesejahteraan petani.`,
+`Tujuan dari pengusulan bantuan ${a.nama} ini adalah untuk memenuhi kebutuhan ${a.kategori} anggota Kelompok Tani ${up(d.poktan)} yang selama ini belum terpenuhi, sehingga kegiatan ${a.tahap} dapat dilaksanakan secara tepat waktu, efisien, dan terjangkau oleh seluruh anggota.
+
+Adapun manfaat yang diharapkan antara lain: ${mList}. Secara keseluruhan, bantuan ini diharapkan mampu meningkatkan produksi ${d.komoditas} sekaligus pendapatan dan kesejahteraan anggota kelompok tani.`,
+`Pengusulan bantuan ${a.singkat} bertujuan agar anggota Kelompok Tani ${up(d.poktan)} memperoleh sarana ${a.tahap} yang memadai tanpa terbebani biaya pengadaan yang berat.
+
+Manfaatnya bagi petani yaitu ${mList}, sehingga produksi ${d.komoditas} dan pendapatan anggota kelompok dapat meningkat.`]); },
+
+  nSasaran(d){
+    const luas=d.hamparan?`dengan hamparan lahan persawahan ${d.hamparan} Hektar`:"yang menjadi kawasan pertanian";
+    const jml=anggota.length?`sebanyak ${anggota.length} (${terbilang(anggota.length)}) orang anggota`:"mempunyai beberapa orang anggota";
+    return V(d,[
+`Sasaran dari bantuan yang diusulkan dalam proposal ini, yaitu para petani yang tergabung dalam Kelompok Tani ${up(d.poktan)} di Desa ${d.desa} Kecamatan ${d.kec} Kabupaten ${d.kab} ${jml}.
+
+Lokasi Kelompok Tani ${up(d.poktan)} merupakan salah satu daerah di Kecamatan ${d.kec} yang menjadi kawasan pertanian di Desa ${d.desa} ${luas}.${d.koordinat?" Adapun titik koordinat lokasi kelompok yaitu "+d.koordinat+".":""}`,
+`Sasaran penerima manfaat bantuan ini adalah seluruh petani yang tergabung dalam Kelompok Tani ${up(d.poktan)} ${jml}, yang mengusahakan komoditas ${d.komoditas} di wilayah Desa ${d.desa}.
+
+Adapun lokasi kegiatan berada di Desa ${d.desa} Kecamatan ${d.kec} Kabupaten ${d.kab} Provinsi ${d.prov}, ${luas}.${d.koordinat?" Titik koordinat lokasi: "+d.koordinat+".":""} Daftar nama calon petani dan calon lokasi (CPCL) terlampir dalam proposal ini.`,
+`Sasaran bantuan ini yaitu anggota Kelompok Tani ${up(d.poktan)} ${jml} di Desa ${d.desa} Kecamatan ${d.kec} Kabupaten ${d.kab}, ${luas}.${d.koordinat?" Titik koordinat: "+d.koordinat+".":""} Daftar CPCL terlampir.`]); },
+
+  nJenis(d){ const a=d.alsin; return V(d,[
+`Jenis bantuan yang diusulkan yaitu ${a.namaSpek} untuk dimanfaatkan untuk kegiatan ${a.tahap} di Kelompok Tani ${up(d.poktan)} volume yang diusulkan yaitu ${d.volTeks}.`,
+`Bantuan yang diusulkan dalam proposal ini berupa ${a.namaSpek} sebanyak ${d.volTeks}. Alat tersebut akan dikelola dan dimanfaatkan secara bersama oleh seluruh anggota Kelompok Tani ${up(d.poktan)} untuk kegiatan ${a.tahap}, serta dipelihara sesuai ketentuan yang berlaku.`,
+`Jenis dan volume bantuan yang diusulkan: ${a.namaSpek} sebanyak ${d.volTeks}, dimanfaatkan untuk kegiatan ${a.tahap} anggota Kelompok Tani ${up(d.poktan)}.`]); },
+
+  nPenutup(d){ return V(d,[
+`Demikian proposal ini kami ajukan, mudah-mudahan dapat disetujui dan diterima dengan baik. Semoga Tuhan Yang Maha Esa senantiasa meridhoi setiap langkah dan semua amalan yang kita perbuat.
+
+Atas perhatian dan partisipasinya kami ucapkan terima kasih.`,
+`Demikian proposal permohonan bantuan ${d.alsin.singkat} ini kami susun sebagai bahan pertimbangan bagi instansi terkait. Besar harapan kami permohonan ini dapat dikabulkan sehingga kegiatan usaha tani anggota kelompok berjalan lebih baik dan produksi ${d.komoditas} meningkat.
+
+Atas perhatian, pertimbangan, dan bantuan yang diberikan, kami ucapkan terima kasih.`,
+`Demikian proposal ini kami ajukan. Besar harapan kami permohonan ini dapat dipertimbangkan dan disetujui. Atas perhatian dan bantuannya kami ucapkan terima kasih.`]); }
+};
+function regen(id){ dirty[id]=false; $(id).value=GEN[id](D()); markLock(); render(); sim(); }
+function susunUlangSemua(){ const d=D(); NKEY.forEach(k=>{dirty[k]=false; $(k).value=GEN[k](d);}); markLock(); render(); sim(); }
+function autoNarasi(){ const d=D(); NKEY.forEach(k=>{ if(!dirty[k]) $(k).value=GEN[k](d); }); markLock(); }
+function markLock(){ NKEY.forEach(k=>{ const b=$("lock-"+k); if(b){ b.textContent=dirty[k]?"terkunci":"otomatis"; b.className="lock"+(dirty[k]?" on":""); } }); }
+
+/* ══════════════ ANGGOTA ══════════════ */
+function tambahAnggota(n=1){
+  for(let i=0;i<n;i++){
+    const j=anggota.length===0?"Ketua":anggota.length===1?"Sekretaris":anggota.length===2?"Bendahara":"Anggota";
+    anggota.push({nama:"",jabatan:j,luas:""});
+  }
+  renderAnggota(); render();
+}
+function hapusAnggota(i){ anggota.splice(i,1); renderAnggota(); autoNarasi(); render(); sim(); }
+function renderAnggota(){
+  const tb=$("tbAnggota"); tb.innerHTML="";
+  anggota.forEach((a,i)=>{
+    const tr=document.createElement("tr");
+    tr.innerHTML=`<td style="color:var(--ink-3);font-size:11px;text-align:center;font-family:'JetBrains Mono',monospace">${i+1}</td>
+      <td><input type="text" value="${esc(a.nama)}" oninput="anggota[${i}].nama=this.value;render();sim()"></td>
+      <td><input type="text" value="${esc(a.jabatan)}" oninput="anggota[${i}].jabatan=this.value;render();sim()"></td>
+      <td><input type="text" value="${esc(a.luas)}" oninput="anggota[${i}].luas=this.value;render();hitung();sim()"></td>
+      <td><button class="xbtn" onclick="hapusAnggota(${i})">×</button></td>`;
+    tb.appendChild(tr);
+  });
+  hitung();
+}
+function hitung(){
+  $("sumJml").textContent=anggota.length;
+  const t=anggota.reduce((s,a)=>s+(parseFloat(String(a.luas).replace(",","."))||0),0);
+  $("sumLuas").textContent=(Math.round(t*100)/100).toString().replace(".",",");
+}
+function togglePaste(){ const w=$("pasteWrap"); w.style.display=w.style.display==="none"?"block":"none"; }
+function prosesPaste(tambah){
+  const raw=$("pasteBox").value.trim(); if(!raw) return;
+  const rows=raw.split("\n").map(l=>l.trim()).filter(Boolean).map(l=>{
+    const c=l.includes("\t")?l.split("\t"):l.split(/\s*[;|]\s*/);
+    return {nama:(c[0]||"").trim(),jabatan:(c[1]||"Anggota").trim(),luas:(c[2]||"").trim()};
+  });
+  anggota=tambah?anggota.concat(rows):rows;
+  $("pasteBox").value=""; $("pasteWrap").style.display="none";
+  renderAnggota(); autoNarasi(); render(); sim();
+}
+
+/* ══════════════ RENDER DOKUMEN ══════════════ */
+function kop(d){
+  return `<div class="kop">
+    ${img.logo?`<img class="emblem" src="${img.logo}" alt="">`:""}
+    <div class="k1">KELOMPOK TANI ${esc(up(d.poktan))}</div>
+    <div class="k2">DESA ${esc(up(d.desa))} KECAMATAN ${esc(up(d.kec))}</div>
+    <div class="k2">KABUPATEN ${esc(up(d.kab))}</div>
+    <div class="rule"></div>
+  </div>`;
+}
+function sig(jab,nama,nip,ttd){
+  return `<div class="c">${esc(jab)}<div class="ttdspace">${ttd?`<img src="${ttd}" alt="">`:""}</div>
+    <div class="nm">${esc(up(nama)||"........................")}</div>${nip?`<div class="nip">NIP. ${esc(nip)}</div>`:""}</div>`;
+}
+function render(){
+  const d=D(), a=d.alsin, P=[], pakaiNomor=$("pgNomor").checked;
+  let no=0; const pg=()=>{ no++; return pakaiNomor?`<div class="pgno">${no}</div>`:""; };
+
+  /* ── 1. SAMPUL ── */
+  P.push(`<div class="page sampul"><div class="cvframe">
+    <div class="cv-t1">PROPOSAL</div>
+    <div class="cv-t2">PERMOHONAN BANTUAN</div>
+    <div class="cv-t3">${esc(a.judulSampul)}</div>
+    ${img.alsinImg?`<img class="cv-img" src="${img.alsinImg}" alt="">`:""}
+    <div class="cv-gap"></div>
+    <div class="cv-oleh">OLEH</div>
+    <div class="cv-idn">
+      <div>KELOMPOK TANI</div><div>: ${esc(up(d.poktan))}</div>
+      <div>DESA</div><div>: ${esc(up(d.desa))}</div>
+      <div>KECAMATAN</div><div>: ${esc(up(d.kec))}</div>
+      <div>KABUPATEN</div><div>: ${esc(up(d.kab))}</div>
+      <div>TAHUN</div><div>: ${esc(d.tahun)}</div>
+    </div>
+    <div class="cv-gap"></div>
+  </div></div>`);
+
+  /* ── 2. SURAT PERMOHONAN ── */
+  const tuju=lines(d.tujuan).map(l=>{
+    const t=l.trim();
+    if(t.startsWith("*")){ const s=t.slice(1).trim(); const m=s.match(/^(\S+\.)\s+([\s\S]*)$/);
+      return m?`<div class="yth"><span>${esc(m[1])}</span><span>${esc(m[2])}</span></div>`
+              :`<div class="yth"><span></span><span>${esc(s)}</span></div>`; }
+    if(t.startsWith(">")) return `<div class="kota">${esc(t.slice(1).trim())}</div>`;
+    return `<div class="plain">${esc(t)}</div>`;
+  }).join("");
+  P.push(`<div class="page">${kop(d)}
+    <div class="suratkop">
+      <div class="kiri">
+        <div><span>Nomor</span><span>: ${esc(d.nomor||"..............................")}</span></div>
+        <div><span>Lampiran</span><span>: ${esc(d.lampiran||"1 (satu) bundel Proposal")}</span></div>
+        <div><span>Perihal</span><span>: Permohonan Bantuan <i>${esc(a.singkat||a.nama)}</i>${
+          a.kurung?`<div style="padding-left:.7cm"><i>(${esc(a.kurung)})</i></div>`:""}</span></div>
+      </div>
+      <div class="kanan">${tuju}</div>
+    </div>
+    <p class="noind">Dengan Hormat</p>
+    ${paras($("nSurat").value,a)}
+    <div class="rightblok">${esc(d.kotaTgl)}</div>
+    <div class="sig">
+      ${sig("Penyuluh Desa "+d.desa, d.penyuluh, d.nipPenyuluh, img.ttdPenyuluh)}
+      ${sig("Ketua Kelompok,", d.ketua, "", img.ttdKetua)}
+    </div>
+    <div class="center" style="margin-top:12pt">Mengetahui:</div>
+    <div class="center">Kepala Desa ${esc(d.desa)}</div>
+    <div class="sig one">${sig("", d.kades, "", img.ttdKades)}</div>
+    <div style="margin-top:12pt;font-size:11.5pt">Tembusan:<br>${lines(d.tembusan).map((l,i)=>
+      `${i===0?"Yth: ":"<span style='display:inline-block;width:1.05cm'></span>"}${i+1}. ${esc(l)}`).join("<br>")}</div>
+    ${pg()}
+  </div>`);
+
+  /* ── 3. KATA PENGANTAR ── */
+  P.push(`<div class="page">${kop(d)}
+    <div class="doc-title">KATA PENGANTAR</div>
+    ${paras($("nPengantar").value,a)}
+    <div style="margin-top:18pt;display:flex;justify-content:flex-end">
+      <div class="center" style="min-width:6.5cm">${esc(d.kotaTgl)}<br>Ketua Kelompok
+        <div class="ttdspace">${img.ttdKetua?`<img src="${img.ttdKetua}" alt="">`:""}</div>
+        <div>${esc(up(d.ketua)||"........................")}</div>
+      </div>
+    </div>
+    ${pg()}
+  </div>`);
+
+  /* ── 4. DAFTAR ISI ── */
+  if($("pgDaftar").checked){
+    const utama=[["Surat Proposal","1"],["Kata Pengantar","2"],["Daftar Isi","3"]];
+    const sub=[["A.","Latar Belakang","4"],["B.","Tujuan dan Manfaat","4"],["C.","Sasaran dan Lokasi","4"],
+               ["D.","Jenis dan Bantuan yang Diusulkan","5"],["E.","Penutup","5"]];
+    P.push(`<div class="page">${kop(d)}
+      <div class="doc-title">DAFTAR ISI</div>
+      ${utama.map(r=>`<div class="dot"><span>${esc(r[0])}</span><span class="dots"></span><span>${r[1]}</span></div>`).join("")}
+      ${sub.map(r=>`<div class="dot sub"><span class="lbl"><span>${r[0]}</span><span>${esc(r[1])}</span></span><span class="dots"></span><span>${r[2]}</span></div>`).join("")}
+      <div style="margin-top:10pt">Lampiran</div>
+      ${pg()}
+    </div>`);
+  }
+
+  /* ── 5. ISI A–C ── */
+  P.push(`<div class="page">${kop(d)}
+    <div class="doc-title">PROPOSAL BANTUAN ${esc(up(a.singkat||a.nama))}</div>
+    <h3 class="bab">A. LATAR BELAKANG</h3>${paras($("nLatar").value,a)}
+    <h3 class="bab">B. TUJUAN DAN MANFAAT</h3>${paras($("nTujuan").value,a)}
+    <h3 class="bab">C. SASARAN DAN LOKASI</h3>${paras($("nSasaran").value,a)}
+    ${pg()}
+  </div>`);
+
+  /* ── 6. ISI D–E ── */
+  P.push(`<div class="page">${kop(d)}
+    <h3 class="bab">D. JENIS DAN VOLUME BANTUAN YANG DIUSULKAN</h3>${paras($("nJenis").value,a)}
+    <h3 class="bab">E. PENUTUP</h3>${paras($("nPenutup").value,a)}
+    <div class="center" style="margin-top:12pt">Pengurus Kelompok Tani ${esc(up(d.poktan))}</div>
+    <div class="rightblok" style="margin-top:8pt">${esc(d.kotaTgl)}</div>
+    <div class="sig">
+      ${sig("Ketua Kelompok,", d.ketua, "", img.ttdKetua)}
+      ${sig("Sekretaris,", d.sekretaris, "", "")}
+    </div>
+    <div class="center" style="margin-top:10pt">Mengetahui:</div>
+    <div class="sig one">${sig("Penyuluh Desa "+d.desa+",", d.penyuluh, d.nipPenyuluh, img.ttdPenyuluh)}</div>
+    ${pg()}
+  </div>`);
+
+  /* ── 7. SUSUNAN PENGURUS ── */
+  if($("pgPengurus").checked){
+    P.push(`<div class="page">${kop(d)}
+      <div class="doc-title" style="margin-top:16pt;line-height:2">SUSUNAN PENGURUS KELOMPOK TANI &ldquo;${esc(up(d.poktan))}&rdquo;<br>
+        DESA ${esc(up(d.desa))} KECAMATAN ${esc(up(d.kec))}<br>KABUPATEN ${esc(up(d.kab))}</div>
+      <div class="identitas indent" style="margin-top:18pt">
+        <div><span>KETUA</span><span>:</span><span>${esc(up(d.ketua))}</span></div>
+        <div><span>SEKRETARIS</span><span>:</span><span>${esc(up(d.sekretaris))}</span></div>
+        <div><span>BENDAHARA</span><span>:</span><span>${esc(up(d.bendahara))}</span></div>
+      </div>
+      <div class="rightblok" style="margin-top:16pt">${esc(d.kotaTgl)}</div>
+      <div class="sig">
+        ${sig("Penyuluh Desa "+d.desa+",", d.penyuluh, d.nipPenyuluh, img.ttdPenyuluh)}
+        ${sig("Ketua,", d.ketua, "", img.ttdKetua)}
+      </div>
+      <div class="center" style="margin-top:12pt">Mengetahui:</div>
+      <div class="sig">
+        ${sig("Kepala "+d.bpp, d.koordinator, d.nipKoordinator, img.ttdBpp)}
+        ${sig("Kepala Desa "+d.desa, d.kades, "", img.ttdKades)}
+      </div>
+    </div>`);
+  }
+
+  /* ── 8. KTP PENGURUS ── */
+  if($("pgKtp").checked){
+    const jab=["KETUA","SEKRETARIS","BENDAHARA"];
+    P.push(`<div class="page">${kop(d)}
+      <div class="doc-title">KTP PENGURUS KELOMPOK TANI ${esc(up(d.poktan))}</div>
+      ${jab.map((j,i)=>`<div class="ktp-slot"><div class="lbl">${j}</div>
+        <div class="box">${img["ktp"+i]?`<img src="${img["ktp"+i]}" alt="">`:""}</div></div>`).join("")}
+    </div>`);
+  }
+
+  /* ── 9. PEMBATAS LAMPIRAN ── */
+  if($("pgLamp").checked){
+    P.push(`<div class="page"><div class="lamp">${"LAMPIRAN".split("").map(c=>`<div>${c}</div>`).join("")}</div></div>`);
+  }
+
+  /* ── 10. CPCL ── */
+  if($("pgCpcl").checked){
+    const total=anggota.reduce((s,x)=>s+(parseFloat(String(x.luas).replace(",","."))||0),0);
+    P.push(`<div class="page" data-fit="soft">
+      <div class="doc-title" style="line-height:1.95;margin-top:6pt">CALON PETANI CALON LOKASI<br>BANTUAN SARANA PERTANIAN<br>
+        KELOMPOK TANI &ldquo;${esc(up(d.poktan))}&rdquo;<br>DESA ${esc(up(d.desa))} KECAMATAN ${esc(up(d.kec))}<br>KABUPATEN ${esc(up(d.kab))}</div>
+      <div class="identitas">
+        <div><span>Nama kelompok tani</span><span>:</span><span>${esc(d.poktan)}</span></div>
+        <div><span>Komoditas</span><span>:</span><span>${esc(d.komoditas)}</span></div>
+        <div><span>Jenis bantuan</span><span>:</span><span>${esc(a.namaSpek)} — ${esc(d.volTeks)}</span></div>
+        <div><span>Alamat</span><span>:</span><span>${esc(d.alamat)}</span></div>
+        <div><span>Titik Koordinat</span><span>:</span><span>${esc(d.koordinat||"-")}</span></div>
+      </div>
+      <table class="doc">
+        <thead><tr><th style="width:1.2cm">NO</th><th>NAMA</th><th style="width:3.2cm">JABATAN</th><th style="width:3cm">LUAS LAHAN (Ha)</th></tr></thead>
+        <tbody>${anggota.length?anggota.map((x,i)=>`<tr><td class="c">${i+1}</td><td>${esc(up(x.nama))}</td><td class="c">${esc(x.jabatan)}</td><td class="c">${esc(x.luas)}</td></tr>`).join(""):`<tr><td class="c">1</td><td>&nbsp;</td><td></td><td></td></tr>`}
+        <tr><td class="c" colspan="3"><b>JUMLAH</b></td><td class="c"><b>${(Math.round(total*100)/100).toString().replace(".",",")}</b></td></tr></tbody>
+      </table>
+      <div class="rightblok" style="margin-top:8pt">${esc(d.kotaTgl)}</div>
+      <div class="sig">
+        ${sig("Penyuluh Pertanian Desa "+d.desa, d.penyuluh, d.nipPenyuluh, img.ttdPenyuluh)}
+        ${sig("Ketua Kelompok Tani "+d.poktan, d.ketua, "", img.ttdKetua)}
+      </div>
+      <div class="center" style="margin-top:10pt">Mengetahui,</div>
+      <div class="sig one">${sig("Koordinator "+d.bpp, d.koordinator, d.nipKoordinator, img.ttdBpp)}</div>
+    </div>`);
+  }
+
+  $("stage").innerHTML = P.map((h,i)=>`<div class="sheetwrap"><span class="pgmark">Halaman ${i+1}</span>${h}</div>`).join("");
+  fitPages();
+}
+
+/* Menyusutkan isi halaman secukupnya agar tetap muat satu lembar A4 */
+function fitPages(){
+  if(innerWidth<=1100) return;
+  document.querySelectorAll(".page").forEach(p=>{
+    const mode=p.dataset.fit||"1";
+    let body=p.querySelector(":scope > .pgbody");
+    if(!body){
+      body=document.createElement("div"); body.className="pgbody";
+      const keep=[...p.children].filter(c=>c.classList.contains("pgno"));
+      while(p.firstChild) body.appendChild(p.firstChild);
+      keep.forEach(k=>{ if(k.parentNode===body) body.removeChild(k); });
+      p.appendChild(body); keep.forEach(k=>p.appendChild(k));
+    }
+    body.style.transform=""; body.style.width=""; body.style.height="";
+    const cs=getComputedStyle(p);
+    const avail=1122.5-parseFloat(cs.paddingTop)-parseFloat(cs.paddingBottom);
+    const h=body.scrollHeight;
+    if(h<=avail+1) return;
+    let s=avail/h; const min=mode==="soft"?0.82:0.66;
+    if(s<min){ if(mode==="soft") return; s=min; }
+    body.style.transformOrigin="top left";
+    body.style.width=(100/s)+"%";
+    body.style.transform="scale("+s.toFixed(4)+")";
+    body.style.height=Math.ceil(h*s)+"px";
+  });
+}
+addEventListener("resize",fitPages);
+
+/* ══════════════ GAMBAR ══════════════ */
+function renderSlots(){
+  document.querySelectorAll(".slot").forEach(el=>{
+    const k=el.dataset.k, L=SLOT_LABEL[k];
+    el.classList.toggle("filled",!!img[k]);
+    el.innerHTML=`<span class="tag">${L[0]}</span><button class="rm" onclick="event.stopPropagation();hapusImg('${k}')">×</button>`
+      +(img[k]?`<img src="${img[k]}" alt="">`
+       :`<span class="ph"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>${L[1]}</span>`);
+  });
+}
+function hapusImg(k){ delete img[k]; renderSlots(); render(); sim(); }
+function pilihImg(k){
+  const inp=document.createElement("input"); inp.type="file"; inp.accept="image/*";
+  inp.onchange=()=>{ const f=inp.files[0]; if(!f) return;
+    const r=new FileReader(); r.onload=()=>{ img[k]=r.result; renderSlots(); render(); sim(); }; r.readAsDataURL(f); };
+  inp.click();
+}
+
+/* ══════════════ SIMPAN / MUAT ══════════════ */
+const FIELDS=["poktan","desa","kecamatan","kabupaten","provinsi","komoditas","hamparan","tahun","koordinat","alamat",
+  "alsin","alsinNama","alsinTahap","alsinFungsi","volume","satuan","spek","judulSampul","nomor","lampiran","tanggal","kota",
+  "tujuan","tembusan","ketua","sekretaris","bendahara","kades","penyuluh","nipPenyuluh","koordinator","nipKoordinator",
+  "bpp","bppTembusan","variasi",...NKEY];
+const CHECKS=["pgDaftar","pgPengurus","pgKtp","pgLamp","pgCpcl","pgNomor"];
+function snapshot(){
+  const o={v:2,f:{},c:{},anggota,dirty,img};
+  FIELDS.forEach(k=>o.f[k]=$(k).value);
+  CHECKS.forEach(k=>o.c[k]=$(k).checked);
+  return o;
+}
+function restore(o){
+  if(!o||!o.f) return;
+  FIELDS.forEach(k=>{ if(o.f[k]!==undefined) $(k).value=o.f[k]; });
+  CHECKS.forEach(k=>{ if(o.c&&o.c[k]!==undefined) $(k).checked=o.c[k]; });
+  anggota=o.anggota||[]; dirty=o.dirty||{}; img=o.img||{};
+  toggleCustom(); renderSlots(); renderAnggota(); markLock(); render();
+}
+let simT;
+function sim(){
+  $("dot").classList.add("saving"); $("saveTxt").textContent="Menyimpan";
+  clearTimeout(simT);
+  simT=setTimeout(()=>{
+    $("saveTxt").textContent = LS.set(KEY,JSON.stringify(snapshot())) ? "Tersimpan" : "Lokal mati";
+    $("dot").classList.remove("saving");
+  },500);
+}
+function exportJSON(){
+  const b=new Blob([JSON.stringify(snapshot(),null,2)],{type:"application/json"});
+  const a=document.createElement("a"); a.href=URL.createObjectURL(b);
+  a.download="proposal-"+($("poktan").value.trim().replace(/\s+/g,"-").toLowerCase()||"kelompok")+".json"; a.click();
+  toast("Berkas diekspor");
+}
+function importJSON(inp){
+  const f=inp.files[0]; if(!f) return;
+  const r=new FileReader();
+  r.onload=()=>{ try{ restore(JSON.parse(r.result)); sim(); toast("Berhasil diimpor"); }catch(e){ toast("File tidak valid"); } };
+  r.readAsText(f); inp.value="";
+}
+function resetAll(){
+  if(!confirm("Kosongkan seluruh isian?")) return;
+  FIELDS.forEach(k=>{ const el=$(k); if(el.tagName==="SELECT") el.selectedIndex=0; else el.value=""; });
+  CHECKS.forEach(k=>$(k).checked=(k!=="pgNomor"));
+  $("volume").value=1; $("satuan").value="unit"; $("tahun").value=String(new Date().getFullYear());
+  $("tanggal").value=new Date().toISOString().slice(0,10);
+  anggota=[]; dirty={}; img={};
+  isiDefaultTeks(); toggleCustom(); renderSlots(); tambahAnggota(3); autoNarasi(); render(); sim();
+  toast("Isian dikosongkan");
+}
+let toastT;
+function toast(m){ const t=$("toast"); t.textContent=m; t.classList.add("show"); clearTimeout(toastT); toastT=setTimeout(()=>t.classList.remove("show"),1900); }
+function tog(id){ $(id).classList.toggle("collapsed"); }
+function toggleTheme(){
+  document.body.classList.toggle("dark");
+  LS.set("rops-theme",document.body.classList.contains("dark")?"dark":"light");
+  updateThemeIcons();
+}
+function updateThemeIcons(){
+  const dk=document.body.classList.contains("dark");
+  $("sun").style.display=dk?"block":"none"; $("moon").style.display=dk?"none":"block";
+}
+function toggleCustom(){ $("wrapCustom").style.display=$("alsin").value==="custom"?"block":"none"; }
+function isiDefaultTeks(){
+  $("tujuan").value="Kepada\n*Yth. Menteri Pertanian RI\n*Cq. Dirjen Prasarana dan Sarana Pertanian\nDi-\n>Jakarta";
+  $("tembusan").value="Koordinator BPP setempat\nPertinggal";
+}
+
+/* ══════════════ INIT ══════════════ */
+(function init(){
+  if(LS.get("rops-theme")!=="light") document.body.classList.add("dark");
+  updateThemeIcons();
+
+  const sel=$("alsin");
+  Object.keys(ALSIN_LABEL).forEach(k=>{ const o=document.createElement("option"); o.value=k; o.textContent=ALSIN_LABEL[k]; sel.appendChild(o); });
+
+  $("narasiBox").innerHTML=NARASI.map(([k,l])=>`
+    <div class="field">
+      <div class="lblrow"><label>${l}</label>
+        <span style="display:flex;gap:7px;align-items:center"><span class="lock" id="lock-${k}">otomatis</span>
+        <button class="btn btn-line btn-sm" onclick="regen('${k}')" title="Susun ulang">↻</button></span></div>
+      <textarea id="${k}" style="min-height:${k==="nSurat"||k==="nLatar"?"170px":"120px"}"></textarea>
+    </div>`).join("");
+
+  $("tahun").value=String(new Date().getFullYear());
+  $("tanggal").value=new Date().toISOString().slice(0,10);
+  $("satuan").value="unit";
+  isiDefaultTeks();
+
+  FIELDS.forEach(k=>{
+    const el=$(k);
+    const h=()=>{
+      if(NKEY.includes(k)){ dirty[k]=true; markLock(); }
+      if(k==="alsin"){ toggleCustom(); $("satuan").value=ALSIN[$("alsin").value].satuan||"unit"; $("judulSampul").value=""; }
+      if(!NKEY.includes(k)) autoNarasi();
+      render(); sim();
+    };
+    el.addEventListener("input",h);
+    if(el.tagName==="SELECT") el.addEventListener("change",h);
+  });
+  CHECKS.forEach(k=>$(k).addEventListener("change",()=>{render();sim();}));
+  document.querySelectorAll(".slot").forEach(el=>el.addEventListener("click",()=>pilihImg(el.dataset.k)));
+
+  const saved=LS.get(KEY);
+  if(saved){
+    try{ restore(JSON.parse(saved)); $("saveTxt").textContent="Tersimpan"; toast("Data terakhir dipulihkan"); }
+    catch(e){ renderSlots(); tambahAnggota(3); autoNarasi(); render(); }
+  } else { renderSlots(); tambahAnggota(3); autoNarasi(); render(); }
+})();
+
+/* ══════════════ CONTOH ══════════════ */
+function contohData(){
+  const s=(k,v)=>$(k).value=v;
+  s("poktan","GALIMPUA I"); s("desa","Otting"); s("kecamatan","Pitu Riawa");
+  s("kabupaten","Sidenreng Rappang"); s("provinsi","Sulawesi Selatan");
+  s("komoditas","Padi"); s("hamparan","1.110"); s("tahun","2026");
+  s("koordinat","-3.845458, 119.938127"); s("alamat","");
+  s("alsin","handtraktor"); s("volume","1"); s("satuan","unit"); s("spek",""); s("judulSampul","HANDTRAKTOR");
+  s("nomor","001/KT-GLMI XVIII/IV/2026"); s("lampiran","1 (satu) bundel Proposal");
+  s("tanggal","2026-04-18"); s("kota","Otting");
+  s("ketua","LACACCING"); s("sekretaris","FIRMAN"); s("bendahara","FIRNANDA");
+  s("kades","PALLAWAGAU"); s("penyuluh","MUHAMMAD FACHRURI, S.TP"); s("nipPenyuluh","19940702 202012 1 002");
+  s("koordinator","HARYANA HATTA SP, MP"); s("nipKoordinator","19870220 202012 2 003");
+  s("bpp","BPP Pitu Riawa"); s("bppTembusan","Koordinator BPP Pitu Riawa di Betao");
+  $("tembusan").value="Koordinator BPP Pitu Riawa di Betao\nPertinggal";
+  anggota=[["LACACCING","Ketua","2"],["FIRMAN","Sekretaris","1,8"],["FIRNANDA","Bendahara","1,9"],
+    ["ALAMSYAH","Anggota","2"],["SATRIYANI HALIM","Anggota","0,8"],["RASMAWATI","Anggota","1,9"],
+    ["YASIR","Anggota","2"],["ZAINUDDIN","Anggota","2"],["SOALEHE","Anggota","0,8"],["JAMALUDDIN","Anggota","1,25"]]
+    .map(r=>({nama:r[0],jabatan:r[1],luas:r[2]}));
+  dirty={}; toggleCustom(); renderAnggota(); autoNarasi(); render(); sim(); toast("Contoh data dimuat");
+}
+</script>
+</body>
+</html>
