@@ -362,6 +362,16 @@
         <div class="field"><label>Nomor Surat</label><input type="text" id="nomor" placeholder="001/KT-GLMI XVIII/IV/2026"></div>
         <div class="field"><label>Lampiran</label><input type="text" id="lampiran" placeholder="1 (satu) bundel Proposal"></div>
         <div class="field"><label>Tanggal Surat</label><input type="date" id="tanggal"></div>
+        <div class="field"><label>Gaya Penulisan Tanggal</label>
+          <select id="tglGaya" onchange="toggleTgl()">
+            <option value="panjang">18 April 2026</option>
+            <option value="romawi">18 April 2026 (bulan romawi: 18/IV/2026)</option>
+            <option value="strip">18-04-2026</option>
+            <option value="miring">18/04/2026</option>
+            <option value="manual">Tulis sendiri…</option>
+          </select></div>
+        <div class="field" id="fTglManual" style="display:none"><label>Tanggal Ditulis Sendiri</label>
+          <input type="text" id="tglManual" placeholder="mis. 18 April 2026"></div>
         <div class="field"><label>Kota Penandatanganan</label><input type="text" id="kota" placeholder="otomatis dari nama desa"></div>
         <div class="field full"><label>Ditujukan Kepada</label><textarea id="tujuan" style="min-height:92px"></textarea>
           <div class="hint">Awali baris dengan <b>*</b> untuk dicetak tebal (Yth. / Cq.), dengan <b>&gt;</b> untuk dijorokkan (nama kota).</div></div>
@@ -608,7 +618,23 @@ const BULAN = ["Januari","Februari","Maret","April","Mei","Juni","Juli","Agustus
 const esc = s => String(s==null?"":s).replace(/[&<>]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[c]));
 const up  = s => String(s||"").toUpperCase();
 const rxq = s => String(s).replace(/[.*+?^${}()|[\]\\]/g,"\\$&");
-function tglID(v){ if(!v) return ""; const d=new Date(v+"T00:00:00"); if(isNaN(d)) return v; return d.getDate()+" "+BULAN[d.getMonth()]+" "+d.getFullYear(); }
+const ROMAWI=["I","II","III","IV","V","VI","VII","VIII","IX","X","XI","XII"];
+function tglID(v,gaya){
+  if(gaya==="manual") return $("tglManual").value.trim();
+  if(!v) return "";
+  const d=new Date(v+"T00:00:00"); if(isNaN(d)) return v;
+  const D2=String(d.getDate()).padStart(2,"0"), M2=String(d.getMonth()+1).padStart(2,"0");
+  switch(gaya){
+    case "romawi": return D2+"/"+ROMAWI[d.getMonth()]+"/"+d.getFullYear();
+    case "strip":  return D2+"-"+M2+"-"+d.getFullYear();
+    case "miring": return D2+"/"+M2+"/"+d.getFullYear();
+    default:       return d.getDate()+" "+BULAN[d.getMonth()]+" "+d.getFullYear();
+  }
+}
+function toggleTgl(){
+  $("fTglManual").style.display = $("tglGaya").value==="manual" ? "" : "none";
+  render(); sim();
+}
 function terbilang(n){
   n=Math.floor(Math.abs(Number(n)||0));
   const s=["nol","satu","dua","tiga","empat","lima","enam","tujuh","delapan","sembilan","sepuluh","sebelas"];
@@ -670,7 +696,7 @@ function D(){
     koordinat:$("koordinat").value.trim(),
     alsin:a, vol:vol, satuan:$("satuan").value.trim()||a.satuan||"unit",
     nomor:$("nomor").value.trim(), lampiran:$("lampiran").value.trim(),
-    tanggal:tglID($("tanggal").value),
+    tanggal:tglID($("tanggal").value,$("tglGaya").value),
     ketua:$("ketua").value.trim(), sekretaris:$("sekretaris").value.trim(), bendahara:$("bendahara").value.trim(),
     kades:$("kades").value.trim(), penyuluh:$("penyuluh").value.trim(), nipPenyuluh:$("nipPenyuluh").value.trim(),
     koordinator:$("koordinator").value.trim(), nipKoordinator:$("nipKoordinator").value.trim(),
@@ -1116,6 +1142,7 @@ function pilihImg(k){
 /* ══════════════ SIMPAN / MUAT ══════════════ */
 const FIELDS=["poktan","desa","kecamatan","kabupaten","provinsi","komoditas","hamparan","tahun","koordinat","alamat",
   "alsin","alsinNama","alsinTahap","alsinFungsi","volume","satuan","spek","judulSampul","nomor","lampiran","tanggal","kota",
+  "tglGaya","tglManual",
   "tujuan","tembusan","ketua","sekretaris","bendahara","kades","penyuluh","nipPenyuluh","koordinator","nipKoordinator",
   "bpp","bppTembusan","variasi",...NKEY];
 const CHECKS=["pgDaftar","pgPengurus","pgKtp","pgLamp","pgCpcl","pgNomor"];
@@ -1130,7 +1157,8 @@ function restore(o){
   FIELDS.forEach(k=>{ if(o.f[k]!==undefined) $(k).value=o.f[k]; });
   CHECKS.forEach(k=>{ if(o.c&&o.c[k]!==undefined) $(k).checked=o.c[k]; });
   anggota=o.anggota||[]; dirty=o.dirty||{}; img=o.img||{};
-  toggleCustom(); renderSlots(); renderAnggota(); markLock(); render();
+  toggleCustom(); $("fTglManual").style.display = $("tglGaya").value==="manual" ? "" : "none";
+  renderSlots(); renderAnggota(); markLock(); render();
 }
 let simT;
 function sim(){
@@ -1162,23 +1190,6 @@ function b64utf8(str){
 }
 const bungkus76 = s => s.replace(/(.{76})/g,"$1\r\n");
 
-/* buang seluruh blok @media supaya Word tidak memungut aturan layar/cetak */
-function tanpaMedia(css){
-  let out="",i=0;
-  for(;;){
-    const m=css.indexOf("@media",i);
-    if(m<0) return out+css.slice(i);
-    out+=css.slice(i,m);
-    let j=css.indexOf("{",m);
-    if(j<0) return out;
-    for(let d=0;j<css.length;j++){
-      if(css[j]==="{") d++;
-      else if(css[j]==="}"){ d--; if(!d){ j++; break; } }
-    }
-    i=j;
-  }
-}
-
 /* ubah wadah grid jadi tabel: anak ke-n mengisi kolom ke-(n mod kol) */
 function gridKeTabel(el,kol,lebar){
   if(!el||!el.parentNode) return;
@@ -1204,13 +1215,39 @@ function gridKeTabel(el,kol,lebar){
 function halamanUntukWord(page){
   const c=page.cloneNode(true);
   c.querySelectorAll(".pgbody").forEach(b=>{ b.style.transform=""; b.style.width=""; b.style.height=""; });
+  /* Word mengabaikan max-width/object-fit dan memasang gambar sebesar resolusi
+     aslinya — scan KTP 1400 px akan meluber sampai 37 cm. Ukuran tata letak yang
+     sudah dihitung di layar (offsetWidth, tak terpengaruh transform auto-fit)
+     dipindahkan jadi ukuran tetap dalam pt. */
+  const asli=page.querySelectorAll("img"), salin=c.querySelectorAll("img");
+  asli.forEach((im,i)=>{
+    const t=salin[i]; if(!t) return;
+    const w=im.offsetWidth, h=im.offsetHeight;
+    if(w>0&&h>0){
+      t.style.width=(w*0.75).toFixed(1)+"pt";
+      t.style.height=(h*0.75).toFixed(1)+"pt";
+      t.setAttribute("width",Math.round(w)); t.setAttribute("height",Math.round(h));
+    }
+  });
   /* dari wadah terdalam ke terluar */
   c.querySelectorAll(".suratkop .kiri > div").forEach(e=>gridKeTabel(e,2,["2.3cm",null]));
+  c.querySelectorAll(".identitas > div").forEach(e=>gridKeTabel(e,3,["5cm","8pt",null]));
   c.querySelectorAll(".suratkop .kanan .yth").forEach(e=>gridKeTabel(e,2,["1.15cm",null]));
   c.querySelectorAll(".cv-idn").forEach(e=>gridKeTabel(e,2,["38%",null]));
   c.querySelectorAll(".sig.one").forEach(e=>gridKeTabel(e,1));
   c.querySelectorAll(".sig").forEach(e=>gridKeTabel(e,2,["50%","50%"]));
   c.querySelectorAll(".suratkop").forEach(e=>gridKeTabel(e,2,["52%","48%"]));
+  c.querySelectorAll('[style*="display:flex"]').forEach(e=>{
+    const kanan=/flex-end/.test(e.getAttribute("style")||"");
+    const t=document.createElement("table");
+    t.setAttribute("cellspacing","0"); t.setAttribute("cellpadding","0");
+    if(kanan) t.setAttribute("align","right");
+    t.style.cssText="border-collapse:collapse;border:none;margin-top:18pt";
+    const tr=document.createElement("tr"), td=document.createElement("td");
+    td.style.cssText="border:none;padding:0";
+    [...e.children].forEach(ch=>td.appendChild(ch));
+    tr.appendChild(td); t.appendChild(tr); e.replaceWith(t);
+  });
   c.querySelectorAll(".dot .lbl").forEach(e=>{  /* huruf bab + judulnya */
     const t=gridKeTabel(e,2,[".85cm",null]);
     if(t&&t.querySelector("td")) t.querySelector("td").style.paddingRight="2pt";
@@ -1227,7 +1264,7 @@ function halamanUntukWord(page){
     const rule=k.querySelector(".rule");
     const teks=document.createElement("div"); teks.style.textAlign="center";
     [...k.children].forEach(ch=>{ if(ch!==em&&ch!==rule) teks.appendChild(ch); });
-    em.style.cssText="height:19mm;position:static";
+    em.style.position="static";
     const t=document.createElement("table");
     t.setAttribute("cellspacing","0"); t.setAttribute("cellpadding","0");
     t.style.cssText="width:100%;border-collapse:collapse;border:none";
@@ -1240,9 +1277,12 @@ function halamanUntukWord(page){
   return c;
 }
 
-function unduhWord(){
+async function unduhWord(){
   const pages=[...document.querySelectorAll("#stage .page")];
   if(!pages.length){ toast("Dokumen belum siap"); return; }
+  /* ukuran tata letak gambar baru terbaca setelah gambarnya dimuat */
+  await Promise.all([...document.querySelectorAll("#stage img")]
+    .map(im=>im.complete?null:new Promise(r=>{im.onload=im.onerror=r})));
   const BASE="file:///C:/project-rops/";
   const lampiran=[], peta=new Map();
   const isi=pages.map((p,i)=>{
@@ -1264,28 +1304,85 @@ function unduhWord(){
     return c.outerHTML;
   }).join("\n");
 
+  /* Lembar & huruf mengikuti dokumen acuan: F4 (21,6 x 33 cm), Times New Roman 12pt,
+     spasi 1,5, paragraf menjorok 1,25 cm tanpa jarak antar-paragraf, tepi kiri
+     2 cm + gutter. Gaya ditulis khusus untuk Word — CSS layar tidak disalin ke
+     sini karena penuh var(), calc(), grid, dan flex yang tidak dikenal Word. */
   const gut=(getComputedStyle(pages[0]).getPropertyValue("--gutter")||"10mm").trim();
   const kiriCm=(2+(parseFloat(gut)||10)/10).toFixed(2);
-  const css=tanpaMedia([...document.querySelectorAll("style")].map(e=>e.textContent).join("\n"))+`
-/* ── penyesuaian khusus Word ── */
-@page Section1{ size:21.0cm 29.7cm; margin:1.8cm 2.0cm 1.6cm ${kiriCm}cm; mso-page-orientation:portrait }
+  const css=`
+@page Section1{ size:21.6cm 33.0cm; margin:2.54cm 2.0cm 2.5cm ${kiriCm}cm; mso-page-orientation:portrait }
 div.Section1{ page:Section1 }
-body{ background:#fff!important;margin:0 }
-.page{ width:auto!important;min-height:0!important;padding:0!important;margin:0!important;
-  box-shadow:none!important;border:none }
-.pgbody{ display:block!important }
-.pgno{ position:static!important;display:block;text-align:center;margin-top:14pt }
-.cvframe{ display:block!important;min-height:23cm;padding:14mm 10mm }
-.cv-img{ display:block;margin-left:auto;margin-right:auto }
-.cv-gap{ height:14mm }
-.ktp-slot .box{ display:block!important;text-align:center }
-.ttdspace{ display:block!important;text-align:center }
-.kop{ position:static!important }
-.kop .emblem{ position:static!important }
-.dot .dots{ display:block;transform:none }
-/* wadah grid sudah jadi <table> tapi kelasnya ikut terbawa — kembalikan ke tabel */
-table{ display:table!important;border-collapse:collapse;mso-table-lspace:0;mso-table-rspace:0 }
-td{ vertical-align:top }
+body{ margin:0;background:#fff;color:#000;font-family:"Times New Roman",serif;font-size:12.0pt }
+p,div,span,td,th,li{ font-family:"Times New Roman",serif;font-size:12.0pt }
+img{ border:none }
+table{ border-collapse:collapse;mso-table-lspace:0pt;mso-table-rspace:0pt }
+td,th{ vertical-align:top;padding:0 }
+
+.page{ width:auto;margin:0;padding:0;border:none;background:#fff;page-break-after:always }
+.pgbody{ display:block }
+p{ margin:0;text-align:justify;text-indent:1.25cm;line-height:150% }
+p.noind{ text-indent:0 }
+.center{ text-align:center;text-indent:0 }
+.rightblok{ margin-top:12.0pt;text-align:right;text-indent:0 }
+
+/* sampul */
+.cvframe{ border:2.25pt solid #000;padding:1.4cm 1.0cm;text-align:center }
+.cv-t1{ font-size:36.0pt;line-height:110% }
+.cv-t2{ font-size:15.0pt;font-weight:bold;margin-top:0.7cm }
+.cv-t3{ font-size:15.0pt;font-weight:bold;margin-top:0.4cm }
+.cv-img{ margin-top:0.9cm;margin-left:auto;margin-right:auto;display:block }
+.cv-gap{ height:1.6cm;font-size:2.0pt;line-height:0 }
+.cv-oleh{ font-size:16.0pt;margin-top:0.6cm }
+table.cv-idn{ margin-top:1.0cm;margin-left:auto;margin-right:auto;width:auto;text-align:left }
+table.cv-idn td{ font-size:13.0pt;padding:0 0.15cm 0.26cm 0;white-space:nowrap }
+
+/* kop surat */
+.kop{ text-align:center;padding-bottom:3.0pt }
+.kop .k1{ font-size:14.0pt;font-weight:bold }
+.kop .k2{ font-size:11.5pt;font-weight:bold }
+.kop .rule{ border-top:2.5pt solid #000;margin-top:3.0pt;font-size:2.0pt;line-height:0 }
+.doc-title{ text-align:center;font-size:11.5pt;font-weight:bold;margin:7.0pt 0 11.0pt;text-indent:0 }
+h3.bab{ font-size:12.0pt;font-weight:bold;margin:11.0pt 0 5.0pt;text-indent:0 }
+
+/* kepala surat */
+table.suratkop{ margin:10.0pt 0 16.0pt;width:100% }
+.kanan{ padding-left:12.0pt }
+table.yth{ font-weight:bold;margin-bottom:3.0pt }
+.plain{ margin-bottom:3.0pt }
+.kota{ padding-left:1.7cm }
+
+/* identitas berlabel */
+.identitas{ margin:10.0pt 0 12.0pt }
+.identitas.indent{ margin-left:2.0cm }
+.identitas table td{ padding-bottom:3.0pt }
+
+/* tanda tangan */
+table.sig{ margin-top:8.0pt;width:100% }
+table.sig td{ text-align:center }
+.sig .c{ text-align:center }
+.ttdspace{ height:1.9cm;text-align:center;overflow:hidden }
+.nm{ font-weight:bold;text-decoration:underline }
+.nip{ font-size:11.0pt }
+
+/* daftar isi */
+table.dot{ width:100%;margin-bottom:7.0pt }
+table.dot td{ vertical-align:bottom }
+table.dot.sub{ margin-left:1.2cm;width:auto }
+.dot .dots{ display:block;border-bottom:1.5pt dotted #444;margin-bottom:3.0pt }
+
+/* tabel CPCL */
+table.doc{ width:100%;font-size:11.0pt;margin:8.0pt 0 }
+table.doc th,table.doc td{ border:1.0pt solid #000;padding:3.0pt 5.0pt;font-size:11.0pt;vertical-align:top }
+table.doc th{ background:#efefef;text-align:center;font-weight:bold }
+table.doc td.c{ text-align:center }
+
+/* KTP & pembatas lampiran */
+.ktp-slot{ margin-bottom:0.6cm }
+.ktp-slot .lbl{ text-align:center;font-size:11.0pt;margin-bottom:0.3cm }
+.ktp-slot .box{ text-align:center }
+.lamp{ text-align:center;font-size:20.0pt;line-height:235%;margin-top:9.0cm }
+.pgno{ text-align:center;font-size:11.0pt;margin-top:14.0pt;text-indent:0 }
 `;
   const judul=($("judulSampul").value||"Proposal").trim();
   const doc='<html xmlns:o="urn:schemas-microsoft-com:office:office" '
@@ -1334,6 +1431,7 @@ function resetAll(){
   $("volume").value=1; $("satuan").value="unit"; $("tahun").value=String(new Date().getFullYear());
   $("tanggal").value=new Date().toISOString().slice(0,10);
   anggota=[]; dirty={}; img={};
+  $("fTglManual").style.display="none";
   isiDefaultTeks(); toggleCustom(); renderSlots(); tambahAnggota(3); autoNarasi(); render(); sim();
   toast("Isian dikosongkan");
 }

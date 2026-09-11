@@ -8,6 +8,9 @@ Buka `index.html` di browser, isi form di panel kiri, lalu unduh hasilnya:
 - **Cetak / PDF** — pilih tujuan *Save as PDF*, ukuran A4, margin *None*.
 - **Word** — mengunduh `.doc` yang bisa langsung disunting di Microsoft Word.
 
+Tanggal surat punya lima gaya penulisan (18 April 2026 · 18/IV/2026 · 18-04-2026 ·
+18/04/2026 · tulis sendiri) yang berlaku untuk seluruh blok tanda tangan sekaligus.
+
 ## Struktur dokumen yang dihasilkan
 
 1. **Sampul** berbingkai — PROPOSAL / PERMOHONAN BANTUAN / nama alsin / gambar alsin / OLEH / identitas kelompok
@@ -40,8 +43,19 @@ Halaman 4, 7, 8, 9, dan 10 bisa dimatikan lewat kartu **Gambar & Halaman**.
   dari situ supaya margin dokumen ikut menyesuaikan.
 - **Ekspor Word** merakit MHTML (*multipart/related*) berekstensi `.doc`: bagian pertama HTML, tiap gambar
   jadi bagian tersendiri yang dirujuk relatif — Word tidak memuat gambar dari `data:` URI, sedangkan alat
-  ini harus tetap satu berkas tanpa pustaka luar. Semua tata letak `grid`/`flex` (kop, kepala surat, blok
-  tanda tangan, identitas sampul, daftar isi) diterjemahkan dulu menjadi `<table>` karena Word tidak
-  mengenal keduanya. Gambar yang sama, misalnya logo kop di banyak halaman, hanya dilampirkan sekali.
+  ini harus tetap satu berkas tanpa pustaka luar. Gambar yang sama, misalnya logo kop di banyak halaman,
+  hanya dilampirkan sekali.
+
+  Berkas Word **tidak memakai CSS layar sama sekali**; ia punya lembar gaya sendiri yang ditulis khusus,
+  tanpa `var()`, `calc()`, `grid`, maupun `flex` — Word tidak mengenal semua itu dan hasilnya berantakan.
+  Setiap wadah `grid`/`flex` (kop berlogo, kepala surat, blok tanda tangan, identitas sampul, daftar isi,
+  baris berlabel CPCL) diterjemahkan menjadi `<table>`, dengan kelas wadahnya ikut dibawa supaya aturan
+  turunan seperti `.sig .c` tetap berlaku. Tiap gambar juga diberi ukuran tetap dalam `pt` yang diambil
+  dari tata letak layar — Word mengabaikan `max-width`/`object-fit` dan akan memasang gambar sebesar
+  resolusi aslinya, sehingga satu scan KTP 1400 px bisa meluber sampai 37 cm.
+
+  Ukuran lembar dan tipografinya mengikuti dokumen proposal acuan: **F4 (21,6 × 33 cm)**, Times New Roman
+  12 pt, spasi 1,5, paragraf menjorok 1,25 cm tanpa jarak antar-paragraf, tepi 2,54 cm atas · 2 cm kanan ·
+  2,5 cm bawah · 2 cm + gutter di kiri. Pratinjau layar dan Cetak/PDF tetap A4.
 - **Simpan otomatis** ke localStorage; **Ekspor/Impor** `.json` untuk memakai ulang data pada kelompok lain.
 - Daftar anggota bisa ditempel langsung dari Excel (Nama · Jabatan · Luas).
