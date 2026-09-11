@@ -158,9 +158,11 @@
   .sheetwrap{flex:0 0 auto}
   .pgmark{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-3);
     margin-bottom:5px;display:block}
+  /* --gutter = ruang jilid tambahan di tepi kiri; dipakai layar, cetak, dan Word */
   .page{
+    --gutter:10mm;
     width:210mm;min-height:297mm;background:#fff;color:#000;
-    padding:18mm 20mm 16mm;box-shadow:0 10px 34px rgba(0,0,0,.22);
+    padding:18mm 20mm 16mm calc(20mm + var(--gutter));box-shadow:0 10px 34px rgba(0,0,0,.22);
     font-family:"Times New Roman",Times,serif;font-size:12pt;line-height:1.45;
     position:relative;flex:0 0 auto;
   }
@@ -169,7 +171,7 @@
   .page p.noind{text-indent:0}
 
   /* sampul */
-  .page.sampul{padding:12mm}
+  .page.sampul{padding:12mm 12mm 12mm calc(12mm + var(--gutter))}
   .cvframe{border:2.2pt solid #000;min-height:273mm;padding:16mm 12mm 14mm;display:flex;flex-direction:column;align-items:center;text-align:center}
   .cv-t1{font-size:36pt;line-height:1.1}
   .cv-t2{font-size:15pt;font-weight:bold;margin-top:7mm;letter-spacing:.4pt}
@@ -231,7 +233,7 @@
 
   /* lampiran */
   .lamp{min-height:250mm;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:20pt;line-height:2.35}
-  .pgno{position:absolute;bottom:10mm;left:0;right:0;text-align:center;font-size:11pt}
+  .pgno{position:absolute;bottom:10mm;left:var(--gutter);right:0;text-align:center;font-size:11pt}
 
   @media print{
     body{background:#fff}
@@ -248,7 +250,7 @@
     .shell{grid-template-columns:1fr;height:auto}
     .wrap{overflow:visible;padding:16px 12px 30px}
     .stage{overflow:visible;border-left:none;border-top:1px solid var(--line);padding:18px 8px 60px}
-    .page{width:100%;min-height:auto;padding:12mm 9mm}
+    .page{width:100%;min-height:auto;padding:12mm 9mm 12mm calc(9mm + var(--gutter))}
     .cvframe{min-height:auto;padding:10mm 6mm}
     input,select,textarea{font-size:16px}
     textarea{font-size:13px}
@@ -282,6 +284,10 @@
     <button class="btn btn-line" onclick="contohData()">Contoh</button>
     <button class="btn btn-line" onclick="exportJSON()">Ekspor</button>
     <button class="btn btn-line" onclick="document.getElementById('impor').click()">Impor</button>
+    <button class="btn btn-line" onclick="unduhWord()" title="Unduh sebagai dokumen Word">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5 5 5-5"/><path d="M12 15V3"/></svg>
+      Word
+    </button>
     <button class="btn btn-emerald" onclick="window.print()">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><path d="M6 14h12v8H6z"/></svg>
       Cetak / PDF
@@ -1056,10 +1062,54 @@ function renderSlots(){
   });
 }
 function hapusImg(k){ delete img[k]; renderSlots(); render(); sim(); }
+/* Semua gambar dinormalkan ke PNG: format apa pun yang bisa dibaca peramban
+   (JPG, WEBP, HEIC) di-decode lalu dikodekan ulang lewat kanvas. Sisi terpanjang
+   dibatasi, dan kalau hasilnya masih di atas anggaran ukuran, diperkecil
+   bertahap — PNG tidak memampatkan foto seperti JPG, tanpa batas ini satu foto
+   bisa menghabiskan jatah localStorage. */
+const IMG_SISI=1400, IMG_SISI_MIN=700, IMG_ANGGARAN=1.6e6;
+function keUkuranKB(dataURL){ return Math.round(dataURL.length*0.75/1024); }
+function kePNG(file){
+  return new Promise((res,rej)=>{
+    const r=new FileReader();
+    r.onerror=()=>rej(new Error("baca"));
+    r.onload=()=>{
+      const im=new Image();
+      im.onerror=()=>rej(new Error("format"));
+      im.onload=()=>{
+        try{
+          let sisi=IMG_SISI, out="";
+          do{
+            const f=Math.min(1,sisi/Math.max(im.width,im.height));
+            const c=document.createElement("canvas");
+            c.width=Math.max(1,Math.round(im.width*f));
+            c.height=Math.max(1,Math.round(im.height*f));
+            const g=c.getContext("2d");
+            g.imageSmoothingEnabled=true; g.imageSmoothingQuality="high";
+            g.drawImage(im,0,0,c.width,c.height);
+            out=c.toDataURL("image/png");
+            sisi=Math.round(sisi*0.8);
+          }while(out.length>IMG_ANGGARAN&&sisi>=IMG_SISI_MIN);
+          if(out.slice(0,15)!=="data:image/png,".slice(0,15)&&out.indexOf("data:image/png")!==0)
+            return rej(new Error("png"));
+          res(out);
+        }catch(e){ rej(e); }
+      };
+      im.src=r.result;
+    };
+    r.readAsDataURL(file);
+  });
+}
 function pilihImg(k){
   const inp=document.createElement("input"); inp.type="file"; inp.accept="image/*";
-  inp.onchange=()=>{ const f=inp.files[0]; if(!f) return;
-    const r=new FileReader(); r.onload=()=>{ img[k]=r.result; renderSlots(); render(); sim(); }; r.readAsDataURL(f); };
+  inp.onchange=()=>{
+    const f=inp.files[0]; if(!f) return;
+    toast("Mengubah ke PNG\u2026");
+    kePNG(f).then(u=>{
+      img[k]=u; renderSlots(); render(); sim();
+      toast("Tersimpan sebagai PNG \u00b7 "+keUkuranKB(u)+" KB");
+    }).catch(()=>toast("Gambar tidak terbaca \u2014 coba PNG atau JPG"));
+  };
   inp.click();
 }
 
@@ -1097,6 +1147,180 @@ function exportJSON(){
   a.download="proposal-"+($("poktan").value.trim().replace(/\s+/g,"-").toLowerCase()||"kelompok")+".json"; a.click();
   toast("Berkas diekspor");
 }
+/* ══════════════ UNDUH WORD ══════════════
+   Dokumen dirakit sebagai MHTML (multipart/related) berekstensi .doc: bagian
+   pertama HTML, tiap gambar jadi bagian tersendiri yang dirujuk secara relatif.
+   Cara ini dipilih karena Word tidak memuat gambar dari data: URI, sedangkan
+   berkas ini harus tetap satu file tanpa pustaka luar.
+   Tata letak grid/flex diterjemahkan dulu menjadi tabel — Word tidak mengenal
+   keduanya; tanpa ini kop surat, blok tanda tangan, dan identitas sampul akan
+   menumpuk ke bawah. */
+function b64utf8(str){
+  const u=new TextEncoder().encode(str); let bin="";
+  for(let i=0;i<u.length;i+=0x8000) bin+=String.fromCharCode.apply(null,u.subarray(i,i+0x8000));
+  return btoa(bin);
+}
+const bungkus76 = s => s.replace(/(.{76})/g,"$1\r\n");
+
+/* buang seluruh blok @media supaya Word tidak memungut aturan layar/cetak */
+function tanpaMedia(css){
+  let out="",i=0;
+  for(;;){
+    const m=css.indexOf("@media",i);
+    if(m<0) return out+css.slice(i);
+    out+=css.slice(i,m);
+    let j=css.indexOf("{",m);
+    if(j<0) return out;
+    for(let d=0;j<css.length;j++){
+      if(css[j]==="{") d++;
+      else if(css[j]==="}"){ d--; if(!d){ j++; break; } }
+    }
+    i=j;
+  }
+}
+
+/* ubah wadah grid jadi tabel: anak ke-n mengisi kolom ke-(n mod kol) */
+function gridKeTabel(el,kol,lebar){
+  if(!el||!el.parentNode) return;
+  const t=document.createElement("table");
+  t.setAttribute("cellspacing","0"); t.setAttribute("cellpadding","0");
+  t.className=el.className;                       /* .sig .c, .dot.sub, dll. tetap berlaku */
+  t.style.cssText="width:100%;border-collapse:collapse;border:none";
+  let tr=null;
+  [...el.children].forEach((c,i)=>{
+    if(i%kol===0){ tr=document.createElement("tr"); t.appendChild(tr); }
+    const td=document.createElement("td");
+    td.style.cssText="vertical-align:top;border:none;padding:0"
+      +(lebar&&lebar[i%kol]?";width:"+lebar[i%kol]:"");
+    td.appendChild(c); tr.appendChild(td);
+  });
+  while(tr&&tr.children.length<kol){
+    const td=document.createElement("td"); td.style.cssText="border:none;padding:0"; tr.appendChild(td);
+  }
+  el.replaceWith(t);
+  return t;
+}
+
+function halamanUntukWord(page){
+  const c=page.cloneNode(true);
+  c.querySelectorAll(".pgbody").forEach(b=>{ b.style.transform=""; b.style.width=""; b.style.height=""; });
+  /* dari wadah terdalam ke terluar */
+  c.querySelectorAll(".suratkop .kiri > div").forEach(e=>gridKeTabel(e,2,["2.3cm",null]));
+  c.querySelectorAll(".suratkop .kanan .yth").forEach(e=>gridKeTabel(e,2,["1.15cm",null]));
+  c.querySelectorAll(".cv-idn").forEach(e=>gridKeTabel(e,2,["38%",null]));
+  c.querySelectorAll(".sig.one").forEach(e=>gridKeTabel(e,1));
+  c.querySelectorAll(".sig").forEach(e=>gridKeTabel(e,2,["50%","50%"]));
+  c.querySelectorAll(".suratkop").forEach(e=>gridKeTabel(e,2,["52%","48%"]));
+  c.querySelectorAll(".dot .lbl").forEach(e=>{  /* huruf bab + judulnya */
+    const t=gridKeTabel(e,2,[".85cm",null]);
+    if(t&&t.querySelector("td")) t.querySelector("td").style.paddingRight="2pt";
+  });
+  c.querySelectorAll(".dot").forEach(e=>{        /* daftar isi: judul | titik-titik | halaman */
+    const t=gridKeTabel(e,3,[null,"100%",null]); if(!t) return;
+    const td=t.querySelectorAll("td");           /* judul & nomor jangan dipatah */
+    if(td[0]) td[0].style.whiteSpace="nowrap";
+    if(td[2]){ td[2].style.whiteSpace="nowrap"; td[2].style.textAlign="right"; }
+  });
+  /* kop: lambang dikeluarkan dari posisi absolut menjadi kolom kiri tabel */
+  c.querySelectorAll(".kop").forEach(k=>{
+    const em=k.querySelector(".emblem"); if(!em) return;
+    const rule=k.querySelector(".rule");
+    const teks=document.createElement("div"); teks.style.textAlign="center";
+    [...k.children].forEach(ch=>{ if(ch!==em&&ch!==rule) teks.appendChild(ch); });
+    em.style.cssText="height:19mm;position:static";
+    const t=document.createElement("table");
+    t.setAttribute("cellspacing","0"); t.setAttribute("cellpadding","0");
+    t.style.cssText="width:100%;border-collapse:collapse;border:none";
+    const tr=document.createElement("tr");
+    const a=document.createElement("td"); a.style.cssText="width:24mm;vertical-align:middle;border:none;padding:0";
+    const b=document.createElement("td"); b.style.cssText="vertical-align:middle;text-align:center;border:none;padding:0";
+    a.appendChild(em); b.appendChild(teks); tr.append(a,b); t.appendChild(tr);
+    k.insertBefore(t,k.firstChild);
+  });
+  return c;
+}
+
+function unduhWord(){
+  const pages=[...document.querySelectorAll("#stage .page")];
+  if(!pages.length){ toast("Dokumen belum siap"); return; }
+  const BASE="file:///C:/project-rops/";
+  const lampiran=[], peta=new Map();
+  const isi=pages.map((p,i)=>{
+    const c=halamanUntukWord(p);
+    c.querySelectorAll("img").forEach(im=>{
+      const src=im.getAttribute("src")||"";
+      const m=/^data:(image\/([a-z0-9+.-]+));base64,([\s\S]+)$/i.exec(src);
+      if(!m) return;
+      let nama=peta.get(src);                         /* gambar sama (mis. logo kop) cukup sekali */
+      if(!nama){
+        const ext=m[2].toLowerCase()==="jpeg"?"jpg":m[2].toLowerCase().replace(/[^a-z0-9]/g,"");
+        nama="gbr"+(lampiran.length+1)+"."+ext;
+        lampiran.push({nama,tipe:m[1],data:m[3].replace(/\s+/g,"")});
+        peta.set(src,nama);
+      }
+      im.setAttribute("src",nama);
+    });
+    if(i<pages.length-1) c.style.pageBreakAfter="always";
+    return c.outerHTML;
+  }).join("\n");
+
+  const gut=(getComputedStyle(pages[0]).getPropertyValue("--gutter")||"10mm").trim();
+  const kiriCm=(2+(parseFloat(gut)||10)/10).toFixed(2);
+  const css=tanpaMedia([...document.querySelectorAll("style")].map(e=>e.textContent).join("\n"))+`
+/* ── penyesuaian khusus Word ── */
+@page Section1{ size:21.0cm 29.7cm; margin:1.8cm 2.0cm 1.6cm ${kiriCm}cm; mso-page-orientation:portrait }
+div.Section1{ page:Section1 }
+body{ background:#fff!important;margin:0 }
+.page{ width:auto!important;min-height:0!important;padding:0!important;margin:0!important;
+  box-shadow:none!important;border:none }
+.pgbody{ display:block!important }
+.pgno{ position:static!important;display:block;text-align:center;margin-top:14pt }
+.cvframe{ display:block!important;min-height:23cm;padding:14mm 10mm }
+.cv-img{ display:block;margin-left:auto;margin-right:auto }
+.cv-gap{ height:14mm }
+.ktp-slot .box{ display:block!important;text-align:center }
+.ttdspace{ display:block!important;text-align:center }
+.kop{ position:static!important }
+.kop .emblem{ position:static!important }
+.dot .dots{ display:block;transform:none }
+/* wadah grid sudah jadi <table> tapi kelasnya ikut terbawa — kembalikan ke tabel */
+table{ display:table!important;border-collapse:collapse;mso-table-lspace:0;mso-table-rspace:0 }
+td{ vertical-align:top }
+`;
+  const judul=($("judulSampul").value||"Proposal").trim();
+  const doc='<html xmlns:o="urn:schemas-microsoft-com:office:office" '
+    +'xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40">'
+    +'<head><meta http-equiv="Content-Type" content="text/html; charset=utf-8">'
+    +'<meta name="ProgId" content="Word.Document"><title>'+esc(judul)+'</title>'
+    +'<!--[if gte mso 9]><xml><w:WordDocument><w:View>Print</w:View><w:Zoom>100</w:Zoom>'
+    +'<w:DoNotOptimizeForBrowser/></w:WordDocument></xml><![endif]-->'
+    +'<style>'+css+'</style></head><body><div class="Section1">'+isi+'</div></body></html>';
+
+  const B="----=_NextPart_PROJECT_ROPS";
+  let mht="MIME-Version: 1.0\r\n"
+    +'Content-Type: multipart/related; type="text/html"; boundary="'+B+'"\r\n\r\n'
+    +"--"+B+"\r\n"
+    +'Content-Type: text/html; charset="utf-8"\r\n'
+    +"Content-Transfer-Encoding: base64\r\n"
+    +"Content-Location: "+BASE+"dokumen.htm\r\n\r\n"
+    +bungkus76(b64utf8(doc))+"\r\n\r\n";
+  lampiran.forEach(g=>{
+    mht+="--"+B+"\r\n"
+      +"Content-Type: "+g.tipe+"\r\n"
+      +"Content-Transfer-Encoding: base64\r\n"
+      +"Content-Location: "+BASE+g.nama+"\r\n\r\n"
+      +bungkus76(g.data)+"\r\n\r\n";
+  });
+  mht+="--"+B+"--\r\n";
+
+  const a=document.createElement("a");
+  a.href=URL.createObjectURL(new Blob([mht],{type:"application/msword"}));
+  a.download="proposal-"+($("poktan").value.trim().replace(/\s+/g,"-").toLowerCase()||"kelompok")+".doc";
+  a.click();
+  setTimeout(()=>URL.revokeObjectURL(a.href),4000);
+  toast("Dokumen Word diunduh \u00b7 "+pages.length+" halaman");
+}
+
 function importJSON(inp){
   const f=inp.files[0]; if(!f) return;
   const r=new FileReader();
