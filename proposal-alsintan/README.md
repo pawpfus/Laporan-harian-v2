@@ -30,7 +30,8 @@ Tanggal surat punya lima gaya penulisan (18 April 2026 · 18/IV/2026 · 18-04-20
 8. **KTP pengurus** — tiga slot scan
 9. **Pembatas LAMPIRAN**
 10. **Daftar CPCL** — tabel anggota + luas lahan, tanda tangan penyuluh, ketua, koordinator BPP
-11. **Lampiran SK Bupati** — satu lembar per halaman pindaian, ditaruh paling belakang (opsional)
+11. **Lampiran SK Bupati** — satu lembar per halaman pindaian, ditaruh paling belakang (opsional).
+    Halaman yang aslinya **melintang** dicetak di lembar melintang pula
 
 Halaman 4, 7, 8, 9, 10, dan 11 bisa dimatikan lewat kartu **Gambar & Halaman**.
 
@@ -86,4 +87,10 @@ Halaman 4, 7, 8, 9, 10, dan 11 bisa dimatikan lewat kartu **Gambar & Halaman**.
   pindai sebagai gambar saja.
   Halaman SK disimpan sebagai **JPEG** (bukan PNG seperti slot gambar lain): PNG tidak memampatkan
   pindaian, dan SK tiga-empat halaman saja sudah menghabiskan jatah localStorage.
+- **Orientasi lampiran mengikuti aslinya.** Dimensi tiap halaman SK ikut disimpan; yang lebih lebar
+  daripada tinggi diberi kelas `.melintang` dan tampil di lembar melintang — dipaksa ke lembar tegak,
+  pindaian melintang menyusut sampai tak terbaca. Tiga jalur keluaran menanganinya masing-masing:
+  cetak lewat `@page` bernama (`page:lbrMelintang`), unduhan PDF lewat `MediaBox` per lembar, dan Word
+  lewat pergantian *section* — halaman berurutan dengan orientasi sama dikelompokkan ke satu section
+  karena Word hanya bisa berganti orientasi di batas section.
 - Daftar anggota bisa ditempel langsung dari Excel (Nama · Jabatan · Luas).

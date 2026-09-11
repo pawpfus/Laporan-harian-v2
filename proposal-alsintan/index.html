@@ -234,9 +234,13 @@
   .ktp-slot .box{height:52mm;display:flex;align-items:center;justify-content:center;overflow:hidden}
   .ktp-slot .box img{max-height:52mm;max-width:88%;object-fit:contain}
 
-  /* lampiran SK: satu lembar pindaian per halaman */
+  /* lampiran SK: satu lembar pindaian per halaman. Pindaian yang aslinya
+     melintang dicetak di lembar melintang juga — dipaksa ke lembar tegak,
+     gambarnya menyusut sampai tak terbaca. */
   .skpage{text-align:center}
   .skpage img{max-width:100%;max-height:calc(var(--kertas-h) - 42mm);object-fit:contain;display:block;margin:0 auto}
+  .page.melintang{width:var(--kertas-h);min-height:var(--kertas-w)}
+  .skpage.melintang img{max-height:calc(var(--kertas-w) - 42mm)}
   .skbar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:11px}
 
   /* lampiran */
@@ -252,7 +256,9 @@
     .sheetwrap:last-child .page{page-break-after:auto}
     table.doc thead{display:table-header-group}
     table.doc tr,.sig,.ktp-slot{page-break-inside:avoid}
-    @page{size:210mm 297mm;margin:0}   /* samakan dengan --kertas-w/h */
+    @page{size:210mm 297mm;margin:0}          /* samakan dengan --kertas-w/h */
+    @page lbrMelintang{size:297mm 210mm;margin:0}
+    .page.melintang{page:lbrMelintang}
   }
   @media(max-width:1100px){
     .shell{grid-template-columns:1fr;height:auto}
@@ -1071,7 +1077,8 @@ function render(){
 
   /* ── 11. LAMPIRAN SK BUPATI (lampiran terakhir) ── */
   if($("pgSk").checked&&skPages.length){
-    skPages.forEach(u=>P.push(`<div class="page skpage"><img src="${u}" alt="">${pg()}</div>`));
+    skPages.forEach(hal=>P.push(
+      `<div class="page skpage${skMelintang(hal)?" melintang":""}"><img src="${hal.u}" alt="">${pg()}</div>`));
   }
 
   $("stage").innerHTML = P.map((h,i)=>`<div class="sheetwrap"><span class="pgmark">Halaman ${i+1}</span>${h}</div>`).join("");
@@ -1103,7 +1110,9 @@ function fitPages(paksa){
     }
     body.style.transform=""; body.style.width=""; body.style.height="";
     const cs=getComputedStyle(p);
-    const avail=kertasMM().h*PX_PER_MM-parseFloat(cs.paddingTop)-parseFloat(cs.paddingBottom);
+    const K=kertasMM();
+    const tinggiMM=p.classList.contains("melintang")?K.w:K.h;
+    const avail=tinggiMM*PX_PER_MM-parseFloat(cs.paddingTop)-parseFloat(cs.paddingBottom);
     const h=body.scrollHeight;
     if(h<=avail+1) return;
     let s=avail/h; const min=mode==="soft"?0.82:0.66;
@@ -1150,8 +1159,11 @@ function skDariKanvas(cv){
     const g=k.getContext("2d"); g.imageSmoothingQuality="high";
     g.drawImage(cv,0,0,k.width,k.height); cv=k;
   }
-  return cv.toDataURL("image/jpeg",SK_MUTU);
+  /* dimensinya ikut disimpan supaya orientasi lembarnya bisa ditentukan */
+  return {u:cv.toDataURL("image/jpeg",SK_MUTU),w:cv.width,h:cv.height};
 }
+const skMelintang = hal => !!hal && hal.w>hal.h;
+const skUkuranKB = () => keUkuranKB(skPages.map(h=>h.u).join(""));
 function muatPDFJS(){
   if(window.pdfjsLib) return Promise.resolve(window.pdfjsLib);
   const B="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/";
@@ -1203,7 +1215,7 @@ function pilihSK(){
         else skPages.push(await skDariGambar(f));
       }
       renderSK(); render(); sim();
-      toast("SK Bupati: "+skPages.length+" halaman \u00b7 "+keUkuranKB(skPages.join(""))+" KB");
+      toast("SK Bupati: "+skPages.length+" halaman \u00b7 "+skUkuranKB()+" KB");
     }catch(e){
       toast(e.message==="cdn"
         ? "Perlu internet sekali untuk membaca PDF \u2014 atau unggah hasil pindainya sebagai gambar"
@@ -1216,13 +1228,14 @@ function pilihSK(){
 function hapusSKHal(i){ skPages.splice(i,1); renderSK(); render(); sim(); }
 function hapusSemuaSK(){ if(!skPages.length) return; skPages=[]; renderSK(); render(); sim(); }
 function renderSK(){
-  $("skInfo").textContent = skPages.length
-    ? skPages.length+" halaman \u00b7 "+keUkuranKB(skPages.join(""))+" KB"
+  const n=skPages.length, mel=skPages.filter(skMelintang).length;
+  $("skInfo").textContent = n
+    ? n+" halaman \u00b7 "+skUkuranKB()+" KB"+(mel?" \u00b7 "+mel+" melintang":"")
     : "Belum ada berkas";
-  $("skList").innerHTML = skPages.map((u,i)=>
-    `<div class="slot filled"><span class="tag">Hal ${i+1}</span>`
+  $("skList").innerHTML = skPages.map((hal,i)=>
+    `<div class="slot filled"><span class="tag">Hal ${i+1}${skMelintang(hal)?" \u21c4":""}</span>`
     +`<button class="rm" onclick="hapusSKHal(${i})">\u00d7</button>`
-    +`<img src="${u}" alt=""></div>`).join("");
+    +`<img src="${hal.u}" alt=""></div>`).join("");
 }
 /* Semua gambar dinormalkan ke PNG: format apa pun yang bisa dibaca peramban
    (JPG, WEBP, HEIC) di-decode lalu dikodekan ulang lewat kanvas. Sisi terpanjang
@@ -1292,7 +1305,9 @@ function restore(o){
   if(!o||!o.f) return;
   FIELDS.forEach(k=>{ if(o.f[k]!==undefined) $(k).value=o.f[k]; });
   CHECKS.forEach(k=>{ if(o.c&&o.c[k]!==undefined) $(k).checked=o.c[k]; });
-  anggota=o.anggota||[]; dirty=o.dirty||{}; img=o.img||{}; skPages=o.skPages||[];
+  anggota=o.anggota||[]; dirty=o.dirty||{}; img=o.img||{};
+  /* simpanan lama menyimpan SK sebagai untaian data URI saja */
+  skPages=(o.skPages||[]).map(h=>typeof h==="string"?{u:h,w:0,h:0}:h);
   toggleCustom(); $("fTglManual").style.display = $("tglGaya").value==="manual" ? "" : "none";
   renderSlots(); renderSK(); renderAnggota(); markLock(); render();
 }
@@ -1348,6 +1363,7 @@ function siapkanLembarPenuh(){
   st.textContent=".page{width:"+K.w+"mm!important;min-height:"+K.h+"mm!important;"
     +"padding:18mm 20mm 16mm calc(20mm + var(--gutter))!important}"
     +".page.sampul{padding:12mm 12mm 12mm calc(12mm + var(--gutter))!important}"
+    +".page.melintang{width:"+K.h+"mm!important;min-height:"+K.w+"mm!important}"
     +".cvframe{min-height:"+(K.h-24)+"mm!important}";
   document.head.appendChild(st);
   fitPages(true);
@@ -1366,8 +1382,10 @@ function svgHalaman(page,css,wpx,hpx){
     +'<style>'+gaya+'</style>'+xml+'</div></foreignObject></svg>';
 }
 
-/* penulis PDF minimal: satu XObject JPEG per halaman */
-function rakitPDF(jpegs,wpt,hpt){
+/* penulis PDF minimal: satu XObject JPEG per halaman.
+   Tiap lembar membawa ukuran medianya sendiri supaya lampiran melintang bisa
+   berdampingan dengan halaman tegak dalam satu berkas. */
+function rakitPDF(jpegs){
   const enc=new TextEncoder(), bagian=[]; let n=0;
   const tulis=x=>{ bagian.push(typeof x==="string"?enc.encode(x):x); n+=bagian[bagian.length-1].length; };
   const obj=[]; const mulai=()=>obj.push(n);
@@ -1378,9 +1396,9 @@ function rakitPDF(jpegs,wpt,hpt){
   mulai(); tulis("2 0 obj\n<</Type/Pages/Kids["+kids.join(" ")+"]/Count "+jml+">>\nendobj\n");
   jpegs.forEach((g,i)=>{
     const idHal=3+i*3, idIsi=idHal+1, idImg=idHal+2;
-    mulai(); tulis(idHal+" 0 obj\n<</Type/Page/Parent 2 0 R/MediaBox[0 0 "+wpt+" "+hpt+"]"
+    mulai(); tulis(idHal+" 0 obj\n<</Type/Page/Parent 2 0 R/MediaBox[0 0 "+g.wpt+" "+g.hpt+"]"
       +"/Resources<</XObject<</Im0 "+idImg+" 0 R>>>>/Contents "+idIsi+" 0 R>>\nendobj\n");
-    const isi="q "+wpt+" 0 0 "+hpt+" 0 0 cm /Im0 Do Q\n";
+    const isi="q "+g.wpt+" 0 0 "+g.hpt+" 0 0 cm /Im0 Do Q\n";
     mulai(); tulis(idIsi+" 0 obj\n<</Length "+isi.length+">>\nstream\n"+isi+"endstream\nendobj\n");
     mulai(); tulis(idImg+" 0 obj\n<</Type/XObject/Subtype/Image/Width "+g.w+"/Height "+g.h
       +"/ColorSpace/DeviceRGB/BitsPerComponent 8/Filter/DCTDecode/Length "+g.data.length+">>\nstream\n");
@@ -1401,15 +1419,19 @@ async function unduhPDF(){
     .map(im=>im.complete?null:new Promise(r=>{im.onload=im.onerror=r})));
   const css=tanpaMedia([...document.querySelectorAll("style")].map(e=>e.textContent).join("\n"));
   const K=kertasMM();
-  const wpx=Math.round(K.w*PX_PER_MM), hpx=Math.round(K.h*PX_PER_MM);
-  const cw=wpx*PDF_SKALA, ch=hpx*PDF_SKALA;
-  const lembar=document.createElement("canvas"); lembar.width=cw; lembar.height=ch;
+  const lembar=document.createElement("canvas");
   const gl=lembar.getContext("2d");
   const jpegs=[];
   const pulihkan=siapkanLembarPenuh();
   try{
     for(let i=0;i<pages.length;i++){
       toast("Menyusun PDF \u00b7 halaman "+(i+1)+"/"+pages.length);
+      /* lampiran pindaian melintang memakai lembar melintang pula */
+      const mel=pages[i].classList.contains("melintang");
+      const wMM=mel?K.h:K.w, hMM=mel?K.w:K.h;
+      const wpx=Math.round(wMM*PX_PER_MM), hpx=Math.round(hMM*PX_PER_MM);
+      const cw=wpx*PDF_SKALA, ch=hpx*PDF_SKALA;
+      lembar.width=cw; lembar.height=ch;
       /* Halaman yang isinya tetap meluber setelah auto-fit (mis. daftar CPCL
          panjang, yang di jalur cetak memang mengalir ke lembar berikutnya)
          dirender setinggi aslinya lalu dipecah jadi beberapa lembar, bukan
@@ -1430,15 +1452,15 @@ async function unduhPDF(){
         gl.fillStyle="#fff"; gl.fillRect(0,0,cw,ch);
         gl.drawImage(tinggiCv,0,k*ch,cw,ch,0,0,cw,ch);
         const b=await new Promise(r=>lembar.toBlob(r,"image/jpeg",0.9));
-        jpegs.push({w:cw,h:ch,data:new Uint8Array(await b.arrayBuffer())});
+        jpegs.push({w:cw,h:ch,data:new Uint8Array(await b.arrayBuffer()),
+          wpt:+(wMM/25.4*72).toFixed(2), hpt:+(hMM/25.4*72).toFixed(2)});
       }
     }
   }catch(e){
     toast("Gagal menyusun PDF \u2014 pakai tombol Cetak lalu pilih Save as PDF");
     return;
   }finally{ pulihkan(); }
-  const wpt=+(K.w/25.4*72).toFixed(2), hpt=+(K.h/25.4*72).toFixed(2);
-  const blob=rakitPDF(jpegs,wpt,hpt);
+  const blob=rakitPDF(jpegs);
   const a=document.createElement("a");
   a.href=URL.createObjectURL(blob);
   a.download="proposal-"+($("poktan").value.trim().replace(/\s+/g,"-").toLowerCase()||"kelompok")+".pdf";
@@ -1563,7 +1585,7 @@ async function unduhWord(){
 async function susunWord(pages){
   const BASE="file:///C:/project-rops/";
   const lampiran=[], peta=new Map();
-  const isi=pages.map((p,i)=>{
+  const potong=pages.map((p,i)=>{
     const c=halamanUntukWord(p);
     c.querySelectorAll("img").forEach(im=>{
       const src=im.getAttribute("src")||"";
@@ -1583,8 +1605,18 @@ async function susunWord(pages){
       im.setAttribute("data-rops-src",nama);
     });
     if(i<pages.length-1) c.style.pageBreakAfter="always";
-    return c.outerHTML;
-  }).join("\n").replace(/data-rops-src="([^"]*)"/g,'src="$1"');
+    return {mel:p.classList.contains("melintang"), html:c.outerHTML};
+  });
+  /* Word mengganti orientasi hanya lewat pergantian section, jadi halaman
+     berurutan dengan orientasi sama dikelompokkan ke satu <div> section. */
+  let isi="", deret=null;
+  const tutup=()=>{ if(deret) isi+='<div class="'+(deret.mel?"Section2":"Section1")+'">'+deret.html+"</div>\n"; };
+  potong.forEach(x=>{
+    if(!deret||deret.mel!==x.mel){ tutup(); deret={mel:x.mel,html:""}; }
+    deret.html+=x.html+"\n";
+  });
+  tutup();
+  isi=isi.replace(/data-rops-src="([^"]*)"/g,'src="$1"');
 
   /* Huruf & margin mengikuti dokumen acuan: Times New Roman 12pt,
      spasi 1,5, paragraf menjorok 1,25 cm tanpa jarak antar-paragraf, tepi kiri
@@ -1594,9 +1626,12 @@ async function susunWord(pages){
   const kiriCm=(2+(parseFloat(gut)||10)/10).toFixed(2);
   const KW=kertasMM();
   const lembarCm=(KW.w/10).toFixed(1)+"cm "+(KW.h/10).toFixed(1)+"cm";
+  const lembarCmMel=(KW.h/10).toFixed(1)+"cm "+(KW.w/10).toFixed(1)+"cm";
   const css=`
 @page Section1{ size:${lembarCm}; margin:2.54cm 2.0cm 2.5cm ${kiriCm}cm; mso-page-orientation:portrait }
 div.Section1{ page:Section1 }
+@page Section2{ size:${lembarCmMel}; margin:2.0cm 2.54cm 2.0cm ${kiriCm}cm; mso-page-orientation:landscape }
+div.Section2{ page:Section2 }
 body{ margin:0;background:#fff;color:#000;font-family:"Times New Roman",serif;font-size:12.0pt }
 p,div,span,td,th,li{ font-family:"Times New Roman",serif;font-size:12.0pt }
 img{ border:none }
@@ -1675,7 +1710,7 @@ table.doc td.c{ text-align:center }
     +'<meta name="ProgId" content="Word.Document"><title>'+esc(judul)+'</title>'
     +'<!--[if gte mso 9]><xml><w:WordDocument><w:View>Print</w:View><w:Zoom>100</w:Zoom>'
     +'<w:DoNotOptimizeForBrowser/></w:WordDocument></xml><![endif]-->'
-    +'<style>'+css+'</style></head><body><div class="Section1">'+isi+'</div></body></html>';
+    +'<style>'+css+'</style></head><body>'+isi+'</body></html>';
 
   const B="----=_NextPart_PROJECT_ROPS";
   let mht="MIME-Version: 1.0\r\n"
