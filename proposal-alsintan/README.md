@@ -5,8 +5,12 @@ Tema mengikuti COCKPIT (sama seperti Eviden LCS): terang/gelap, aksen lime, ters
 
 Buka `index.html` di browser, isi form di panel kiri, lalu unduh hasilnya:
 
-- **Cetak / PDF** — pilih tujuan *Save as PDF*, ukuran A4, margin *None*.
+- **Cetak** — dialog cetak peramban; pilih *Save as PDF*, ukuran F4/Folio, margin *None*.
+  Ini cara terbaik untuk arsip resmi: teksnya tetap vektor, bisa disorot dan dicari, berkasnya kecil.
+- **PDF** — mengunduh berkas PDF sekali klik, tanpa lewat dialog cetak.
 - **Word** — mengunduh `.doc` yang bisa langsung disunting di Microsoft Word.
+
+Seluruh keluaran memakai lembar **F4 (21,6 × 33 cm)** mengikuti dokumen proposal acuan.
 
 Tanggal surat punya lima gaya penulisan (18 April 2026 · 18/IV/2026 · 18-04-2026 ·
 18/04/2026 · tulis sendiri) yang berlaku untuk seluruh blok tanda tangan sekaligus.
@@ -31,7 +35,7 @@ Halaman 4, 7, 8, 9, dan 10 bisa dimatikan lewat kartu **Gambar & Halaman**.
 - **Narasi otomatis** menyesuaikan jenis alsin (15 pilihan + isian bebas), dengan 3 gaya penulisan (A/B/C) atau acak.
   Kotak yang disunting manual berubah menjadi *terkunci* dan tidak ditimpa lagi — tekan ↻ untuk membuka kunci.
 - Nama alsin dicetak **miring** di dalam kalimat, mengikuti dokumen aslinya.
-- **Auto-fit halaman**: isi tiap halaman disusutkan secukupnya (maksimal 66%) agar tetap muat satu lembar A4.
+- **Auto-fit halaman**: isi tiap halaman disusutkan secukupnya (maksimal 66%) agar tetap muat satu lembar F4.
   Halaman CPCL dibiarkan mengalir ke lembar berikutnya bila anggotanya banyak; header tabel ikut berulang.
 - **Gambar** (logo kop, foto alsin, empat tanda tangan, tiga scan KTP) selalu dinormalkan ke **PNG**:
   format apa pun yang bisa dibaca peramban (JPG, WEBP, HEIC) di-decode lalu dikodekan ulang lewat kanvas.
@@ -54,8 +58,12 @@ Halaman 4, 7, 8, 9, dan 10 bisa dimatikan lewat kartu **Gambar & Halaman**.
   dari tata letak layar — Word mengabaikan `max-width`/`object-fit` dan akan memasang gambar sebesar
   resolusi aslinya, sehingga satu scan KTP 1400 px bisa meluber sampai 37 cm.
 
-  Ukuran lembar dan tipografinya mengikuti dokumen proposal acuan: **F4 (21,6 × 33 cm)**, Times New Roman
-  12 pt, spasi 1,5, paragraf menjorok 1,25 cm tanpa jarak antar-paragraf, tepi 2,54 cm atas · 2 cm kanan ·
-  2,5 cm bawah · 2 cm + gutter di kiri. Pratinjau layar dan Cetak/PDF tetap A4.
+  Tipografinya mengikuti dokumen proposal acuan: Times New Roman 12 pt, spasi 1,5, paragraf menjorok
+  1,25 cm tanpa jarak antar-paragraf, tepi 2,54 cm atas · 2 cm kanan · 2,5 cm bawah · 2 cm + gutter di kiri.
+- **Unduh PDF** merender tiap halaman lewat `<foreignObject>` SVG — murni kemampuan peramban, tanpa pustaka
+  luar — lalu menjahitnya jadi PDF satu-gambar-per-halaman yang ditulis tangan (192 dpi, JPEG). Hasilnya
+  **raster**: teksnya tidak bisa disorot atau dicari, dan berkasnya jauh lebih besar (±2,3 MB untuk 10
+  halaman) daripada PDF vektor dari tombol **Cetak**. Tombol ini untuk yang butuh berkas jadi sekali klik;
+  untuk arsip resmi pakai **Cetak** lalu *Save as PDF*.
 - **Simpan otomatis** ke localStorage; **Ekspor/Impor** `.json` untuk memakai ulang data pada kelompok lain.
 - Daftar anggota bisa ditempel langsung dari Excel (Nama · Jabatan · Luas).
