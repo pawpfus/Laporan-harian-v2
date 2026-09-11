@@ -295,7 +295,6 @@
     <button class="btn-toggle" onclick="resetAll()" title="Mulai dari awal">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg>
     </button>
-    <button class="btn btn-line" onclick="contohData()">Contoh</button>
     <button class="btn btn-line" onclick="exportJSON()">Ekspor</button>
     <button class="btn btn-line" onclick="document.getElementById('impor').click()">Impor</button>
     <button class="btn btn-line" onclick="unduhPDF()" title="Unduh sebagai berkas PDF">
@@ -1614,27 +1613,6 @@ function isiDefaultTeks(){
   } else { renderSlots(); renderSemuaLamp(); tambahAnggota(3); autoNarasi(); render(); }
 })();
 
-/* ══════════════ CONTOH ══════════════ */
-function contohData(){
-  const s=(k,v)=>$(k).value=v;
-  s("poktan","GALIMPUA I"); s("desa","Otting"); s("kecamatan","Pitu Riawa");
-  s("kabupaten","Sidenreng Rappang"); s("provinsi","Sulawesi Selatan");
-  s("komoditas","Padi"); s("hamparan","1.110"); s("tahun","2026");
-  s("koordinat","-3.845458, 119.938127"); s("alamat","");
-  s("alsin","handtraktor"); s("volume","1"); s("satuan","unit"); s("spek",""); s("judulSampul","HANDTRAKTOR");
-  s("nomor","001/KT-GLMI XVIII/IV/2026"); s("lampiran","1 (satu) bundel Proposal");
-  s("tanggal","2026-04-18"); s("kota","Otting");
-  s("ketua","LACACCING"); s("sekretaris","FIRMAN"); s("bendahara","FIRNANDA");
-  s("kades","PALLAWAGAU"); s("penyuluh","MUHAMMAD FACHRURI, S.TP"); s("nipPenyuluh","19940702 202012 1 002");
-  s("koordinator","HARYANA HATTA SP, MP"); s("nipKoordinator","19870220 202012 2 003");
-  s("bpp","BPP Pitu Riawa"); s("bppTembusan","Koordinator BPP Pitu Riawa di Betao");
-  $("tembusan").value="Koordinator BPP Pitu Riawa di Betao\nPertinggal";
-  anggota=[["LACACCING","Ketua","2"],["FIRMAN","Sekretaris","1,8"],["FIRNANDA","Bendahara","1,9"],
-    ["ALAMSYAH","Anggota","2"],["SATRIYANI HALIM","Anggota","0,8"],["RASMAWATI","Anggota","1,9"],
-    ["YASIR","Anggota","2"],["ZAINUDDIN","Anggota","2"],["SOALEHE","Anggota","0,8"],["JAMALUDDIN","Anggota","1,25"]]
-    .map(r=>({nama:r[0],jabatan:r[1],luas:r[2]}));
-  dirty={}; toggleCustom(); renderAnggota(); autoNarasi(); render(); sim(); toast("Contoh data dimuat");
-}
 </script>
 </body>
 </html>
