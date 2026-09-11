@@ -158,12 +158,13 @@
   .sheetwrap{flex:0 0 auto}
   .pgmark{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-3);
     margin-bottom:5px;display:block}
-  /* Lembar F4 (21,6 x 33 cm) mengikuti dokumen proposal acuan — berlaku di
-     pratinjau, Cetak, PDF, dan Word.
+  /* Ukuran lembar cukup diubah di dua nilai berikut; seluruh jalur keluaran
+     (pratinjau, Cetak, PDF, Word) membacanya dari sini. Pengecualian satu-
+     satunya adalah aturan @page cetak di bawah, yang tidak bisa memakai var().
      --gutter = ruang jilid tambahan di tepi kiri. */
   .page{
-    --gutter:10mm;
-    width:216mm;min-height:330mm;background:#fff;color:#000;
+    --kertas-w:210mm; --kertas-h:297mm; --gutter:10mm;
+    width:var(--kertas-w);min-height:var(--kertas-h);background:#fff;color:#000;
     padding:18mm 20mm 16mm calc(20mm + var(--gutter));box-shadow:0 10px 34px rgba(0,0,0,.22);
     font-family:"Times New Roman",Times,serif;font-size:12pt;line-height:1.45;
     position:relative;flex:0 0 auto;
@@ -174,7 +175,7 @@
 
   /* sampul */
   .page.sampul{padding:12mm 12mm 12mm calc(12mm + var(--gutter))}
-  .cvframe{border:2.2pt solid #000;min-height:306mm;padding:16mm 12mm 14mm;display:flex;flex-direction:column;align-items:center;text-align:center}
+  .cvframe{border:2.2pt solid #000;min-height:calc(var(--kertas-h) - 24mm);padding:16mm 12mm 14mm;display:flex;flex-direction:column;align-items:center;text-align:center}
   .cv-t1{font-size:36pt;line-height:1.1}
   .cv-t2{font-size:15pt;font-weight:bold;margin-top:7mm;letter-spacing:.4pt}
   .cv-t3{font-size:15pt;font-weight:bold;margin-top:4mm;letter-spacing:.4pt}
@@ -235,11 +236,11 @@
 
   /* lampiran SK: satu lembar pindaian per halaman */
   .skpage{text-align:center}
-  .skpage img{max-width:100%;max-height:288mm;object-fit:contain;display:block;margin:0 auto}
+  .skpage img{max-width:100%;max-height:calc(var(--kertas-h) - 42mm);object-fit:contain;display:block;margin:0 auto}
   .skbar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:11px}
 
   /* lampiran */
-  .lamp{min-height:283mm;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:20pt;line-height:2.35}
+  .lamp{min-height:calc(var(--kertas-h) - 47mm);display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:20pt;line-height:2.35}
   .pgno{position:absolute;bottom:10mm;left:var(--gutter);right:0;text-align:center;font-size:11pt}
 
   @media print{
@@ -251,7 +252,7 @@
     .sheetwrap:last-child .page{page-break-after:auto}
     table.doc thead{display:table-header-group}
     table.doc tr,.sig,.ktp-slot{page-break-inside:avoid}
-    @page{size:216mm 330mm;margin:0}
+    @page{size:210mm 297mm;margin:0}   /* samakan dengan --kertas-w/h */
   }
   @media(max-width:1100px){
     .shell{grid-template-columns:1fr;height:auto}
@@ -1077,9 +1078,17 @@ function render(){
   fitPages();
 }
 
-/* Menyusutkan isi halaman secukupnya agar tetap muat satu lembar F4 */
-const PX_PER_MM=96/25.4, F4_W_MM=216, F4_H_MM=330;
-const F4_H_PX=F4_H_MM*PX_PER_MM;
+/* Menyusutkan isi halaman secukupnya agar tetap muat satu lembar.
+   Ukuran lembar dibaca dari custom property --kertas-w/--kertas-h pada .page
+   supaya CSS dan seluruh jalur ekspor tidak pernah berbeda angka. */
+const PX_PER_MM=96/25.4;
+function kertasMM(){
+  const el=document.querySelector("#stage .page")||document.querySelector(".page");
+  const cs=el&&getComputedStyle(el);
+  const a=cs&&parseFloat(cs.getPropertyValue("--kertas-w"));
+  const t=cs&&parseFloat(cs.getPropertyValue("--kertas-h"));
+  return {w:a>0?a:210, h:t>0?t:297};
+}
 function fitPages(paksa){
   if(!paksa&&innerWidth<=1100) return;
   document.querySelectorAll(".page").forEach(p=>{
@@ -1094,7 +1103,7 @@ function fitPages(paksa){
     }
     body.style.transform=""; body.style.width=""; body.style.height="";
     const cs=getComputedStyle(p);
-    const avail=F4_H_PX-parseFloat(cs.paddingTop)-parseFloat(cs.paddingBottom);
+    const avail=kertasMM().h*PX_PER_MM-parseFloat(cs.paddingTop)-parseFloat(cs.paddingBottom);
     const h=body.scrollHeight;
     if(h<=avail+1) return;
     let s=avail/h; const min=mode==="soft"?0.82:0.66;
@@ -1335,10 +1344,11 @@ function tanpaMedia(css){
    ulang auto-fit terhadap geometri itu. Mengembalikan fungsi pemulih. */
 function siapkanLembarPenuh(){
   const st=document.createElement("style");
-  st.textContent=".page{width:216mm!important;min-height:330mm!important;"
+  const K=kertasMM();
+  st.textContent=".page{width:"+K.w+"mm!important;min-height:"+K.h+"mm!important;"
     +"padding:18mm 20mm 16mm calc(20mm + var(--gutter))!important}"
     +".page.sampul{padding:12mm 12mm 12mm calc(12mm + var(--gutter))!important}"
-    +".cvframe{min-height:306mm!important}";
+    +".cvframe{min-height:"+(K.h-24)+"mm!important}";
   document.head.appendChild(st);
   fitPages(true);
   return ()=>{ st.remove(); fitPages(); };
@@ -1390,7 +1400,8 @@ async function unduhPDF(){
   await Promise.all([...document.querySelectorAll("#stage img")]
     .map(im=>im.complete?null:new Promise(r=>{im.onload=im.onerror=r})));
   const css=tanpaMedia([...document.querySelectorAll("style")].map(e=>e.textContent).join("\n"));
-  const wpx=Math.round(F4_W_MM*PX_PER_MM), hpx=Math.round(F4_H_MM*PX_PER_MM);
+  const K=kertasMM();
+  const wpx=Math.round(K.w*PX_PER_MM), hpx=Math.round(K.h*PX_PER_MM);
   const cw=wpx*PDF_SKALA, ch=hpx*PDF_SKALA;
   const lembar=document.createElement("canvas"); lembar.width=cw; lembar.height=ch;
   const gl=lembar.getContext("2d");
@@ -1426,7 +1437,7 @@ async function unduhPDF(){
     toast("Gagal menyusun PDF \u2014 pakai tombol Cetak lalu pilih Save as PDF");
     return;
   }finally{ pulihkan(); }
-  const wpt=+(F4_W_MM/25.4*72).toFixed(2), hpt=+(F4_H_MM/25.4*72).toFixed(2);
+  const wpt=+(K.w/25.4*72).toFixed(2), hpt=+(K.h/25.4*72).toFixed(2);
   const blob=rakitPDF(jpegs,wpt,hpt);
   const a=document.createElement("a");
   a.href=URL.createObjectURL(blob);
@@ -1575,14 +1586,16 @@ async function susunWord(pages){
     return c.outerHTML;
   }).join("\n").replace(/data-rops-src="([^"]*)"/g,'src="$1"');
 
-  /* Lembar & huruf mengikuti dokumen acuan: F4 (21,6 x 33 cm), Times New Roman 12pt,
+  /* Huruf & margin mengikuti dokumen acuan: Times New Roman 12pt,
      spasi 1,5, paragraf menjorok 1,25 cm tanpa jarak antar-paragraf, tepi kiri
      2 cm + gutter. Gaya ditulis khusus untuk Word — CSS layar tidak disalin ke
      sini karena penuh var(), calc(), grid, dan flex yang tidak dikenal Word. */
   const gut=(getComputedStyle(pages[0]).getPropertyValue("--gutter")||"10mm").trim();
   const kiriCm=(2+(parseFloat(gut)||10)/10).toFixed(2);
+  const KW=kertasMM();
+  const lembarCm=(KW.w/10).toFixed(1)+"cm "+(KW.h/10).toFixed(1)+"cm";
   const css=`
-@page Section1{ size:21.6cm 33.0cm; margin:2.54cm 2.0cm 2.5cm ${kiriCm}cm; mso-page-orientation:portrait }
+@page Section1{ size:${lembarCm}; margin:2.54cm 2.0cm 2.5cm ${kiriCm}cm; mso-page-orientation:portrait }
 div.Section1{ page:Section1 }
 body{ margin:0;background:#fff;color:#000;font-family:"Times New Roman",serif;font-size:12.0pt }
 p,div,span,td,th,li{ font-family:"Times New Roman",serif;font-size:12.0pt }

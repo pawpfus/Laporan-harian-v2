@@ -5,12 +5,15 @@ Tema mengikuti COCKPIT (sama seperti Eviden LCS): terang/gelap, aksen lime, ters
 
 Buka `index.html` di browser, isi form di panel kiri, lalu unduh hasilnya:
 
-- **Cetak** — dialog cetak peramban; pilih *Save as PDF*, ukuran F4/Folio, margin *None*.
+- **Cetak** — dialog cetak peramban; pilih *Save as PDF*, ukuran A4, margin *None*.
   Ini cara terbaik untuk arsip resmi: teksnya tetap vektor, bisa disorot dan dicari, berkasnya kecil.
 - **PDF** — mengunduh berkas PDF sekali klik, tanpa lewat dialog cetak.
 - **Word** — mengunduh `.doc` yang bisa langsung disunting di Microsoft Word.
 
-Seluruh keluaran memakai lembar **F4 (21,6 × 33 cm)** mengikuti dokumen proposal acuan.
+Seluruh keluaran memakai lembar **A4 (21 × 29,7 cm)**. Ukurannya satu sumber saja: custom property
+`--kertas-w` / `--kertas-h` pada `.page`. Pratinjau, ekspor Word, dan unduhan PDF membacanya dari situ,
+jadi mengganti ukuran kertas cukup mengubah dua nilai itu (plus aturan `@page` cetak, yang tidak bisa
+memakai `var()`).
 
 Tanggal surat punya lima gaya penulisan (18 April 2026 · 18/IV/2026 · 18-04-2026 ·
 18/04/2026 · tulis sendiri) yang berlaku untuk seluruh blok tanda tangan sekaligus.
@@ -36,7 +39,7 @@ Halaman 4, 7, 8, 9, 10, dan 11 bisa dimatikan lewat kartu **Gambar & Halaman**.
 - **Narasi otomatis** menyesuaikan jenis alsin (15 pilihan + isian bebas), dengan 3 gaya penulisan (A/B/C) atau acak.
   Kotak yang disunting manual berubah menjadi *terkunci* dan tidak ditimpa lagi — tekan ↻ untuk membuka kunci.
 - Nama alsin dicetak **miring** di dalam kalimat, mengikuti dokumen aslinya.
-- **Auto-fit halaman**: isi tiap halaman disusutkan secukupnya (maksimal 66%) agar tetap muat satu lembar F4.
+- **Auto-fit halaman**: isi tiap halaman disusutkan secukupnya (maksimal 66%) agar tetap muat satu lembar A4.
   Halaman CPCL dibiarkan mengalir ke lembar berikutnya bila anggotanya banyak; header tabel ikut berulang.
 - **Gambar** (logo kop, foto alsin, empat tanda tangan, tiga scan KTP) selalu dinormalkan ke **PNG**:
   format apa pun yang bisa dibaca peramban (JPG, WEBP, HEIC) di-decode lalu dikodekan ulang lewat kanvas.
