@@ -302,10 +302,6 @@
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5 5 5-5"/><path d="M12 15V3"/></svg>
       PDF
     </button>
-    <button class="btn btn-line" onclick="unduhWord()" title="Unduh sebagai dokumen Word">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5 5 5-5"/><path d="M12 15V3"/></svg>
-      Word
-    </button>
     <button class="btn btn-emerald" onclick="window.print()">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><path d="M6 14h12v8H6z"/></svg>
       Cetak
@@ -497,14 +493,25 @@
       </div>
       <label style="display:block;margin:16px 0 9px">Lampiran SK Bupati</label>
       <div class="skbar">
-        <button class="btn btn-line" type="button" onclick="pilihSK()">Pilih berkas</button>
-        <button class="btn-toggle" type="button" onclick="hapusSemuaSK()" title="Kosongkan lampiran SK">
+        <button class="btn btn-line" type="button" onclick="pilihLamp('sk')">Pilih berkas</button>
+        <button class="btn-toggle" type="button" onclick="hapusSemuaLamp('sk')" title="Kosongkan lampiran SK">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14"/></svg>
         </button>
         <span class="hint" id="skInfo">Belum ada berkas</span>
       </div>
       <div class="hint" style="margin-bottom:11px">Terima <b>PDF</b> (tiap halamannya jadi satu lembar lampiran) atau gambar hasil pindai. Bisa pilih beberapa berkas sekaligus.</div>
       <div class="slots" id="skList"></div>
+
+      <label style="display:block;margin:16px 0 9px">Lampiran Tangkapan Layar SIMLUHTAN</label>
+      <div class="skbar">
+        <button class="btn btn-line" type="button" onclick="pilihLamp('sim')">Pilih berkas</button>
+        <button class="btn-toggle" type="button" onclick="hapusSemuaLamp('sim')" title="Kosongkan lampiran SIMLUHTAN">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14"/></svg>
+        </button>
+        <span class="hint" id="simInfo">Belum ada berkas</span>
+      </div>
+      <div class="hint" style="margin-bottom:11px">Tangkapan layar data kelompok di SIMLUHTAN — gambar atau <b>PDF</b>, boleh beberapa sekaligus. Tangkapan layar melintang otomatis dicetak di lembar melintang.</div>
+      <div class="slots" id="simList"></div>
 
       <label style="display:block;margin:18px 0 9px">Halaman yang disertakan</label>
       <div class="checkrow">
@@ -513,6 +520,7 @@
         <label><input type="checkbox" id="pgKtp" checked>KTP pengurus</label>
         <label><input type="checkbox" id="pgLamp" checked>Pembatas LAMPIRAN</label>
         <label><input type="checkbox" id="pgCpcl" checked>Daftar CPCL</label>
+        <label><input type="checkbox" id="pgSim" checked>Lampiran SIMLUHTAN</label>
         <label><input type="checkbox" id="pgSk" checked>Lampiran SK Bupati</label>
         <label><input type="checkbox" id="pgNomor">Nomor halaman</label>
       </div>
@@ -1075,11 +1083,11 @@ function render(){
     </div>`);
   }
 
-  /* ── 11. LAMPIRAN SK BUPATI (lampiran terakhir) ── */
-  if($("pgSk").checked&&skPages.length){
-    skPages.forEach(hal=>P.push(
-      `<div class="page skpage${skMelintang(hal)?" melintang":""}"><img src="${hal.u}" alt="">${pg()}</div>`));
-  }
+  /* ── 11-12. LAMPIRAN BERKAS: SIMLUHTAN lalu SK Bupati paling belakang ── */
+  const lembarLamp=hal=>P.push(
+    `<div class="page skpage${skMelintang(hal)?" melintang":""}"><img src="${hal.u}" alt="">${pg()}</div>`);
+  if($("pgSim").checked) lamp.sim.forEach(lembarLamp);
+  if($("pgSk").checked)  lamp.sk.forEach(lembarLamp);
 
   $("stage").innerHTML = P.map((h,i)=>`<div class="sheetwrap"><span class="pgmark">Halaman ${i+1}</span>${h}</div>`).join("");
   fitPages();
@@ -1133,7 +1141,9 @@ addEventListener("afterprint",()=>{ if(pulihCetak){ pulihCetak(); pulihCetak=nul
 
 /* ══════════════ GAMBAR ══════════════ */
 function renderSlots(){
-  document.querySelectorAll(".slot").forEach(el=>{
+  /* hanya slot gambar tetap; thumbnail lampiran juga memakai kelas .slot
+     tetapi tanpa data-k, dan bukan urusan fungsi ini */
+  document.querySelectorAll(".slot[data-k]").forEach(el=>{
     const k=el.dataset.k, L=SLOT_LABEL[k];
     el.classList.toggle("filled",!!img[k]);
     el.innerHTML=`<span class="tag">${L[0]}</span><button class="rm" onclick="event.stopPropagation();hapusImg('${k}')">×</button>`
@@ -1143,13 +1153,17 @@ function renderSlots(){
 }
 function hapusImg(k){ delete img[k]; renderSlots(); render(); sim(); }
 
-/* ── Lampiran SK Bupati ──────────────────────────────────────────────────
-   Menerima PDF maupun gambar. PDF dibongkar per halaman memakai pdf.js yang
-   BARU diunduh saat dibutuhkan — di luar itu alat ini tetap jalan penuh tanpa
-   jaringan. Halaman pindaian disimpan sebagai JPEG, bukan PNG seperti slot
-   gambar lain: PNG tidak memampatkan pindaian, dan SK tiga-empat halaman saja
-   sudah menghabiskan jatah localStorage. */
-let skPages=[];
+/* Lampiran berkas: SK Bupati & tangkapan layar SIMLUHTAN ─────────────
+   Keduanya menerima PDF maupun gambar. PDF dibongkar per halaman memakai
+   pdf.js yang BARU diunduh saat dibutuhkan — di luar itu alat ini tetap jalan
+   penuh tanpa jaringan. Halamannya disimpan sebagai JPEG, bukan PNG seperti
+   slot gambar lain: PNG tidak memampatkan pindaian maupun tangkapan layar, dan
+   beberapa halaman saja sudah menghabiskan jatah localStorage. */
+const LAMPIRAN={
+  sk: {judul:"SK Bupati", info:"skInfo",  daftar:"skList"},
+  sim:{judul:"SIMLUHTAN", info:"simInfo", daftar:"simList"}
+};
+let lamp={sk:[],sim:[]};
 const SK_SISI=1400, SK_MUTU=0.85;
 function skDariKanvas(cv){
   const f=Math.min(1,SK_SISI/Math.max(cv.width,cv.height));
@@ -1163,7 +1177,7 @@ function skDariKanvas(cv){
   return {u:cv.toDataURL("image/jpeg",SK_MUTU),w:cv.width,h:cv.height};
 }
 const skMelintang = hal => !!hal && hal.w>hal.h;
-const skUkuranKB = () => keUkuranKB(skPages.map(h=>h.u).join(""));
+const lampUkuranKB = k => keUkuranKB(lamp[k].map(h=>h.u).join(""));
 function muatPDFJS(){
   if(window.pdfjsLib) return Promise.resolve(window.pdfjsLib);
   const B="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/";
@@ -1204,39 +1218,40 @@ function skDariGambar(file){
     r.readAsDataURL(file);
   });
 }
-function pilihSK(){
+function pilihLamp(k){
   const inp=document.createElement("input");
   inp.type="file"; inp.accept="application/pdf,image/*"; inp.multiple=true;
   inp.onchange=async()=>{
     const berkas=[...inp.files]; if(!berkas.length) return;
     try{
       for(const f of berkas){
-        if(f.type==="application/pdf"||/\.pdf$/i.test(f.name)) skPages.push(...await skDariPDF(f));
-        else skPages.push(await skDariGambar(f));
+        if(f.type==="application/pdf"||/\.pdf$/i.test(f.name)) lamp[k].push(...await skDariPDF(f));
+        else lamp[k].push(await skDariGambar(f));
       }
-      renderSK(); render(); sim();
-      toast("SK Bupati: "+skPages.length+" halaman \u00b7 "+skUkuranKB()+" KB");
+      renderLamp(k); render(); sim();
+      toast(LAMPIRAN[k].judul+": "+lamp[k].length+" halaman \u00b7 "+lampUkuranKB(k)+" KB");
     }catch(e){
       toast(e.message==="cdn"
-        ? "Perlu internet sekali untuk membaca PDF \u2014 atau unggah hasil pindainya sebagai gambar"
+        ? "Perlu internet sekali untuk membaca PDF \u2014 atau unggah gambarnya saja"
         : "Berkas tidak terbaca");
-      renderSK(); render(); sim();
+      renderLamp(k); render(); sim();
     }
   };
   inp.click();
 }
-function hapusSKHal(i){ skPages.splice(i,1); renderSK(); render(); sim(); }
-function hapusSemuaSK(){ if(!skPages.length) return; skPages=[]; renderSK(); render(); sim(); }
-function renderSK(){
-  const n=skPages.length, mel=skPages.filter(skMelintang).length;
-  $("skInfo").textContent = n
-    ? n+" halaman \u00b7 "+skUkuranKB()+" KB"+(mel?" \u00b7 "+mel+" melintang":"")
+function hapusLampHal(k,i){ lamp[k].splice(i,1); renderLamp(k); render(); sim(); }
+function hapusSemuaLamp(k){ if(!lamp[k].length) return; lamp[k]=[]; renderLamp(k); render(); sim(); }
+function renderLamp(k){
+  const hal=lamp[k], n=hal.length, mel=hal.filter(skMelintang).length;
+  $(LAMPIRAN[k].info).textContent = n
+    ? n+" halaman \u00b7 "+lampUkuranKB(k)+" KB"+(mel?" \u00b7 "+mel+" melintang":"")
     : "Belum ada berkas";
-  $("skList").innerHTML = skPages.map((hal,i)=>
-    `<div class="slot filled"><span class="tag">Hal ${i+1}${skMelintang(hal)?" \u21c4":""}</span>`
-    +`<button class="rm" onclick="hapusSKHal(${i})">\u00d7</button>`
-    +`<img src="${hal.u}" alt=""></div>`).join("");
+  $(LAMPIRAN[k].daftar).innerHTML = hal.map((h,i)=>
+    `<div class="slot filled"><span class="tag">Hal ${i+1}${skMelintang(h)?" \u21c4":""}</span>`
+    +`<button class="rm" onclick="hapusLampHal('${k}',${i})">\u00d7</button>`
+    +`<img src="${h.u}" alt=""></div>`).join("");
 }
+const renderSemuaLamp = () => Object.keys(LAMPIRAN).forEach(renderLamp);
 /* Semua gambar dinormalkan ke PNG: format apa pun yang bisa dibaca peramban
    (JPG, WEBP, HEIC) di-decode lalu dikodekan ulang lewat kanvas. Sisi terpanjang
    dibatasi, dan kalau hasilnya masih di atas anggaran ukuran, diperkecil
@@ -1294,9 +1309,9 @@ const FIELDS=["poktan","desa","kecamatan","kabupaten","provinsi","komoditas","ha
   "tglGaya","tglManual",
   "tujuan","tembusan","ketua","sekretaris","bendahara","kades","penyuluh","nipPenyuluh","koordinator","nipKoordinator",
   "bpp","bppTembusan","variasi",...NKEY];
-const CHECKS=["pgDaftar","pgPengurus","pgKtp","pgLamp","pgCpcl","pgSk","pgNomor"];
+const CHECKS=["pgDaftar","pgPengurus","pgKtp","pgLamp","pgCpcl","pgSim","pgSk","pgNomor"];
 function snapshot(){
-  const o={v:3,f:{},c:{},anggota,dirty,img,skPages};
+  const o={v:4,f:{},c:{},anggota,dirty,img,lamp};
   FIELDS.forEach(k=>o.f[k]=$(k).value);
   CHECKS.forEach(k=>o.c[k]=$(k).checked);
   return o;
@@ -1306,10 +1321,11 @@ function restore(o){
   FIELDS.forEach(k=>{ if(o.f[k]!==undefined) $(k).value=o.f[k]; });
   CHECKS.forEach(k=>{ if(o.c&&o.c[k]!==undefined) $(k).checked=o.c[k]; });
   anggota=o.anggota||[]; dirty=o.dirty||{}; img=o.img||{};
-  /* simpanan lama menyimpan SK sebagai untaian data URI saja */
-  skPages=(o.skPages||[]).map(h=>typeof h==="string"?{u:h,w:0,h:0}:h);
+  /* simpanan lama: SK berupa untaian data URI, dan belum mengenal SIMLUHTAN */
+  const rapikan=a=>(a||[]).map(h=>typeof h==="string"?{u:h,w:0,h:0}:h);
+  lamp={sk:rapikan(o.lamp?o.lamp.sk:o.skPages), sim:rapikan(o.lamp&&o.lamp.sim)};
   toggleCustom(); $("fTglManual").style.display = $("tglGaya").value==="manual" ? "" : "none";
-  renderSlots(); renderSK(); renderAnggota(); markLock(); render();
+  renderSlots(); renderSemuaLamp(); renderAnggota(); markLock(); render();
 }
 let simT;
 function sim(){
@@ -1516,274 +1532,6 @@ async function unduhPDF(){
   toast("PDF diunduh \u00b7 "+jpegs.length+" lembar \u00b7 "+Math.round(blob.size/1024)+" KB");
 }
 
-/* ══════════════ UNDUH WORD ══════════════
-   Dokumen dirakit sebagai MHTML (multipart/related) berekstensi .doc: bagian
-   pertama HTML, tiap gambar jadi bagian tersendiri yang dirujuk secara relatif.
-   Cara ini dipilih karena Word tidak memuat gambar dari data: URI, sedangkan
-   berkas ini harus tetap satu file tanpa pustaka luar.
-   Tata letak grid/flex diterjemahkan dulu menjadi tabel — Word tidak mengenal
-   keduanya; tanpa ini kop surat, blok tanda tangan, dan identitas sampul akan
-   menumpuk ke bawah. */
-function b64utf8(str){
-  const u=new TextEncoder().encode(str); let bin="";
-  for(let i=0;i<u.length;i+=0x8000) bin+=String.fromCharCode.apply(null,u.subarray(i,i+0x8000));
-  return btoa(bin);
-}
-const bungkus76 = s => s.replace(/(.{76})/g,"$1\r\n");
-
-/* ubah wadah grid jadi tabel: anak ke-n mengisi kolom ke-(n mod kol) */
-function gridKeTabel(el,kol,lebar){
-  if(!el||!el.parentNode) return;
-  const t=document.createElement("table");
-  t.setAttribute("cellspacing","0"); t.setAttribute("cellpadding","0");
-  t.className=el.className;                       /* .sig .c, .dot.sub, dll. tetap berlaku */
-  t.style.cssText="width:100%;border-collapse:collapse;border:none";
-  let tr=null;
-  [...el.children].forEach((c,i)=>{
-    if(i%kol===0){ tr=document.createElement("tr"); t.appendChild(tr); }
-    const td=document.createElement("td");
-    td.style.cssText="vertical-align:top;border:none;padding:0"
-      +(lebar&&lebar[i%kol]?";width:"+lebar[i%kol]:"");
-    td.appendChild(c); tr.appendChild(td);
-  });
-  while(tr&&tr.children.length<kol){
-    const td=document.createElement("td"); td.style.cssText="border:none;padding:0"; tr.appendChild(td);
-  }
-  el.replaceWith(t);
-  return t;
-}
-
-function halamanUntukWord(page){
-  const c=page.cloneNode(true);
-  c.querySelectorAll(".pgbody").forEach(b=>{ b.style.transform=""; b.style.width=""; b.style.height=""; });
-  /* Word mengabaikan max-width/object-fit dan memasang gambar sebesar resolusi
-     aslinya — scan KTP 1400 px akan meluber sampai 37 cm. Ukuran tata letak yang
-     sudah dihitung di layar (offsetWidth, tak terpengaruh transform auto-fit)
-     dipindahkan jadi ukuran tetap dalam pt. */
-  const asli=page.querySelectorAll("img"), salin=c.querySelectorAll("img");
-  asli.forEach((im,i)=>{
-    const t=salin[i]; if(!t) return;
-    const w=im.offsetWidth, h=im.offsetHeight;
-    if(w>0&&h>0){
-      t.style.width=(w*0.75).toFixed(1)+"pt";
-      t.style.height=(h*0.75).toFixed(1)+"pt";
-      t.setAttribute("width",Math.round(w)); t.setAttribute("height",Math.round(h));
-    }
-  });
-  /* dari wadah terdalam ke terluar */
-  c.querySelectorAll(".suratkop .kiri > div").forEach(e=>gridKeTabel(e,2,["2.3cm",null]));
-  c.querySelectorAll(".identitas > div").forEach(e=>gridKeTabel(e,3,["5cm","8pt",null]));
-  c.querySelectorAll(".suratkop .kanan .yth").forEach(e=>gridKeTabel(e,2,["1.15cm",null]));
-  c.querySelectorAll(".cv-idn").forEach(e=>gridKeTabel(e,2,["38%",null]));
-  c.querySelectorAll(".sig.one").forEach(e=>gridKeTabel(e,1));
-  c.querySelectorAll(".sig").forEach(e=>gridKeTabel(e,2,["50%","50%"]));
-  c.querySelectorAll(".suratkop").forEach(e=>gridKeTabel(e,2,["52%","48%"]));
-  c.querySelectorAll('[style*="display:flex"]').forEach(e=>{
-    const kanan=/flex-end/.test(e.getAttribute("style")||"");
-    const t=document.createElement("table");
-    t.setAttribute("cellspacing","0"); t.setAttribute("cellpadding","0");
-    if(kanan) t.setAttribute("align","right");
-    t.style.cssText="border-collapse:collapse;border:none;margin-top:18pt";
-    const tr=document.createElement("tr"), td=document.createElement("td");
-    td.style.cssText="border:none;padding:0";
-    [...e.children].forEach(ch=>td.appendChild(ch));
-    tr.appendChild(td); t.appendChild(tr); e.replaceWith(t);
-  });
-  c.querySelectorAll(".dot .lbl").forEach(e=>{  /* huruf bab + judulnya */
-    const t=gridKeTabel(e,2,[".85cm",null]);
-    if(t&&t.querySelector("td")) t.querySelector("td").style.paddingRight="2pt";
-  });
-  c.querySelectorAll(".dot").forEach(e=>{        /* daftar isi: judul | titik-titik | halaman */
-    const t=gridKeTabel(e,3,[null,"100%",null]); if(!t) return;
-    const td=t.querySelectorAll("td");           /* judul & nomor jangan dipatah */
-    if(td[0]) td[0].style.whiteSpace="nowrap";
-    if(td[2]){ td[2].style.whiteSpace="nowrap"; td[2].style.textAlign="right"; }
-  });
-  /* kop: lambang dikeluarkan dari posisi absolut menjadi kolom kiri tabel */
-  c.querySelectorAll(".kop").forEach(k=>{
-    const em=k.querySelector(".emblem"); if(!em) return;
-    const rule=k.querySelector(".rule");
-    const teks=document.createElement("div"); teks.style.textAlign="center";
-    [...k.children].forEach(ch=>{ if(ch!==em&&ch!==rule) teks.appendChild(ch); });
-    em.style.position="static";
-    const t=document.createElement("table");
-    t.setAttribute("cellspacing","0"); t.setAttribute("cellpadding","0");
-    t.style.cssText="width:100%;border-collapse:collapse;border:none";
-    const tr=document.createElement("tr");
-    const a=document.createElement("td"); a.style.cssText="width:24mm;vertical-align:middle;border:none;padding:0";
-    const b=document.createElement("td"); b.style.cssText="vertical-align:middle;text-align:center;border:none;padding:0";
-    a.appendChild(em); b.appendChild(teks); tr.append(a,b); t.appendChild(tr);
-    k.insertBefore(t,k.firstChild);
-  });
-  return c;
-}
-
-async function unduhWord(){
-  const pages=[...document.querySelectorAll("#stage .page")];
-  if(!pages.length){ toast("Dokumen belum siap"); return; }
-  /* ukuran tata letak gambar baru terbaca setelah gambarnya dimuat, dan harus
-     diukur pada geometri lembar penuh — di jendela sempit aturan @media ponsel
-     memberi ukuran yang lain */
-  await Promise.all([...document.querySelectorAll("#stage img")]
-    .map(im=>im.complete?null:new Promise(r=>{im.onload=im.onerror=r})));
-  const pulihkanW=siapkanLembarPenuh();
-  try{ return await susunWord(pages); } finally{ pulihkanW(); }
-}
-async function susunWord(pages){
-  const BASE="file:///C:/project-rops/";
-  const lampiran=[], peta=new Map();
-  const potong=pages.map((p,i)=>{
-    const c=halamanUntukWord(p);
-    c.querySelectorAll("img").forEach(im=>{
-      const src=im.getAttribute("src")||"";
-      const m=/^data:(image\/([a-z0-9+.-]+));base64,([\s\S]+)$/i.exec(src);
-      if(!m) return;
-      let nama=peta.get(src);                         /* gambar sama (mis. logo kop) cukup sekali */
-      if(!nama){
-        const ext=m[2].toLowerCase()==="jpeg"?"jpg":m[2].toLowerCase().replace(/[^a-z0-9]/g,"");
-        nama="gbr"+(lampiran.length+1)+"."+ext;
-        lampiran.push({nama,tipe:m[1],data:m[3].replace(/\s+/g,"")});
-        peta.set(src,nama);
-      }
-      /* jangan pasang src di sini: menyetel src tetap memicu unduhan walau
-         elemennya lepas dari dokumen, dan nama berkas MHTML itu 404 di server.
-         Namanya dititipkan ke atribut lain lalu ditukar setelah diserialkan. */
-      im.removeAttribute("src");
-      im.setAttribute("data-rops-src",nama);
-    });
-    if(i<pages.length-1) c.style.pageBreakAfter="always";
-    return {mel:p.classList.contains("melintang"), html:c.outerHTML};
-  });
-  /* Word mengganti orientasi hanya lewat pergantian section, jadi halaman
-     berurutan dengan orientasi sama dikelompokkan ke satu <div> section. */
-  let isi="", deret=null;
-  const tutup=()=>{ if(deret) isi+='<div class="'+(deret.mel?"Section2":"Section1")+'">'+deret.html+"</div>\n"; };
-  potong.forEach(x=>{
-    if(!deret||deret.mel!==x.mel){ tutup(); deret={mel:x.mel,html:""}; }
-    deret.html+=x.html+"\n";
-  });
-  tutup();
-  isi=isi.replace(/data-rops-src="([^"]*)"/g,'src="$1"');
-
-  /* Huruf & margin mengikuti dokumen acuan: Times New Roman 12pt,
-     spasi 1,5, paragraf menjorok 1,25 cm tanpa jarak antar-paragraf, tepi kiri
-     2 cm + gutter. Gaya ditulis khusus untuk Word — CSS layar tidak disalin ke
-     sini karena penuh var(), calc(), grid, dan flex yang tidak dikenal Word. */
-  const gut=(getComputedStyle(pages[0]).getPropertyValue("--gutter")||"10mm").trim();
-  const kiriCm=(2+(parseFloat(gut)||10)/10).toFixed(2);
-  const KW=kertasMM();
-  const lembarCm=(KW.w/10).toFixed(1)+"cm "+(KW.h/10).toFixed(1)+"cm";
-  const lembarCmMel=(KW.h/10).toFixed(1)+"cm "+(KW.w/10).toFixed(1)+"cm";
-  const css=`
-@page Section1{ size:${lembarCm}; margin:2.54cm 2.0cm 2.5cm ${kiriCm}cm; mso-page-orientation:portrait }
-div.Section1{ page:Section1 }
-@page Section2{ size:${lembarCmMel}; margin:2.0cm 2.54cm 2.0cm ${kiriCm}cm; mso-page-orientation:landscape }
-div.Section2{ page:Section2 }
-body{ margin:0;background:#fff;color:#000;font-family:"Times New Roman",serif;font-size:12.0pt }
-p,div,span,td,th,li{ font-family:"Times New Roman",serif;font-size:12.0pt }
-img{ border:none }
-table{ border-collapse:collapse;mso-table-lspace:0pt;mso-table-rspace:0pt }
-td,th{ vertical-align:top;padding:0 }
-
-.page{ width:auto;margin:0;padding:0;border:none;background:#fff;page-break-after:always }
-.pgbody{ display:block }
-p{ margin:0;text-align:justify;text-indent:1.25cm;line-height:150% }
-p.noind{ text-indent:0 }
-.center{ text-align:center;text-indent:0 }
-.rightblok{ margin-top:12.0pt;text-align:right;text-indent:0 }
-
-/* sampul */
-.cvframe{ border:2.25pt solid #000;padding:1.4cm 1.0cm;text-align:center }
-.cv-t1{ font-size:36.0pt;line-height:110% }
-.cv-t2{ font-size:15.0pt;font-weight:bold;margin-top:0.7cm }
-.cv-t3{ font-size:15.0pt;font-weight:bold;margin-top:0.4cm }
-.cv-img{ margin-top:0.9cm;margin-left:auto;margin-right:auto;display:block }
-.cv-gap{ height:1.6cm;font-size:2.0pt;line-height:0 }
-.cv-oleh{ font-size:16.0pt;margin-top:0.6cm }
-table.cv-idn{ margin-top:1.0cm;margin-left:auto;margin-right:auto;width:auto;text-align:left }
-table.cv-idn td{ font-size:13.0pt;padding:0 0.15cm 0.26cm 0;white-space:nowrap }
-
-/* kop surat */
-.kop{ text-align:center;padding-bottom:3.0pt }
-.kop .k1{ font-size:14.0pt;font-weight:bold }
-.kop .k2{ font-size:11.5pt;font-weight:bold }
-.kop .rule{ border-top:2.5pt solid #000;margin-top:3.0pt;font-size:2.0pt;line-height:0 }
-.doc-title{ text-align:center;font-size:11.5pt;font-weight:bold;margin:7.0pt 0 11.0pt;text-indent:0 }
-h3.bab{ font-size:12.0pt;font-weight:bold;margin:11.0pt 0 5.0pt;text-indent:0 }
-
-/* kepala surat */
-table.suratkop{ margin:10.0pt 0 16.0pt;width:100% }
-.kanan{ padding-left:12.0pt }
-table.yth{ font-weight:bold;margin-bottom:3.0pt }
-.plain{ margin-bottom:3.0pt }
-.kota{ padding-left:1.7cm }
-
-/* identitas berlabel */
-.identitas{ margin:10.0pt 0 12.0pt }
-.identitas.indent{ margin-left:2.0cm }
-.identitas table td{ padding-bottom:3.0pt }
-
-/* tanda tangan */
-table.sig{ margin-top:8.0pt;width:100% }
-table.sig td{ text-align:center }
-.sig .c{ text-align:center }
-.ttdspace{ height:1.9cm;text-align:center;overflow:hidden }
-.nm{ font-weight:bold;text-decoration:underline }
-.nip{ font-size:11.0pt }
-
-/* daftar isi */
-table.dot{ width:100%;margin-bottom:7.0pt }
-table.dot td{ vertical-align:bottom }
-table.dot.sub{ margin-left:1.2cm;width:auto }
-.dot .dots{ display:block;border-bottom:1.5pt dotted #444;margin-bottom:3.0pt }
-
-/* tabel CPCL */
-table.doc{ width:100%;font-size:11.0pt;margin:8.0pt 0 }
-table.doc th,table.doc td{ border:1.0pt solid #000;padding:3.0pt 5.0pt;font-size:11.0pt;vertical-align:top }
-table.doc th{ background:#efefef;text-align:center;font-weight:bold }
-table.doc td.c{ text-align:center }
-
-/* KTP & pembatas lampiran */
-.ktp-slot{ margin-bottom:0.6cm }
-.ktp-slot .lbl{ text-align:center;font-size:11.0pt;margin-bottom:0.3cm }
-.ktp-slot .box{ text-align:center }
-.lamp{ text-align:center;font-size:20.0pt;line-height:235%;margin-top:9.0cm }
-.pgno{ text-align:center;font-size:11.0pt;margin-top:14.0pt;text-indent:0 }
-`;
-  const judul=($("judulSampul").value||"Proposal").trim();
-  const doc='<html xmlns:o="urn:schemas-microsoft-com:office:office" '
-    +'xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40">'
-    +'<head><meta http-equiv="Content-Type" content="text/html; charset=utf-8">'
-    +'<meta name="ProgId" content="Word.Document"><title>'+esc(judul)+'</title>'
-    +'<!--[if gte mso 9]><xml><w:WordDocument><w:View>Print</w:View><w:Zoom>100</w:Zoom>'
-    +'<w:DoNotOptimizeForBrowser/></w:WordDocument></xml><![endif]-->'
-    +'<style>'+css+'</style></head><body>'+isi+'</body></html>';
-
-  const B="----=_NextPart_PROJECT_ROPS";
-  let mht="MIME-Version: 1.0\r\n"
-    +'Content-Type: multipart/related; type="text/html"; boundary="'+B+'"\r\n\r\n'
-    +"--"+B+"\r\n"
-    +'Content-Type: text/html; charset="utf-8"\r\n'
-    +"Content-Transfer-Encoding: base64\r\n"
-    +"Content-Location: "+BASE+"dokumen.htm\r\n\r\n"
-    +bungkus76(b64utf8(doc))+"\r\n\r\n";
-  lampiran.forEach(g=>{
-    mht+="--"+B+"\r\n"
-      +"Content-Type: "+g.tipe+"\r\n"
-      +"Content-Transfer-Encoding: base64\r\n"
-      +"Content-Location: "+BASE+g.nama+"\r\n\r\n"
-      +bungkus76(g.data)+"\r\n\r\n";
-  });
-  mht+="--"+B+"--\r\n";
-
-  const a=document.createElement("a");
-  a.href=URL.createObjectURL(new Blob([mht],{type:"application/msword"}));
-  a.download="proposal-"+($("poktan").value.trim().replace(/\s+/g,"-").toLowerCase()||"kelompok")+".doc";
-  a.click();
-  setTimeout(()=>URL.revokeObjectURL(a.href),4000);
-  toast("Dokumen Word diunduh \u00b7 "+pages.length+" halaman");
-}
-
 function importJSON(inp){
   const f=inp.files[0]; if(!f) return;
   const r=new FileReader();
@@ -1796,9 +1544,9 @@ function resetAll(){
   CHECKS.forEach(k=>$(k).checked=(k!=="pgNomor"));
   $("volume").value=1; $("satuan").value="unit"; $("tahun").value=String(new Date().getFullYear());
   $("tanggal").value=new Date().toISOString().slice(0,10);
-  anggota=[]; dirty={}; img={}; skPages=[];
+  anggota=[]; dirty={}; img={}; lamp={sk:[],sim:[]};
   $("fTglManual").style.display="none";
-  isiDefaultTeks(); toggleCustom(); renderSlots(); renderSK(); tambahAnggota(3); autoNarasi(); render(); sim();
+  isiDefaultTeks(); toggleCustom(); renderSlots(); renderSemuaLamp(); tambahAnggota(3); autoNarasi(); render(); sim();
   toast("Isian dikosongkan");
 }
 let toastT;
@@ -1857,8 +1605,8 @@ function isiDefaultTeks(){
   const saved=LS.get(KEY);
   if(saved){
     try{ restore(JSON.parse(saved)); $("saveTxt").textContent="Tersimpan"; toast("Data terakhir dipulihkan"); }
-    catch(e){ renderSlots(); renderSK(); tambahAnggota(3); autoNarasi(); render(); }
-  } else { renderSlots(); renderSK(); tambahAnggota(3); autoNarasi(); render(); }
+    catch(e){ renderSlots(); renderSemuaLamp(); tambahAnggota(3); autoNarasi(); render(); }
+  } else { renderSlots(); renderSemuaLamp(); tambahAnggota(3); autoNarasi(); render(); }
 })();
 
 /* ══════════════ CONTOH ══════════════ */

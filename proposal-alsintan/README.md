@@ -8,10 +8,9 @@ Buka `index.html` di browser, isi form di panel kiri, lalu unduh hasilnya:
 - **Cetak** — dialog cetak peramban; pilih *Save as PDF*, ukuran A4, margin *None*.
   Ini cara terbaik untuk arsip resmi: teksnya tetap vektor, bisa disorot dan dicari, berkasnya kecil.
 - **PDF** — mengunduh berkas PDF sekali klik, tanpa lewat dialog cetak.
-- **Word** — mengunduh `.doc` yang bisa langsung disunting di Microsoft Word.
 
 Seluruh keluaran memakai lembar **A4 (21 × 29,7 cm)**. Ukurannya satu sumber saja: custom property
-`--kertas-w` / `--kertas-h` pada `.page`. Pratinjau, ekspor Word, dan unduhan PDF membacanya dari situ,
+`--kertas-w` / `--kertas-h` pada `.page`. Pratinjau, cetak, dan unduhan PDF membacanya dari situ,
 jadi mengganti ukuran kertas cukup mengubah dua nilai itu (plus aturan `@page` cetak, yang tidak bisa
 memakai `var()`).
 
@@ -30,10 +29,12 @@ Tanggal surat punya lima gaya penulisan (18 April 2026 · 18/IV/2026 · 18-04-20
 8. **KTP pengurus** — tiga slot scan
 9. **Pembatas LAMPIRAN**
 10. **Daftar CPCL** — tabel anggota + luas lahan, tanda tangan penyuluh, ketua, koordinator BPP
-11. **Lampiran SK Bupati** — satu lembar per halaman pindaian, ditaruh paling belakang (opsional).
-    Halaman yang aslinya **melintang** dicetak di lembar melintang pula
+11. **Lampiran SIMLUHTAN** — tangkapan layar data kelompok, satu lembar per halaman (opsional)
+12. **Lampiran SK Bupati** — satu lembar per halaman pindaian, ditaruh paling belakang (opsional)
 
-Halaman 4, 7, 8, 9, 10, dan 11 bisa dimatikan lewat kartu **Gambar & Halaman**.
+Lampiran yang aslinya **melintang** dicetak di lembar melintang pula.
+
+Tiap halaman opsional bisa dimatikan lewat kartu **Gambar & Halaman**.
 
 ## Catatan teknis
 
@@ -48,24 +49,8 @@ Halaman 4, 7, 8, 9, 10, dan 11 bisa dimatikan lewat kartu **Gambar & Halaman**.
   sampai 700 px — PNG tidak memampatkan foto seperti JPG, tanpa batas ini satu scan bisa menghabiskan
   jatah localStorage. Ukuran hasil ditampilkan di notifikasi setiap kali gambar dipilih.
 - **Gutter kiri** selebar 10 mm ditambahkan di luar margin isi (jadi tepi kiri 30 mm, kanan 20 mm) sebagai
-  ruang jilid. Nilainya satu tempat saja, variabel CSS `--gutter` pada `.page`; ekspor Word membacanya
-  dari situ supaya margin dokumen ikut menyesuaikan.
-- **Ekspor Word** merakit MHTML (*multipart/related*) berekstensi `.doc`: bagian pertama HTML, tiap gambar
-  jadi bagian tersendiri yang dirujuk relatif — Word tidak memuat gambar dari `data:` URI, sedangkan alat
-  ini harus tetap satu berkas tanpa pustaka luar. Gambar yang sama, misalnya logo kop di banyak halaman,
-  hanya dilampirkan sekali.
-
-  Berkas Word **tidak memakai CSS layar sama sekali**; ia punya lembar gaya sendiri yang ditulis khusus,
-  tanpa `var()`, `calc()`, `grid`, maupun `flex` — Word tidak mengenal semua itu dan hasilnya berantakan.
-  Setiap wadah `grid`/`flex` (kop berlogo, kepala surat, blok tanda tangan, identitas sampul, daftar isi,
-  baris berlabel CPCL) diterjemahkan menjadi `<table>`, dengan kelas wadahnya ikut dibawa supaya aturan
-  turunan seperti `.sig .c` tetap berlaku. Tiap gambar juga diberi ukuran tetap dalam `pt` yang diambil
-  dari tata letak layar — Word mengabaikan `max-width`/`object-fit` dan akan memasang gambar sebesar
-  resolusi aslinya, sehingga satu scan KTP 1400 px bisa meluber sampai 37 cm.
-
-  Tipografinya mengikuti dokumen proposal acuan: Times New Roman 12 pt, spasi 1,5, paragraf menjorok
-  1,25 cm tanpa jarak antar-paragraf, tepi 2,54 cm atas · 2 cm kanan · 2,5 cm bawah · 2 cm + gutter di kiri.
-- **Geometri lembar dipaksa penuh** sebelum mencetak, mengekspor Word, maupun mengunduh PDF. Tanpa itu,
+  ruang jilid. Nilainya satu tempat saja, variabel CSS `--gutter` pada `.page`.
+- **Geometri lembar dipaksa penuh** sebelum mencetak maupun mengunduh PDF. Tanpa itu,
   di jendela sempit aturan `@media(max-width:1100px)` menyala dan halaman disusun memakai tata letak
   ponsel — tanpa `min-height` dan tanpa auto-fit — lalu terpotong. Pada jalur PDF ada jebakan kedua:
   di dalam `<foreignObject>` lebar viewport yang dipakai media query adalah lebar foreignObject itu
@@ -84,7 +69,7 @@ Halaman 4, 7, 8, 9, 10, dan 11 bisa dimatikan lewat kartu **Gambar & Halaman**.
   halaman) daripada PDF vektor dari tombol **Cetak**. Tombol ini untuk yang butuh berkas jadi sekali klik;
   untuk arsip resmi pakai **Cetak** lalu *Save as PDF*.
 - **Simpan otomatis** ke localStorage; **Ekspor/Impor** `.json` untuk memakai ulang data pada kelompok lain.
-- **Lampiran SK Bupati** menerima **PDF** maupun gambar, beberapa berkas sekaligus. PDF dibongkar per
+- **Lampiran SK Bupati dan SIMLUHTAN** menerima **PDF** maupun gambar, beberapa berkas sekaligus. PDF dibongkar per
   halaman memakai `pdf.js` yang **baru diunduh dari CDN saat dibutuhkan** — di luar itu alat ini tetap
   berjalan penuh tanpa jaringan, dan setelah dibongkar halamannya tersimpan di berkas simpanan sehingga
   tetap bisa dipakai offline. Kalau CDN tak terjangkau, pesan galatnya mengarahkan untuk mengunggah hasil
@@ -94,7 +79,5 @@ Halaman 4, 7, 8, 9, 10, dan 11 bisa dimatikan lewat kartu **Gambar & Halaman**.
 - **Orientasi lampiran mengikuti aslinya.** Dimensi tiap halaman SK ikut disimpan; yang lebih lebar
   daripada tinggi diberi kelas `.melintang` dan tampil di lembar melintang — dipaksa ke lembar tegak,
   pindaian melintang menyusut sampai tak terbaca. Tiga jalur keluaran menanganinya masing-masing:
-  cetak lewat `@page` bernama (`page:lbrMelintang`), unduhan PDF lewat `MediaBox` per lembar, dan Word
-  lewat pergantian *section* — halaman berurutan dengan orientasi sama dikelompokkan ke satu section
-  karena Word hanya bisa berganti orientasi di batas section.
+  cetak lewat `@page` bernama (`page:lbrMelintang`) dan unduhan PDF lewat `MediaBox` per lembar.
 - Daftar anggota bisa ditempel langsung dari Excel (Nama · Jabatan · Luas).
