@@ -233,6 +233,11 @@
   .ktp-slot .box{height:52mm;display:flex;align-items:center;justify-content:center;overflow:hidden}
   .ktp-slot .box img{max-height:52mm;max-width:88%;object-fit:contain}
 
+  /* lampiran SK: satu lembar pindaian per halaman */
+  .skpage{text-align:center}
+  .skpage img{max-width:100%;max-height:288mm;object-fit:contain;display:block;margin:0 auto}
+  .skbar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:11px}
+
   /* lampiran */
   .lamp{min-height:283mm;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:20pt;line-height:2.35}
   .pgno{position:absolute;bottom:10mm;left:var(--gutter);right:0;text-align:center;font-size:11pt}
@@ -483,6 +488,17 @@
         <div class="slot" data-k="ktp1"></div>
         <div class="slot" data-k="ktp2"></div>
       </div>
+      <label style="display:block;margin:16px 0 9px">Lampiran SK Bupati</label>
+      <div class="skbar">
+        <button class="btn btn-line" type="button" onclick="pilihSK()">Pilih berkas</button>
+        <button class="btn-toggle" type="button" onclick="hapusSemuaSK()" title="Kosongkan lampiran SK">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14"/></svg>
+        </button>
+        <span class="hint" id="skInfo">Belum ada berkas</span>
+      </div>
+      <div class="hint" style="margin-bottom:11px">Terima <b>PDF</b> (tiap halamannya jadi satu lembar lampiran) atau gambar hasil pindai. Bisa pilih beberapa berkas sekaligus.</div>
+      <div class="slots" id="skList"></div>
+
       <label style="display:block;margin:18px 0 9px">Halaman yang disertakan</label>
       <div class="checkrow">
         <label><input type="checkbox" id="pgDaftar" checked>Daftar isi</label>
@@ -490,6 +506,7 @@
         <label><input type="checkbox" id="pgKtp" checked>KTP pengurus</label>
         <label><input type="checkbox" id="pgLamp" checked>Pembatas LAMPIRAN</label>
         <label><input type="checkbox" id="pgCpcl" checked>Daftar CPCL</label>
+        <label><input type="checkbox" id="pgSk" checked>Lampiran SK Bupati</label>
         <label><input type="checkbox" id="pgNomor">Nomor halaman</label>
       </div>
     </div>
@@ -1023,7 +1040,12 @@ function render(){
     P.push(`<div class="page"><div class="lamp">${"LAMPIRAN".split("").map(c=>`<div>${c}</div>`).join("")}</div></div>`);
   }
 
-  /* ── 10. CPCL ── */
+  /* ── 10. LAMPIRAN SK BUPATI ── */
+  if($("pgSk").checked&&skPages.length){
+    skPages.forEach(u=>P.push(`<div class="page skpage"><img src="${u}" alt="">${pg()}</div>`));
+  }
+
+  /* ── 11. CPCL ── */
   if($("pgCpcl").checked){
     const total=anggota.reduce((s,x)=>s+(parseFloat(String(x.luas).replace(",","."))||0),0);
     P.push(`<div class="page" data-fit="soft">
@@ -1096,6 +1118,97 @@ function renderSlots(){
   });
 }
 function hapusImg(k){ delete img[k]; renderSlots(); render(); sim(); }
+
+/* ── Lampiran SK Bupati ──────────────────────────────────────────────────
+   Menerima PDF maupun gambar. PDF dibongkar per halaman memakai pdf.js yang
+   BARU diunduh saat dibutuhkan — di luar itu alat ini tetap jalan penuh tanpa
+   jaringan. Halaman pindaian disimpan sebagai JPEG, bukan PNG seperti slot
+   gambar lain: PNG tidak memampatkan pindaian, dan SK tiga-empat halaman saja
+   sudah menghabiskan jatah localStorage. */
+let skPages=[];
+const SK_SISI=1400, SK_MUTU=0.85;
+function skDariKanvas(cv){
+  const f=Math.min(1,SK_SISI/Math.max(cv.width,cv.height));
+  if(f<1){
+    const k=document.createElement("canvas");
+    k.width=Math.round(cv.width*f); k.height=Math.round(cv.height*f);
+    const g=k.getContext("2d"); g.imageSmoothingQuality="high";
+    g.drawImage(cv,0,0,k.width,k.height); cv=k;
+  }
+  return cv.toDataURL("image/jpeg",SK_MUTU);
+}
+function muatPDFJS(){
+  if(window.pdfjsLib) return Promise.resolve(window.pdfjsLib);
+  const B="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/";
+  return new Promise((res,rej)=>{
+    const sc=document.createElement("script");
+    sc.src=B+"pdf.min.js";
+    sc.onload=()=>{ window.pdfjsLib.GlobalWorkerOptions.workerSrc=B+"pdf.worker.min.js"; res(window.pdfjsLib); };
+    sc.onerror=()=>rej(new Error("cdn"));
+    document.head.appendChild(sc);
+  });
+}
+async function skDariPDF(file){
+  const lib=await muatPDFJS();
+  const doc=await lib.getDocument({data:await file.arrayBuffer()}).promise;
+  const hasil=[];
+  for(let i=1;i<=doc.numPages;i++){
+    toast("Membaca SK \u00b7 halaman "+i+"/"+doc.numPages);
+    const pg=await doc.getPage(i);
+    const v1=pg.getViewport({scale:1});
+    const vp=pg.getViewport({scale:Math.min(2.2,SK_SISI/Math.max(v1.width,v1.height))});
+    const cv=document.createElement("canvas");
+    cv.width=Math.round(vp.width); cv.height=Math.round(vp.height);
+    await pg.render({canvasContext:cv.getContext("2d"),viewport:vp}).promise;
+    hasil.push(skDariKanvas(cv));
+  }
+  return hasil;
+}
+function skDariGambar(file){
+  return new Promise((res,rej)=>{
+    const r=new FileReader();
+    r.onerror=()=>rej(new Error("baca"));
+    r.onload=()=>{ const im=new Image();
+      im.onerror=()=>rej(new Error("format"));
+      im.onload=()=>{ const cv=document.createElement("canvas");
+        cv.width=im.width; cv.height=im.height;
+        cv.getContext("2d").drawImage(im,0,0); res(skDariKanvas(cv)); };
+      im.src=r.result; };
+    r.readAsDataURL(file);
+  });
+}
+function pilihSK(){
+  const inp=document.createElement("input");
+  inp.type="file"; inp.accept="application/pdf,image/*"; inp.multiple=true;
+  inp.onchange=async()=>{
+    const berkas=[...inp.files]; if(!berkas.length) return;
+    try{
+      for(const f of berkas){
+        if(f.type==="application/pdf"||/\.pdf$/i.test(f.name)) skPages.push(...await skDariPDF(f));
+        else skPages.push(await skDariGambar(f));
+      }
+      renderSK(); render(); sim();
+      toast("SK Bupati: "+skPages.length+" halaman \u00b7 "+keUkuranKB(skPages.join(""))+" KB");
+    }catch(e){
+      toast(e.message==="cdn"
+        ? "Perlu internet sekali untuk membaca PDF \u2014 atau unggah hasil pindainya sebagai gambar"
+        : "Berkas tidak terbaca");
+      renderSK(); render(); sim();
+    }
+  };
+  inp.click();
+}
+function hapusSKHal(i){ skPages.splice(i,1); renderSK(); render(); sim(); }
+function hapusSemuaSK(){ if(!skPages.length) return; skPages=[]; renderSK(); render(); sim(); }
+function renderSK(){
+  $("skInfo").textContent = skPages.length
+    ? skPages.length+" halaman \u00b7 "+keUkuranKB(skPages.join(""))+" KB"
+    : "Belum ada berkas";
+  $("skList").innerHTML = skPages.map((u,i)=>
+    `<div class="slot filled"><span class="tag">Hal ${i+1}</span>`
+    +`<button class="rm" onclick="hapusSKHal(${i})">\u00d7</button>`
+    +`<img src="${u}" alt=""></div>`).join("");
+}
 /* Semua gambar dinormalkan ke PNG: format apa pun yang bisa dibaca peramban
    (JPG, WEBP, HEIC) di-decode lalu dikodekan ulang lewat kanvas. Sisi terpanjang
    dibatasi, dan kalau hasilnya masih di atas anggaran ukuran, diperkecil
@@ -1153,9 +1266,9 @@ const FIELDS=["poktan","desa","kecamatan","kabupaten","provinsi","komoditas","ha
   "tglGaya","tglManual",
   "tujuan","tembusan","ketua","sekretaris","bendahara","kades","penyuluh","nipPenyuluh","koordinator","nipKoordinator",
   "bpp","bppTembusan","variasi",...NKEY];
-const CHECKS=["pgDaftar","pgPengurus","pgKtp","pgLamp","pgCpcl","pgNomor"];
+const CHECKS=["pgDaftar","pgPengurus","pgKtp","pgLamp","pgCpcl","pgSk","pgNomor"];
 function snapshot(){
-  const o={v:2,f:{},c:{},anggota,dirty,img};
+  const o={v:3,f:{},c:{},anggota,dirty,img,skPages};
   FIELDS.forEach(k=>o.f[k]=$(k).value);
   CHECKS.forEach(k=>o.c[k]=$(k).checked);
   return o;
@@ -1164,9 +1277,9 @@ function restore(o){
   if(!o||!o.f) return;
   FIELDS.forEach(k=>{ if(o.f[k]!==undefined) $(k).value=o.f[k]; });
   CHECKS.forEach(k=>{ if(o.c&&o.c[k]!==undefined) $(k).checked=o.c[k]; });
-  anggota=o.anggota||[]; dirty=o.dirty||{}; img=o.img||{};
+  anggota=o.anggota||[]; dirty=o.dirty||{}; img=o.img||{}; skPages=o.skPages||[];
   toggleCustom(); $("fTglManual").style.display = $("tglGaya").value==="manual" ? "" : "none";
-  renderSlots(); renderAnggota(); markLock(); render();
+  renderSlots(); renderSK(); renderAnggota(); markLock(); render();
 }
 let simT;
 function sim(){
@@ -1528,9 +1641,9 @@ function resetAll(){
   CHECKS.forEach(k=>$(k).checked=(k!=="pgNomor"));
   $("volume").value=1; $("satuan").value="unit"; $("tahun").value=String(new Date().getFullYear());
   $("tanggal").value=new Date().toISOString().slice(0,10);
-  anggota=[]; dirty={}; img={};
+  anggota=[]; dirty={}; img={}; skPages=[];
   $("fTglManual").style.display="none";
-  isiDefaultTeks(); toggleCustom(); renderSlots(); tambahAnggota(3); autoNarasi(); render(); sim();
+  isiDefaultTeks(); toggleCustom(); renderSlots(); renderSK(); tambahAnggota(3); autoNarasi(); render(); sim();
   toast("Isian dikosongkan");
 }
 let toastT;
@@ -1584,13 +1697,13 @@ function isiDefaultTeks(){
     if(el.tagName==="SELECT") el.addEventListener("change",h);
   });
   CHECKS.forEach(k=>$(k).addEventListener("change",()=>{render();sim();}));
-  document.querySelectorAll(".slot").forEach(el=>el.addEventListener("click",()=>pilihImg(el.dataset.k)));
+  document.querySelectorAll(".slot[data-k]").forEach(el=>el.addEventListener("click",()=>pilihImg(el.dataset.k)));
 
   const saved=LS.get(KEY);
   if(saved){
     try{ restore(JSON.parse(saved)); $("saveTxt").textContent="Tersimpan"; toast("Data terakhir dipulihkan"); }
-    catch(e){ renderSlots(); tambahAnggota(3); autoNarasi(); render(); }
-  } else { renderSlots(); tambahAnggota(3); autoNarasi(); render(); }
+    catch(e){ renderSlots(); renderSK(); tambahAnggota(3); autoNarasi(); render(); }
+  } else { renderSlots(); renderSK(); tambahAnggota(3); autoNarasi(); render(); }
 })();
 
 /* ══════════════ CONTOH ══════════════ */

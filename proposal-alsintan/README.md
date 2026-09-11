@@ -26,9 +26,10 @@ Tanggal surat punya lima gaya penulisan (18 April 2026 · 18/IV/2026 · 18-04-20
 7. **Susunan pengurus** — ketua/sekretaris/bendahara, mengetahui Kepala BPP & Kepala Desa
 8. **KTP pengurus** — tiga slot scan
 9. **Pembatas LAMPIRAN**
-10. **Daftar CPCL** — tabel anggota + luas lahan, tanda tangan penyuluh, ketua, koordinator BPP
+10. **Lampiran SK Bupati** — satu lembar per halaman pindaian (opsional, jumlahnya mengikuti berkas)
+11. **Daftar CPCL** — tabel anggota + luas lahan, tanda tangan penyuluh, ketua, koordinator BPP
 
-Halaman 4, 7, 8, 9, dan 10 bisa dimatikan lewat kartu **Gambar & Halaman**.
+Halaman 4, 7, 8, 9, 10, dan 11 bisa dimatikan lewat kartu **Gambar & Halaman**.
 
 ## Catatan teknis
 
@@ -66,4 +67,11 @@ Halaman 4, 7, 8, 9, dan 10 bisa dimatikan lewat kartu **Gambar & Halaman**.
   halaman) daripada PDF vektor dari tombol **Cetak**. Tombol ini untuk yang butuh berkas jadi sekali klik;
   untuk arsip resmi pakai **Cetak** lalu *Save as PDF*.
 - **Simpan otomatis** ke localStorage; **Ekspor/Impor** `.json` untuk memakai ulang data pada kelompok lain.
+- **Lampiran SK Bupati** menerima **PDF** maupun gambar, beberapa berkas sekaligus. PDF dibongkar per
+  halaman memakai `pdf.js` yang **baru diunduh dari CDN saat dibutuhkan** — di luar itu alat ini tetap
+  berjalan penuh tanpa jaringan, dan setelah dibongkar halamannya tersimpan di berkas simpanan sehingga
+  tetap bisa dipakai offline. Kalau CDN tak terjangkau, pesan galatnya mengarahkan untuk mengunggah hasil
+  pindai sebagai gambar saja.
+  Halaman SK disimpan sebagai **JPEG** (bukan PNG seperti slot gambar lain): PNG tidak memampatkan
+  pindaian, dan SK tiga-empat halaman saja sudah menghabiskan jatah localStorage.
 - Daftar anggota bisa ditempel langsung dari Excel (Nama · Jabatan · Luas).
