@@ -159,7 +159,7 @@
   .pgmark{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-3);
     margin-bottom:5px;display:block}
   /* Ukuran lembar cukup diubah di dua nilai berikut; seluruh jalur keluaran
-     (pratinjau, Cetak, PDF, Word) membacanya dari sini. Pengecualian satu-
+     (pratinjau, Cetak, PDF) membacanya dari sini. Pengecualian satu-
      satunya adalah aturan @page cetak di bawah, yang tidak bisa memakai var().
      --gutter = ruang jilid tambahan di tepi kiri. */
   .page{
@@ -1085,7 +1085,7 @@ function render(){
 
   /* ── 11-12. LAMPIRAN BERKAS: SIMLUHTAN lalu SK Bupati paling belakang ── */
   const lembarLamp=hal=>P.push(
-    `<div class="page skpage${skMelintang(hal)?" melintang":""}"><img src="${hal.u}" alt="">${pg()}</div>`);
+    `<div class="page skpage${lampMelintang(hal)?" melintang":""}"><img src="${hal.u}" alt="">${pg()}</div>`);
   if($("pgSim").checked) lamp.sim.forEach(lembarLamp);
   if($("pgSk").checked)  lamp.sk.forEach(lembarLamp);
 
@@ -1097,6 +1097,9 @@ function render(){
    Ukuran lembar dibaca dari custom property --kertas-w/--kertas-h pada .page
    supaya CSS dan seluruh jalur ekspor tidak pernah berbeda angka. */
 const PX_PER_MM=96/25.4;
+/* satu sumber untuk ambang tata letak ponsel; innerWidth dan media query bisa
+   melaporkan angka berbeda di perangkat ber-DPR tinggi, dan CSS yang menang */
+const TATA_PONSEL = () => matchMedia("(max-width:1100px)").matches;
 function kertasMM(){
   const el=document.querySelector("#stage .page")||document.querySelector(".page");
   const cs=el&&getComputedStyle(el);
@@ -1105,7 +1108,7 @@ function kertasMM(){
   return {w:a>0?a:210, h:t>0?t:297};
 }
 function fitPages(paksa){
-  if(!paksa&&innerWidth<=1100) return;
+  if(!paksa&&TATA_PONSEL()) return;
   document.querySelectorAll(".page").forEach(p=>{
     const mode=p.dataset.fit||"1";
     let body=p.querySelector(":scope > .pgbody");
@@ -1164,9 +1167,9 @@ const LAMPIRAN={
   sim:{judul:"SIMLUHTAN", info:"simInfo", daftar:"simList"}
 };
 let lamp={sk:[],sim:[]};
-const SK_SISI=1400, SK_MUTU=0.85;
-function skDariKanvas(cv){
-  const f=Math.min(1,SK_SISI/Math.max(cv.width,cv.height));
+const LAMP_SISI=1400, LAMP_MUTU=0.85;
+function lampDariKanvas(cv){
+  const f=Math.min(1,LAMP_SISI/Math.max(cv.width,cv.height));
   if(f<1){
     const k=document.createElement("canvas");
     k.width=Math.round(cv.width*f); k.height=Math.round(cv.height*f);
@@ -1174,9 +1177,9 @@ function skDariKanvas(cv){
     g.drawImage(cv,0,0,k.width,k.height); cv=k;
   }
   /* dimensinya ikut disimpan supaya orientasi lembarnya bisa ditentukan */
-  return {u:cv.toDataURL("image/jpeg",SK_MUTU),w:cv.width,h:cv.height};
+  return {u:cv.toDataURL("image/jpeg",LAMP_MUTU),w:cv.width,h:cv.height};
 }
-const skMelintang = hal => !!hal && hal.w>hal.h;
+const lampMelintang = hal => !!hal && hal.w>hal.h;
 const lampUkuranKB = k => keUkuranKB(lamp[k].map(h=>h.u).join(""));
 function muatPDFJS(){
   if(window.pdfjsLib) return Promise.resolve(window.pdfjsLib);
@@ -1189,7 +1192,7 @@ function muatPDFJS(){
     document.head.appendChild(sc);
   });
 }
-async function skDariPDF(file){
+async function lampDariPDF(file){
   const lib=await muatPDFJS();
   const doc=await lib.getDocument({data:await file.arrayBuffer()}).promise;
   const hasil=[];
@@ -1197,15 +1200,15 @@ async function skDariPDF(file){
     toast("Membaca SK \u00b7 halaman "+i+"/"+doc.numPages);
     const pg=await doc.getPage(i);
     const v1=pg.getViewport({scale:1});
-    const vp=pg.getViewport({scale:Math.min(2.2,SK_SISI/Math.max(v1.width,v1.height))});
+    const vp=pg.getViewport({scale:Math.min(2.2,LAMP_SISI/Math.max(v1.width,v1.height))});
     const cv=document.createElement("canvas");
     cv.width=Math.round(vp.width); cv.height=Math.round(vp.height);
     await pg.render({canvasContext:cv.getContext("2d"),viewport:vp}).promise;
-    hasil.push(skDariKanvas(cv));
+    hasil.push(lampDariKanvas(cv));
   }
   return hasil;
 }
-function skDariGambar(file){
+function lampDariGambar(file){
   return new Promise((res,rej)=>{
     const r=new FileReader();
     r.onerror=()=>rej(new Error("baca"));
@@ -1213,7 +1216,7 @@ function skDariGambar(file){
       im.onerror=()=>rej(new Error("format"));
       im.onload=()=>{ const cv=document.createElement("canvas");
         cv.width=im.width; cv.height=im.height;
-        cv.getContext("2d").drawImage(im,0,0); res(skDariKanvas(cv)); };
+        cv.getContext("2d").drawImage(im,0,0); res(lampDariKanvas(cv)); };
       im.src=r.result; };
     r.readAsDataURL(file);
   });
@@ -1225,8 +1228,8 @@ function pilihLamp(k){
     const berkas=[...inp.files]; if(!berkas.length) return;
     try{
       for(const f of berkas){
-        if(f.type==="application/pdf"||/\.pdf$/i.test(f.name)) lamp[k].push(...await skDariPDF(f));
-        else lamp[k].push(await skDariGambar(f));
+        if(f.type==="application/pdf"||/\.pdf$/i.test(f.name)) lamp[k].push(...await lampDariPDF(f));
+        else lamp[k].push(await lampDariGambar(f));
       }
       renderLamp(k); render(); sim();
       toast(LAMPIRAN[k].judul+": "+lamp[k].length+" halaman \u00b7 "+lampUkuranKB(k)+" KB");
@@ -1242,12 +1245,12 @@ function pilihLamp(k){
 function hapusLampHal(k,i){ lamp[k].splice(i,1); renderLamp(k); render(); sim(); }
 function hapusSemuaLamp(k){ if(!lamp[k].length) return; lamp[k]=[]; renderLamp(k); render(); sim(); }
 function renderLamp(k){
-  const hal=lamp[k], n=hal.length, mel=hal.filter(skMelintang).length;
+  const hal=lamp[k], n=hal.length, mel=hal.filter(lampMelintang).length;
   $(LAMPIRAN[k].info).textContent = n
     ? n+" halaman \u00b7 "+lampUkuranKB(k)+" KB"+(mel?" \u00b7 "+mel+" melintang":"")
     : "Belum ada berkas";
   $(LAMPIRAN[k].daftar).innerHTML = hal.map((h,i)=>
-    `<div class="slot filled"><span class="tag">Hal ${i+1}${skMelintang(h)?" \u21c4":""}</span>`
+    `<div class="slot filled"><span class="tag">Hal ${i+1}${lampMelintang(h)?" \u21c4":""}</span>`
     +`<button class="rm" onclick="hapusLampHal('${k}',${i})">\u00d7</button>`
     +`<img src="${h.u}" alt=""></div>`).join("");
 }
@@ -1468,7 +1471,8 @@ function hitungPotongan(page,hpx){
   const kepala=thead?'<table class="doc" style="margin:0 0 0 0"><thead>'+thead.innerHTML+"</thead></table>":"";
   const tinggiKepala=thead?thead.getBoundingClientRect().height:0;
   const hasil=[]; let off=0;
-  for(let k=0;k<8;k++){
+  const MAKS=24;                                   /* pagar keamanan, bukan batas wajar */
+  for(let k=0;k<MAKS;k++){
     const klip=k>0?area-tinggiKepala:area;
     hasil.push({ke:k,off,klip:area,kepala,tinggiKepala});
     let ujung=off+klip;
@@ -1476,6 +1480,7 @@ function hitungPotongan(page,hpx){
     const cocok=batas.filter(b=>b>off+klip*0.45&&b<=ujung);
     if(cocok.length) ujung=cocok[cocok.length-1];
     off=ujung;
+    if(k===MAKS-1) toast("Isi halaman terlalu panjang \u2014 sebagian tidak termuat");
   }
   return hasil;
 }
