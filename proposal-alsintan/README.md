@@ -72,8 +72,12 @@ Halaman 4, 7, 8, 9, 10, dan 11 bisa dimatikan lewat kartu **Gambar & Halaman**.
   (816 px), jadi aturan ponsel menyala **berapa pun lebar jendela sebenarnya**; karena itu blok `@media`
   dibuang seluruhnya dari gaya yang disuntikkan ke SVG.
 - **Halaman yang tetap meluber** setelah auto-fit — daftar CPCL panjang, yang di jalur cetak memang
-  mengalir ke lembar berikutnya — dirender setinggi aslinya lalu dipecah menjadi beberapa lembar PDF,
-  bukan dipotong. Uji 48 anggota: dokumen 13 halaman menghasilkan 14 lembar PDF, tanpa baris hilang.
+  mengalir ke lembar berikutnya — dipecah menjadi beberapa lembar PDF. Tiap lembar dirender terpisah:
+  isinya digeser ke atas lalu dijepit setinggi area teks, sehingga **margin atas-bawahnya tetap ada**
+  (memotong satu gambar panjang membuat isi mepet tepi kertas). Titik potongnya dicari di **batas baris
+  tabel** terdekat di paruh bawah area teks, jadi tidak ada baris yang terbelah, dan **kepala tabel
+  disalin ulang** di tiap lembar lanjutan. Uji 26 anggota: lembar pertama bermargin bawah 16,1 mm,
+  lembar kedua bermargin atas 18 mm dengan pita kepala tabel tepat di bawahnya.
 - **Unduh PDF** merender tiap halaman lewat `<foreignObject>` SVG — murni kemampuan peramban, tanpa pustaka
   luar — lalu menjahitnya jadi PDF satu-gambar-per-halaman yang ditulis tangan (192 dpi, JPEG). Hasilnya
   **raster**: teksnya tidak bisa disorot atau dicari, dan berkasnya jauh lebih besar (±2,3 MB untuk 10

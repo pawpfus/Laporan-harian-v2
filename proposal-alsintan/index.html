@@ -1370,9 +1370,30 @@ function siapkanLembarPenuh(){
   return ()=>{ st.remove(); fitPages(); };
 }
 
-function svgHalaman(page,css,wpx,hpx){
+/* `potong` (opsional) membuat lembar lanjutan dari halaman yang isinya meluber:
+   isi digeser ke atas sejauh `off` lalu dijepit setinggi area teks, sehingga tiap
+   lembar tetap punya margin atas-bawah seperti halaman biasa. Untuk lembar kedua
+   dan seterusnya, kepala tabel disalin ulang di atas jepitan. */
+function svgHalaman(page,css,wpx,hpx,potong){
   const c=page.cloneNode(true);                      /* transform auto-fit sengaja dibiarkan */
   c.style.margin="0"; c.style.boxShadow="none";
+  if(potong){
+    const body=c.querySelector(":scope > .pgbody");
+    if(body){
+      let tinggiKlip=potong.klip;
+      if(potong.ke>0&&potong.kepala){
+        const kep=document.createElement("div");
+        kep.innerHTML=potong.kepala;
+        body.parentNode.insertBefore(kep,body);
+        tinggiKlip-=potong.tinggiKepala;
+      }
+      const klip=document.createElement("div");
+      klip.setAttribute("style","overflow:hidden;height:"+Math.max(0,Math.round(tinggiKlip))+"px");
+      body.parentNode.insertBefore(klip,body);
+      klip.appendChild(body);
+      body.style.marginTop=(-Math.round(potong.off))+"px";
+    }
+  }
   const xml=new XMLSerializer().serializeToString(c);/* serialisasi XML: <br/>, <img/> tertutup */
   const gaya=css.replace(/&/g,"&amp;").replace(/</g,"&lt;");
   return '<svg xmlns="http://www.w3.org/2000/svg" width="'+(wpx*PDF_SKALA)+'" height="'+(hpx*PDF_SKALA)+'"'
@@ -1412,6 +1433,37 @@ function rakitPDF(jpegs){
   return new Blob(bagian,{type:"application/pdf"});
 }
 
+/* Membagi satu halaman jadi daftar lembar. Untuk halaman yang muat, hasilnya
+   satu entri tanpa penjepitan. Untuk yang meluber, potongan diambil di batas
+   baris tabel terdekat di paruh bawah area teks. */
+function hitungPotongan(page,hpx){
+  const cs=getComputedStyle(page);
+  const atas=parseFloat(cs.paddingTop)||0, bawah=parseFloat(cs.paddingBottom)||0;
+  const area=Math.max(60,hpx-atas-bawah);
+  const body=page.querySelector(":scope > .pgbody");
+  const isi=body?body.getBoundingClientRect().height:(page.getBoundingClientRect().height-atas-bawah);
+  if(!body||isi<=area+1) return [{ke:0,off:0,klip:area}];
+  const nol=body.getBoundingClientRect().top;
+  const batas=[...body.querySelectorAll("table.doc tr")]
+    .map(tr=>tr.getBoundingClientRect().bottom-nol)
+    .sort((a,b)=>a-b);
+  /* kepala tabel diulang di lembar lanjutan */
+  const thead=body.querySelector("table.doc thead");
+  const kepala=thead?'<table class="doc" style="margin:0 0 0 0"><thead>'+thead.innerHTML+"</thead></table>":"";
+  const tinggiKepala=thead?thead.getBoundingClientRect().height:0;
+  const hasil=[]; let off=0;
+  for(let k=0;k<8;k++){
+    const klip=k>0?area-tinggiKepala:area;
+    hasil.push({ke:k,off,klip:area,kepala,tinggiKepala});
+    let ujung=off+klip;
+    if(ujung>=isi-1) break;
+    const cocok=batas.filter(b=>b>off+klip*0.45&&b<=ujung);
+    if(cocok.length) ujung=cocok[cocok.length-1];
+    off=ujung;
+  }
+  return hasil;
+}
+
 async function unduhPDF(){
   const pages=[...document.querySelectorAll("#stage .page")];
   if(!pages.length){ toast("Dokumen belum siap"); return; }
@@ -1434,23 +1486,18 @@ async function unduhPDF(){
       lembar.width=cw; lembar.height=ch;
       /* Halaman yang isinya tetap meluber setelah auto-fit (mis. daftar CPCL
          panjang, yang di jalur cetak memang mengalir ke lembar berikutnya)
-         dirender setinggi aslinya lalu dipecah jadi beberapa lembar, bukan
-         dipotong begitu saja. */
-      const tinggiIsi=Math.ceil(pages[i].getBoundingClientRect().height);
-      const n=Math.min(8,Math.max(1,Math.ceil(tinggiIsi/hpx-0.02)));
-      const hRender=n*hpx;
-      const svg=svgHalaman(pages[i],css,wpx,hRender);
-      const url="data:image/svg+xml;charset=utf-8,"+encodeURIComponent(svg);
-      const im=new Image();
-      await new Promise((res,rej)=>{ im.onload=res; im.onerror=()=>rej(new Error("render")); im.src=url; });
-      const tinggiCv=document.createElement("canvas");
-      tinggiCv.width=cw; tinggiCv.height=hRender*PDF_SKALA;
-      const gt=tinggiCv.getContext("2d");
-      gt.fillStyle="#fff"; gt.fillRect(0,0,tinggiCv.width,tinggiCv.height);
-      gt.drawImage(im,0,0,tinggiCv.width,tinggiCv.height);
-      for(let k=0;k<n;k++){
+         dipecah jadi beberapa lembar. Titik potongnya dicari di batas baris
+         tabel terdekat, bukan tepat di tinggi kertas, supaya tidak ada baris
+         yang terbelah; tiap lembar dirender terpisah agar margin atas-bawahnya
+         tetap ada. */
+      const potongan=hitungPotongan(pages[i],hpx);
+      for(let k=0;k<potongan.length;k++){
+        const svg=svgHalaman(pages[i],css,wpx,hpx,potongan.length>1?potongan[k]:null);
+        const url="data:image/svg+xml;charset=utf-8,"+encodeURIComponent(svg);
+        const im=new Image();
+        await new Promise((res,rej)=>{ im.onload=res; im.onerror=()=>rej(new Error("render")); im.src=url; });
         gl.fillStyle="#fff"; gl.fillRect(0,0,cw,ch);
-        gl.drawImage(tinggiCv,0,k*ch,cw,ch,0,0,cw,ch);
+        gl.drawImage(im,0,0,cw,ch);
         const b=await new Promise(r=>lembar.toBlob(r,"image/jpeg",0.9));
         jpegs.push({w:cw,h:ch,data:new Uint8Array(await b.arrayBuffer()),
           wpt:+(wMM/25.4*72).toFixed(2), hpt:+(hMM/25.4*72).toFixed(2)});
