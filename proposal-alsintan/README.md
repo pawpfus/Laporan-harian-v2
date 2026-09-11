@@ -26,8 +26,8 @@ Tanggal surat punya lima gaya penulisan (18 April 2026 · 18/IV/2026 · 18-04-20
 7. **Susunan pengurus** — ketua/sekretaris/bendahara, mengetahui Kepala BPP & Kepala Desa
 8. **KTP pengurus** — tiga slot scan
 9. **Pembatas LAMPIRAN**
-10. **Lampiran SK Bupati** — satu lembar per halaman pindaian (opsional, jumlahnya mengikuti berkas)
-11. **Daftar CPCL** — tabel anggota + luas lahan, tanda tangan penyuluh, ketua, koordinator BPP
+10. **Daftar CPCL** — tabel anggota + luas lahan, tanda tangan penyuluh, ketua, koordinator BPP
+11. **Lampiran SK Bupati** — satu lembar per halaman pindaian, ditaruh paling belakang (opsional)
 
 Halaman 4, 7, 8, 9, 10, dan 11 bisa dimatikan lewat kartu **Gambar & Halaman**.
 
@@ -61,6 +61,15 @@ Halaman 4, 7, 8, 9, 10, dan 11 bisa dimatikan lewat kartu **Gambar & Halaman**.
 
   Tipografinya mengikuti dokumen proposal acuan: Times New Roman 12 pt, spasi 1,5, paragraf menjorok
   1,25 cm tanpa jarak antar-paragraf, tepi 2,54 cm atas · 2 cm kanan · 2,5 cm bawah · 2 cm + gutter di kiri.
+- **Geometri lembar dipaksa penuh** sebelum mencetak, mengekspor Word, maupun mengunduh PDF. Tanpa itu,
+  di jendela sempit aturan `@media(max-width:1100px)` menyala dan halaman disusun memakai tata letak
+  ponsel — tanpa `min-height` dan tanpa auto-fit — lalu terpotong. Pada jalur PDF ada jebakan kedua:
+  di dalam `<foreignObject>` lebar viewport yang dipakai media query adalah lebar foreignObject itu
+  (816 px), jadi aturan ponsel menyala **berapa pun lebar jendela sebenarnya**; karena itu blok `@media`
+  dibuang seluruhnya dari gaya yang disuntikkan ke SVG.
+- **Halaman yang tetap meluber** setelah auto-fit — daftar CPCL panjang, yang di jalur cetak memang
+  mengalir ke lembar berikutnya — dirender setinggi aslinya lalu dipecah menjadi beberapa lembar PDF,
+  bukan dipotong. Uji 48 anggota: dokumen 13 halaman menghasilkan 14 lembar PDF, tanpa baris hilang.
 - **Unduh PDF** merender tiap halaman lewat `<foreignObject>` SVG — murni kemampuan peramban, tanpa pustaka
   luar — lalu menjahitnya jadi PDF satu-gambar-per-halaman yang ditulis tangan (192 dpi, JPEG). Hasilnya
   **raster**: teksnya tidak bisa disorot atau dicari, dan berkasnya jauh lebih besar (±2,3 MB untuk 10

@@ -1040,12 +1040,7 @@ function render(){
     P.push(`<div class="page"><div class="lamp">${"LAMPIRAN".split("").map(c=>`<div>${c}</div>`).join("")}</div></div>`);
   }
 
-  /* ── 10. LAMPIRAN SK BUPATI ── */
-  if($("pgSk").checked&&skPages.length){
-    skPages.forEach(u=>P.push(`<div class="page skpage"><img src="${u}" alt="">${pg()}</div>`));
-  }
-
-  /* ── 11. CPCL ── */
+  /* ── 10. CPCL ── */
   if($("pgCpcl").checked){
     const total=anggota.reduce((s,x)=>s+(parseFloat(String(x.luas).replace(",","."))||0),0);
     P.push(`<div class="page" data-fit="soft">
@@ -1073,6 +1068,11 @@ function render(){
     </div>`);
   }
 
+  /* ── 11. LAMPIRAN SK BUPATI (lampiran terakhir) ── */
+  if($("pgSk").checked&&skPages.length){
+    skPages.forEach(u=>P.push(`<div class="page skpage"><img src="${u}" alt="">${pg()}</div>`));
+  }
+
   $("stage").innerHTML = P.map((h,i)=>`<div class="sheetwrap"><span class="pgmark">Halaman ${i+1}</span>${h}</div>`).join("");
   fitPages();
 }
@@ -1080,8 +1080,8 @@ function render(){
 /* Menyusutkan isi halaman secukupnya agar tetap muat satu lembar F4 */
 const PX_PER_MM=96/25.4, F4_W_MM=216, F4_H_MM=330;
 const F4_H_PX=F4_H_MM*PX_PER_MM;
-function fitPages(){
-  if(innerWidth<=1100) return;
+function fitPages(paksa){
+  if(!paksa&&innerWidth<=1100) return;
   document.querySelectorAll(".page").forEach(p=>{
     const mode=p.dataset.fit||"1";
     let body=p.querySelector(":scope > .pgbody");
@@ -1105,7 +1105,13 @@ function fitPages(){
     body.style.height=Math.ceil(h*s)+"px";
   });
 }
-addEventListener("resize",fitPages);
+addEventListener("resize",()=>fitPages());
+
+/* Dialog cetak: paksa geometri lembar penuh supaya isian halaman tidak
+   terpotong saat dicetak dari jendela sempit. */
+let pulihCetak=null;
+addEventListener("beforeprint",()=>{ if(!pulihCetak) pulihCetak=siapkanLembarPenuh(); });
+addEventListener("afterprint",()=>{ if(pulihCetak){ pulihCetak(); pulihCetak=null; } });
 
 /* ══════════════ GAMBAR ══════════════ */
 function renderSlots(){
@@ -1305,6 +1311,39 @@ function exportJSON(){
    tetap vektor. Tombol ini untuk yang butuh berkas jadi sekali klik. */
 const PDF_SKALA=2;                                   /* 2x96dpi ≈ 192 dpi */
 
+/* Buang seluruh blok @media. Penting: di dalam <foreignObject> lebar viewport
+   yang dipakai media query adalah lebar foreignObject itu (816 px), sehingga
+   aturan @media(max-width:1100px) ikut menyala dan halaman dirender memakai
+   tata letak ponsel — tanpa min-height dan tanpa auto-fit — lalu terpotong. */
+function tanpaMedia(css){
+  let out="",i=0;
+  for(;;){
+    const m=css.indexOf("@media",i);
+    if(m<0) return out+css.slice(i);
+    out+=css.slice(i,m);
+    let j=css.indexOf("{",m);
+    if(j<0) return out;
+    for(let d=0;j<css.length;j++){
+      if(css[j]==="{") d++;
+      else if(css[j]==="}"){ d--; if(!d){ j++; break; } }
+    }
+    i=j;
+  }
+}
+
+/* Paksa geometri lembar F4 penuh walau jendela peramban sempit, lalu hitung
+   ulang auto-fit terhadap geometri itu. Mengembalikan fungsi pemulih. */
+function siapkanLembarPenuh(){
+  const st=document.createElement("style");
+  st.textContent=".page{width:216mm!important;min-height:330mm!important;"
+    +"padding:18mm 20mm 16mm calc(20mm + var(--gutter))!important}"
+    +".page.sampul{padding:12mm 12mm 12mm calc(12mm + var(--gutter))!important}"
+    +".cvframe{min-height:306mm!important}";
+  document.head.appendChild(st);
+  fitPages(true);
+  return ()=>{ st.remove(); fitPages(); };
+}
+
 function svgHalaman(page,css,wpx,hpx){
   const c=page.cloneNode(true);                      /* transform auto-fit sengaja dibiarkan */
   c.style.margin="0"; c.style.boxShadow="none";
@@ -1350,28 +1389,43 @@ async function unduhPDF(){
   if(!pages.length){ toast("Dokumen belum siap"); return; }
   await Promise.all([...document.querySelectorAll("#stage img")]
     .map(im=>im.complete?null:new Promise(r=>{im.onload=im.onerror=r})));
-  const css=[...document.querySelectorAll("style")].map(e=>e.textContent).join("\n");
+  const css=tanpaMedia([...document.querySelectorAll("style")].map(e=>e.textContent).join("\n"));
   const wpx=Math.round(F4_W_MM*PX_PER_MM), hpx=Math.round(F4_H_MM*PX_PER_MM);
   const cw=wpx*PDF_SKALA, ch=hpx*PDF_SKALA;
-  const cv=document.createElement("canvas"); cv.width=cw; cv.height=ch;
-  const g2=cv.getContext("2d");
+  const lembar=document.createElement("canvas"); lembar.width=cw; lembar.height=ch;
+  const gl=lembar.getContext("2d");
   const jpegs=[];
+  const pulihkan=siapkanLembarPenuh();
   try{
     for(let i=0;i<pages.length;i++){
       toast("Menyusun PDF \u00b7 halaman "+(i+1)+"/"+pages.length);
-      const svg=svgHalaman(pages[i],css,wpx,hpx);
+      /* Halaman yang isinya tetap meluber setelah auto-fit (mis. daftar CPCL
+         panjang, yang di jalur cetak memang mengalir ke lembar berikutnya)
+         dirender setinggi aslinya lalu dipecah jadi beberapa lembar, bukan
+         dipotong begitu saja. */
+      const tinggiIsi=Math.ceil(pages[i].getBoundingClientRect().height);
+      const n=Math.min(8,Math.max(1,Math.ceil(tinggiIsi/hpx-0.02)));
+      const hRender=n*hpx;
+      const svg=svgHalaman(pages[i],css,wpx,hRender);
       const url="data:image/svg+xml;charset=utf-8,"+encodeURIComponent(svg);
       const im=new Image();
       await new Promise((res,rej)=>{ im.onload=res; im.onerror=()=>rej(new Error("render")); im.src=url; });
-      g2.fillStyle="#fff"; g2.fillRect(0,0,cw,ch);
-      g2.drawImage(im,0,0,cw,ch);
-      const b=await new Promise(r=>cv.toBlob(r,"image/jpeg",0.9));
-      jpegs.push({w:cw,h:ch,data:new Uint8Array(await b.arrayBuffer())});
+      const tinggiCv=document.createElement("canvas");
+      tinggiCv.width=cw; tinggiCv.height=hRender*PDF_SKALA;
+      const gt=tinggiCv.getContext("2d");
+      gt.fillStyle="#fff"; gt.fillRect(0,0,tinggiCv.width,tinggiCv.height);
+      gt.drawImage(im,0,0,tinggiCv.width,tinggiCv.height);
+      for(let k=0;k<n;k++){
+        gl.fillStyle="#fff"; gl.fillRect(0,0,cw,ch);
+        gl.drawImage(tinggiCv,0,k*ch,cw,ch,0,0,cw,ch);
+        const b=await new Promise(r=>lembar.toBlob(r,"image/jpeg",0.9));
+        jpegs.push({w:cw,h:ch,data:new Uint8Array(await b.arrayBuffer())});
+      }
     }
   }catch(e){
     toast("Gagal menyusun PDF \u2014 pakai tombol Cetak lalu pilih Save as PDF");
     return;
-  }
+  }finally{ pulihkan(); }
   const wpt=+(F4_W_MM/25.4*72).toFixed(2), hpt=+(F4_H_MM/25.4*72).toFixed(2);
   const blob=rakitPDF(jpegs,wpt,hpt);
   const a=document.createElement("a");
@@ -1379,7 +1433,7 @@ async function unduhPDF(){
   a.download="proposal-"+($("poktan").value.trim().replace(/\s+/g,"-").toLowerCase()||"kelompok")+".pdf";
   a.click();
   setTimeout(()=>URL.revokeObjectURL(a.href),4000);
-  toast("PDF diunduh \u00b7 "+pages.length+" halaman \u00b7 "+Math.round(blob.size/1024)+" KB");
+  toast("PDF diunduh \u00b7 "+jpegs.length+" lembar \u00b7 "+Math.round(blob.size/1024)+" KB");
 }
 
 /* ══════════════ UNDUH WORD ══════════════
@@ -1487,9 +1541,15 @@ function halamanUntukWord(page){
 async function unduhWord(){
   const pages=[...document.querySelectorAll("#stage .page")];
   if(!pages.length){ toast("Dokumen belum siap"); return; }
-  /* ukuran tata letak gambar baru terbaca setelah gambarnya dimuat */
+  /* ukuran tata letak gambar baru terbaca setelah gambarnya dimuat, dan harus
+     diukur pada geometri lembar penuh — di jendela sempit aturan @media ponsel
+     memberi ukuran yang lain */
   await Promise.all([...document.querySelectorAll("#stage img")]
     .map(im=>im.complete?null:new Promise(r=>{im.onload=im.onerror=r})));
+  const pulihkanW=siapkanLembarPenuh();
+  try{ return await susunWord(pages); } finally{ pulihkanW(); }
+}
+async function susunWord(pages){
   const BASE="file:///C:/project-rops/";
   const lampiran=[], peta=new Map();
   const isi=pages.map((p,i)=>{
