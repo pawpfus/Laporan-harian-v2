@@ -1398,12 +1398,11 @@ function svgHalaman(page,css,wpx,hpx,potong){
   if(potong){
     const body=c.querySelector(":scope > .pgbody");
     if(body){
-      let tinggiKlip=potong.klip;
+      const tinggiKlip=potong.klip;   /* sudah tepat sampai titik potong */
       if(potong.ke>0&&potong.kepala){
         const kep=document.createElement("div");
         kep.innerHTML=potong.kepala;
         body.parentNode.insertBefore(kep,body);
-        tinggiKlip-=potong.tinggiKepala;
       }
       const klip=document.createElement("div");
       klip.setAttribute("style","overflow:hidden;height:"+Math.max(0,Math.round(tinggiKlip))+"px");
@@ -1472,14 +1471,42 @@ function hitungPotongan(page,hpx){
   const hasil=[]; let off=0;
   const MAKS=24;                                   /* pagar keamanan, bukan batas wajar */
   for(let k=0;k<MAKS;k++){
-    const klip=k>0?area-tinggiKepala:area;
-    hasil.push({ke:k,off,klip:area,kepala,tinggiKepala});
-    let ujung=off+klip;
-    if(ujung>=isi-1) break;
-    const cocok=batas.filter(b=>b>off+klip*0.45&&b<=ujung);
-    if(cocok.length) ujung=cocok[cocok.length-1];
+    /* lembar lanjutan kehilangan sebagian ruang untuk kepala tabel ulangan */
+    const ruang=k>0?Math.max(60,area-tinggiKepala):area;
+    let ujung=off+ruang, habis=false;
+    if(ujung>=isi-1){ ujung=isi; habis=true; }
+    else{
+      /* mundur ke batas baris terdekat supaya tidak ada baris yang terbelah */
+      const cocok=batas.filter(b=>b>off+ruang*0.45&&b<=ujung);
+      if(cocok.length) ujung=cocok[cocok.length-1];
+    }
+    /* dijepit TEPAT sampai titik potong. Kalau dijepit setinggi ruang penuh,
+       bagian setelah titik potong ikut tampil di lembar ini lalu terulang di
+       lembar berikutnya — itu yang membuat baris JUMLAH dan blok tanda
+       tangan muncul dua kali. */
+    hasil.push({ke:k,off,klip:ujung-off,kepala,tinggiKepala});
+    if(habis) break;
     off=ujung;
-    if(k===MAKS-1) toast("Isi halaman terlalu panjang \u2014 sebagian tidak termuat");
+    if(k===MAKS-1) toast("Isi halaman terlalu panjang — sebagian tidak termuat");
+  }
+  /* Hindari lembar penutup yang hanya berisi blok tanda tangan, terlepas dari
+     tabelnya. Titik potong sebelumnya ditarik mundur ke baris paling awal yang
+     masih membuat seluruh sisa muat, sehingga lembar terakhir ikut membawa isi
+     tabel. */
+  if(hasil.length>1&&batas.length){
+    const akhirTabel=batas[batas.length-1];
+    const trk=hasil[hasil.length-1], sblm=hasil[hasil.length-2];
+    if(trk.off>=akhirTabel-1){
+      const ruang=Math.max(60,area-tinggiKepala);
+      const muat=batas.filter(b=>isi-b<=ruang&&b<trk.off&&b>sblm.off+60);
+      if(muat.length){
+        /* batas PALING AKHIR yang sisanya masih muat: lembar sebelumnya tetap
+           padat, lembar penutup cukup kebagian sebagian tabel */
+        const b=muat[muat.length-1];
+        sblm.klip=b-sblm.off;
+        trk.off=b; trk.klip=isi-b;
+      }
+    }
   }
   return hasil;
 }

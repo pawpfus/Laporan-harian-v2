@@ -61,8 +61,18 @@ Tiap halaman opsional bisa dimatikan lewat kartu **Gambar & Halaman**.
   isinya digeser ke atas lalu dijepit setinggi area teks, sehingga **margin atas-bawahnya tetap ada**
   (memotong satu gambar panjang membuat isi mepet tepi kertas). Titik potongnya dicari di **batas baris
   tabel** terdekat di paruh bawah area teks, jadi tidak ada baris yang terbelah, dan **kepala tabel
-  disalin ulang** di tiap lembar lanjutan. Uji 26 anggota: lembar pertama bermargin bawah 16,1 mm,
-  lembar kedua bermargin atas 18 mm dengan pita kepala tabel tepat di bawahnya.
+  disalin ulang** di tiap lembar lanjutan.
+
+  Tiap lembar dijepit **tepat sampai titik potongnya**, bukan setinggi ruang penuh. Kalau dijepit
+  penuh, bagian setelah titik potong ikut tampil di lembar itu lalu terulang di lembar berikutnya —
+  baris JUMLAH dan blok tanda tangan sempat muncul dua kali karena ini.
+
+  Agar lembar penutup tidak berisi blok tanda tangan saja, titik potong sebelumnya ditarik mundur ke
+  batas baris paling akhir yang sisanya masih muat, sehingga lembar terakhir tetap kebagian isi tabel
+  tanpa mengosongkan lembar sebelumnya.
+
+  Diuji pada 10 · 26 · 33 · 39 · 48 · 70 · 120 anggota: tumpang tindih 0 px, celah 0 px, dan lembar
+  penutup selalu memuat isi tabel.
 - **Unduh PDF** merender tiap halaman lewat `<foreignObject>` SVG — murni kemampuan peramban, tanpa pustaka
   luar — lalu menjahitnya jadi PDF satu-gambar-per-halaman yang ditulis tangan (192 dpi, JPEG). Hasilnya
   **raster**: teksnya tidak bisa disorot atau dicari, dan berkasnya jauh lebih besar (±2,3 MB untuk 10
