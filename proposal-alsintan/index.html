@@ -1392,25 +1392,9 @@ function siapkanLembarPenuh(){
    isi digeser ke atas sejauh `off` lalu dijepit setinggi area teks, sehingga tiap
    lembar tetap punya margin atas-bawah seperti halaman biasa. Untuk lembar kedua
    dan seterusnya, kepala tabel disalin ulang di atas jepitan. */
-function svgHalaman(page,css,wpx,hpx,potong){
-  const c=page.cloneNode(true);                      /* transform auto-fit sengaja dibiarkan */
+function svgHalaman(el,css,wpx,hpx){
+  const c=el.cloneNode(true);                        /* transform auto-fit sengaja dibiarkan */
   c.style.margin="0"; c.style.boxShadow="none";
-  if(potong){
-    const body=c.querySelector(":scope > .pgbody");
-    if(body){
-      const tinggiKlip=potong.klip;   /* sudah tepat sampai titik potong */
-      if(potong.ke>0&&potong.kepala){
-        const kep=document.createElement("div");
-        kep.innerHTML=potong.kepala;
-        body.parentNode.insertBefore(kep,body);
-      }
-      const klip=document.createElement("div");
-      klip.setAttribute("style","overflow:hidden;height:"+Math.max(0,Math.round(tinggiKlip))+"px");
-      body.parentNode.insertBefore(klip,body);
-      klip.appendChild(body);
-      body.style.marginTop=(-Math.round(potong.off))+"px";
-    }
-  }
   const xml=new XMLSerializer().serializeToString(c);/* serialisasi XML: <br/>, <img/> tertutup */
   const gaya=css.replace(/&/g,"&amp;").replace(/</g,"&lt;");
   return '<svg xmlns="http://www.w3.org/2000/svg" width="'+(wpx*PDF_SKALA)+'" height="'+(hpx*PDF_SKALA)+'"'
@@ -1450,65 +1434,62 @@ function rakitPDF(jpegs){
   return new Blob(bagian,{type:"application/pdf"});
 }
 
-/* Membagi satu halaman jadi daftar lembar. Untuk halaman yang muat, hasilnya
-   satu entri tanpa penjepitan. Untuk yang meluber, potongan diambil di batas
-   baris tabel terdekat di paruh bawah area teks. */
-function hitungPotongan(page,hpx){
+/* Memecah satu halaman jadi beberapa lembar dengan MEMBUANG elemen, bukan
+   menggeser-dan-menjepit piksel. Pendekatan piksel sempat membuat baris
+   terbelah: tinggi baris yang diukur di halaman hidup tidak selalu sama persis
+   dengan tinggi saat dirender ulang di dalam <foreignObject>, dan selisih
+   sekecil apa pun menggeser seluruh titik potong. Dengan membuang <tr> di luar
+   jangkauan, satu baris mustahil terbelah berapa pun selisihnya.
+   Hanya halaman bertabel (daftar CPCL) yang dipecah; halaman lain sudah
+   dijamin muat oleh auto-fit. */
+function bagiHalaman(page,hpx){
   const cs=getComputedStyle(page);
-  const atas=parseFloat(cs.paddingTop)||0, bawah=parseFloat(cs.paddingBottom)||0;
-  const area=Math.max(60,hpx-atas-bawah);
-  const body=page.querySelector(":scope > .pgbody");
-  const isi=body?body.getBoundingClientRect().height:(page.getBoundingClientRect().height-atas-bawah);
-  if(!body||isi<=area+1) return [{ke:0,off:0,klip:area}];
-  const nol=body.getBoundingClientRect().top;
-  const batas=[...body.querySelectorAll("table.doc tr")]
-    .map(tr=>tr.getBoundingClientRect().bottom-nol)
-    .sort((a,b)=>a-b);
-  /* kepala tabel diulang di lembar lanjutan */
-  const thead=body.querySelector("table.doc thead");
-  const kepala=thead?'<table class="doc" style="margin:0 0 0 0"><thead>'+thead.innerHTML+"</thead></table>":"";
-  const tinggiKepala=thead?thead.getBoundingClientRect().height:0;
-  const hasil=[]; let off=0;
-  const MAKS=24;                                   /* pagar keamanan, bukan batas wajar */
-  for(let k=0;k<MAKS;k++){
-    /* lembar lanjutan kehilangan sebagian ruang untuk kepala tabel ulangan */
-    const ruang=k>0?Math.max(60,area-tinggiKepala):area;
-    let ujung=off+ruang, habis=false;
-    if(ujung>=isi-1){ ujung=isi; habis=true; }
-    else{
-      /* mundur ke batas baris terdekat supaya tidak ada baris yang terbelah */
-      const cocok=batas.filter(b=>b>off+ruang*0.45&&b<=ujung);
-      if(cocok.length) ujung=cocok[cocok.length-1];
+  const area=Math.max(60,hpx-(parseFloat(cs.paddingTop)||0)-(parseFloat(cs.paddingBottom)||0));
+  const body=page.querySelector(":scope > .pgbody")||page;
+  const tabel=body.querySelector("table.doc");
+  if(!tabel||body.getBoundingClientRect().height<=area+1) return [page];
+
+  const atasBody=body.getBoundingClientRect().top;
+  const kotakTabel=tabel.getBoundingClientRect();
+  const thead=tabel.querySelector("thead");
+  const baris=[...tabel.querySelectorAll("tbody tr")];
+  const tinggiBaris=baris.map(tr=>tr.getBoundingClientRect().height);
+  const sebelum=kotakTabel.top-atasBody;                       /* judul + identitas */
+  const tKepala=thead?thead.getBoundingClientRect().height:0;
+  const ekor=(atasBody+body.getBoundingClientRect().height)-kotakTabel.bottom; /* tanda tangan */
+
+  const rencana=[]; let i=0, pertama=true;
+  while(i<baris.length){
+    const muat=area-(pertama?sebelum:0)-tKepala;
+    let tinggi=0, j=i;
+    while(j<baris.length&&tinggi+tinggiBaris[j]<=muat){ tinggi+=tinggiBaris[j]; j++; }
+    if(j===i) j=i+1;                                          /* satu baris lebih tinggi dari lembar */
+    /* lembar penutup harus memuat blok tanda tangan juga */
+    if(j>=baris.length){
+      while(j>i+1&&tinggi+ekor>muat){ j--; tinggi-=tinggiBaris[j]; }
     }
-    /* dijepit TEPAT sampai titik potong. Kalau dijepit setinggi ruang penuh,
-       bagian setelah titik potong ikut tampil di lembar ini lalu terulang di
-       lembar berikutnya — itu yang membuat baris JUMLAH dan blok tanda
-       tangan muncul dua kali. */
-    hasil.push({ke:k,off,klip:ujung-off,kepala,tinggiKepala});
-    if(habis) break;
-    off=ujung;
-    if(k===MAKS-1) toast("Isi halaman terlalu panjang — sebagian tidak termuat");
+    rencana.push({mulai:i,akhir:j,pertama,ekor:false});
+    i=j; pertama=false;
+    if(rencana.length>=40) break;                             /* pagar keamanan */
   }
-  /* Hindari lembar penutup yang hanya berisi blok tanda tangan, terlepas dari
-     tabelnya. Titik potong sebelumnya ditarik mundur ke baris paling awal yang
-     masih membuat seluruh sisa muat, sehingga lembar terakhir ikut membawa isi
-     tabel. */
-  if(hasil.length>1&&batas.length){
-    const akhirTabel=batas[batas.length-1];
-    const trk=hasil[hasil.length-1], sblm=hasil[hasil.length-2];
-    if(trk.off>=akhirTabel-1){
-      const ruang=Math.max(60,area-tinggiKepala);
-      const muat=batas.filter(b=>isi-b<=ruang&&b<trk.off&&b>sblm.off+60);
-      if(muat.length){
-        /* batas PALING AKHIR yang sisanya masih muat: lembar sebelumnya tetap
-           padat, lembar penutup cukup kebagian sebagian tabel */
-        const b=muat[muat.length-1];
-        sblm.klip=b-sblm.off;
-        trk.off=b; trk.klip=isi-b;
-      }
-    }
-  }
-  return hasil;
+  if(!rencana.length) return [page];
+  rencana[rencana.length-1].ekor=true;
+  if(rencana.length===1) return [page];
+  return rencana.map(r=>potongLembar(page,r));
+}
+
+/* Salinan halaman yang hanya memuat baris [mulai,akhir); blok sebelum tabel
+   ikut dibuang kecuali di lembar pertama, blok sesudahnya kecuali di penutup.
+   Kepala tabel terbawa sendirinya karena <thead> tidak pernah dibuang. */
+function potongLembar(page,r){
+  const c=page.cloneNode(true);
+  const body=c.querySelector(":scope > .pgbody")||c;
+  const tabel=body.querySelector("table.doc");
+  if(!tabel) return c;
+  if(!r.pertama) for(let n=tabel.previousElementSibling;n;){ const s=n.previousElementSibling; n.remove(); n=s; }
+  if(!r.ekor)    for(let n=tabel.nextElementSibling;n;){ const s=n.nextElementSibling; n.remove(); n=s; }
+  [...tabel.querySelectorAll("tbody tr")].forEach((tr,i)=>{ if(i<r.mulai||i>=r.akhir) tr.remove(); });
+  return c;
 }
 
 async function unduhPDF(){
@@ -1531,15 +1512,12 @@ async function unduhPDF(){
       const wpx=Math.round(wMM*PX_PER_MM), hpx=Math.round(hMM*PX_PER_MM);
       const cw=wpx*PDF_SKALA, ch=hpx*PDF_SKALA;
       lembar.width=cw; lembar.height=ch;
-      /* Halaman yang isinya tetap meluber setelah auto-fit (mis. daftar CPCL
-         panjang, yang di jalur cetak memang mengalir ke lembar berikutnya)
-         dipecah jadi beberapa lembar. Titik potongnya dicari di batas baris
-         tabel terdekat, bukan tepat di tinggi kertas, supaya tidak ada baris
-         yang terbelah; tiap lembar dirender terpisah agar margin atas-bawahnya
-         tetap ada. */
-      const potongan=hitungPotongan(pages[i],hpx);
-      for(let k=0;k<potongan.length;k++){
-        const svg=svgHalaman(pages[i],css,wpx,hpx,potongan.length>1?potongan[k]:null);
+      /* Daftar CPCL yang panjang \u2014 di jalur cetak memang mengalir ke lembar
+         berikutnya \u2014 dipecah per baris tabel, tiap lembar dirender terpisah
+         supaya margin atas-bawahnya tetap ada. */
+      const lembaran=bagiHalaman(pages[i],hpx);
+      for(const halaman of lembaran){
+        const svg=svgHalaman(halaman,css,wpx,hpx);
         const url="data:image/svg+xml;charset=utf-8,"+encodeURIComponent(svg);
         const im=new Image();
         await new Promise((res,rej)=>{ im.onload=res; im.onerror=()=>rej(new Error("render")); im.src=url; });

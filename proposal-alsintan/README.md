@@ -56,23 +56,18 @@ Tiap halaman opsional bisa dimatikan lewat kartu **Gambar & Halaman**.
   di dalam `<foreignObject>` lebar viewport yang dipakai media query adalah lebar foreignObject itu
   (816 px), jadi aturan ponsel menyala **berapa pun lebar jendela sebenarnya**; karena itu blok `@media`
   dibuang seluruhnya dari gaya yang disuntikkan ke SVG.
-- **Halaman yang tetap meluber** setelah auto-fit — daftar CPCL panjang, yang di jalur cetak memang
-  mengalir ke lembar berikutnya — dipecah menjadi beberapa lembar PDF. Tiap lembar dirender terpisah:
-  isinya digeser ke atas lalu dijepit setinggi area teks, sehingga **margin atas-bawahnya tetap ada**
-  (memotong satu gambar panjang membuat isi mepet tepi kertas). Titik potongnya dicari di **batas baris
-  tabel** terdekat di paruh bawah area teks, jadi tidak ada baris yang terbelah, dan **kepala tabel
-  disalin ulang** di tiap lembar lanjutan.
+- **Daftar CPCL yang panjang** dipecah jadi beberapa lembar PDF dengan **membuang elemen**, bukan
+  menggeser-dan-menjepit piksel: tiap lembar adalah salinan halaman yang hanya memuat sebagian `<tr>`,
+  tanpa judul/identitas kecuali di lembar pertama, dan tanpa blok tanda tangan kecuali di lembar penutup.
+  Kepala tabel terbawa sendirinya karena `<thead>` tidak pernah dibuang.
 
-  Tiap lembar dijepit **tepat sampai titik potongnya**, bukan setinggi ruang penuh. Kalau dijepit
-  penuh, bagian setelah titik potong ikut tampil di lembar itu lalu terulang di lembar berikutnya —
-  baris JUMLAH dan blok tanda tangan sempat muncul dua kali karena ini.
+  Pendekatan piksel sebelumnya membelah baris: tinggi baris yang diukur di halaman hidup tidak selalu
+  sama persis dengan tinggi saat dirender ulang di dalam `<foreignObject>`, dan selisih sekecil apa pun
+  menggeser seluruh titik potong. Dengan membuang `<tr>`, satu baris mustahil terbelah berapa pun
+  selisihnya. Lembar penutup juga dijamin memuat blok tanda tangan — baris ditarik mundur bila perlu.
 
-  Agar lembar penutup tidak berisi blok tanda tangan saja, titik potong sebelumnya ditarik mundur ke
-  batas baris paling akhir yang sisanya masih muat, sehingga lembar terakhir tetap kebagian isi tabel
-  tanpa mengosongkan lembar sebelumnya.
-
-  Diuji pada 10 · 26 · 33 · 39 · 48 · 70 · 120 anggota: tumpang tindih 0 px, celah 0 px, dan lembar
-  penutup selalu memuat isi tabel.
+  Diuji pada 26 · 33 · 39 · 48 · 70 anggota: jumlah baris di seluruh lembar selalu sama persis dengan
+  jumlah baris tabel, tidak ada yang hilang maupun terulang.
 - **Unduh PDF** merender tiap halaman lewat `<foreignObject>` SVG — murni kemampuan peramban, tanpa pustaka
   luar — lalu menjahitnya jadi PDF satu-gambar-per-halaman yang ditulis tangan (192 dpi, JPEG). Hasilnya
   **raster**: teksnya tidak bisa disorot atau dicari, dan berkasnya jauh lebih besar (±2,3 MB untuk 10
