@@ -66,8 +66,13 @@ Tiap halaman opsional bisa dimatikan lewat kartu **Gambar & Halaman**.
   menggeser seluruh titik potong. Dengan membuang `<tr>`, satu baris mustahil terbelah berapa pun
   selisihnya. Lembar penutup juga dijamin memuat blok tanda tangan — baris ditarik mundur bila perlu.
 
-  Diuji pada 26 · 33 · 39 · 48 · 70 anggota: jumlah baris di seluruh lembar selalu sama persis dengan
-  jumlah baris tabel, tidak ada yang hilang maupun terulang.
+  Berapa baris yang muat **tidak diperkirakan** lewat penjumlahan tinggi baris — cara itu melewatkan
+  margin milik tabel sendiri dan membuat lembar meluber sampai 19 px. Tiap calon lembar benar-benar
+  dipasang di luar layar lalu diukur, dan jumlah barisnya dicari dengan bagi dua.
+
+  Diuji menyeluruh pada **1–80 anggota** ditambah 85 · 90 · 100 · 110 · 120 · 135 · 150 · 175 · 200 · 250:
+  tidak ada baris hilang atau terulang, judul selalu di lembar pertama, blok tanda tangan selalu di lembar
+  penutup, dan lembar terpenuh masih 1,4 px di bawah batas area teks.
 - **Unduh PDF** merender tiap halaman lewat `<foreignObject>` SVG — murni kemampuan peramban, tanpa pustaka
   luar — lalu menjahitnya jadi PDF satu-gambar-per-halaman yang ditulis tangan (192 dpi, JPEG). Hasilnya
   **raster**: teksnya tidak bisa disorot atau dicari, dan berkasnya jauh lebih besar (±2,3 MB untuk 10

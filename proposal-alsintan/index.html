@@ -1437,45 +1437,57 @@ function rakitPDF(jpegs){
 /* Memecah satu halaman jadi beberapa lembar dengan MEMBUANG elemen, bukan
    menggeser-dan-menjepit piksel. Pendekatan piksel sempat membuat baris
    terbelah: tinggi baris yang diukur di halaman hidup tidak selalu sama persis
-   dengan tinggi saat dirender ulang di dalam <foreignObject>, dan selisih
-   sekecil apa pun menggeser seluruh titik potong. Dengan membuang <tr> di luar
-   jangkauan, satu baris mustahil terbelah berapa pun selisihnya.
-   Hanya halaman bertabel (daftar CPCL) yang dipecah; halaman lain sudah
-   dijamin muat oleh auto-fit. */
+   dengan tinggi saat dirender ulang, dan selisih sekecil apa pun menggeser
+   seluruh titik potong. Dengan membuang <tr> di luar jangkauan, satu baris
+   mustahil terbelah.
+
+   Berapa baris yang muat TIDAK diperkirakan lewat penjumlahan tinggi baris —
+   cara itu melewatkan margin milik tabel sendiri dan membuat lembar meluber
+   sampai 19 px. Tiap calon lembar benar-benar dipasang di luar layar lalu
+   diukur, dan jumlah barisnya dicari dengan bagi dua. Hanya halaman bertabel
+   (daftar CPCL) yang dipecah; halaman lain sudah dijamin muat oleh auto-fit. */
 function bagiHalaman(page,hpx){
   const cs=getComputedStyle(page);
   const area=Math.max(60,hpx-(parseFloat(cs.paddingTop)||0)-(parseFloat(cs.paddingBottom)||0));
-  const body=page.querySelector(":scope > .pgbody")||page;
-  const tabel=body.querySelector("table.doc");
-  if(!tabel||body.getBoundingClientRect().height<=area+1) return [page];
+  const badan=page.querySelector(":scope > .pgbody")||page;
+  const tabel=badan.querySelector("table.doc");
+  if(!tabel||badan.getBoundingClientRect().height<=area+1) return [page];
+  const jml=tabel.querySelectorAll("tbody tr").length;
+  if(!jml) return [page];
 
-  const atasBody=body.getBoundingClientRect().top;
-  const kotakTabel=tabel.getBoundingClientRect();
-  const thead=tabel.querySelector("thead");
-  const baris=[...tabel.querySelectorAll("tbody tr")];
-  const tinggiBaris=baris.map(tr=>tr.getBoundingClientRect().height);
-  const sebelum=kotakTabel.top-atasBody;                       /* judul + identitas */
-  const tKepala=thead?thead.getBoundingClientRect().height:0;
-  const ekor=(atasBody+body.getBoundingClientRect().height)-kotakTabel.bottom; /* tanda tangan */
+  const sarang=document.createElement("div");
+  sarang.style.cssText="position:absolute;left:-99999px;top:0;visibility:hidden";
+  document.body.appendChild(sarang);
+  const muat=el=>{
+    sarang.appendChild(el);
+    const c=getComputedStyle(el);
+    const ruang=hpx-(parseFloat(c.paddingTop)||0)-(parseFloat(c.paddingBottom)||0);
+    const b=el.querySelector(":scope > .pgbody")||el;
+    const lebih=b.getBoundingClientRect().height-ruang;
+    el.remove();
+    return lebih<=0.5;
+  };
 
-  const rencana=[]; let i=0, pertama=true;
-  while(i<baris.length){
-    const muat=area-(pertama?sebelum:0)-tKepala;
-    let tinggi=0, j=i;
-    while(j<baris.length&&tinggi+tinggiBaris[j]<=muat){ tinggi+=tinggiBaris[j]; j++; }
-    if(j===i) j=i+1;                                          /* satu baris lebih tinggi dari lembar */
-    /* lembar penutup harus memuat blok tanda tangan juga */
-    if(j>=baris.length){
-      while(j>i+1&&tinggi+ekor>muat){ j--; tinggi-=tinggiBaris[j]; }
+  const lembar=[]; let i=0, pertama=true, sesak=false;
+  while(i<jml&&lembar.length<40){
+    /* cari jumlah baris terbanyak yang masih muat; lembar penutup sekalian
+       harus memuat blok tanda tangan, dan itu ikut terukur */
+    let lo=i+1, hi=jml, terbaik=i+1;
+    while(lo<=hi){
+      const tengah=(lo+hi)>>1;
+      if(muat(potongLembar(page,{mulai:i,akhir:tengah,pertama,ekor:tengah===jml}))){
+        terbaik=tengah; lo=tengah+1;
+      } else hi=tengah-1;
     }
-    rencana.push({mulai:i,akhir:j,pertama,ekor:false});
-    i=j; pertama=false;
-    if(rencana.length>=40) break;                             /* pagar keamanan */
+    if(terbaik===i+1&&!muat(potongLembar(page,{mulai:i,akhir:terbaik,pertama,ekor:terbaik===jml})))
+      sesak=true;                                 /* satu baris pun tak muat sepenuhnya */
+    lembar.push({mulai:i,akhir:terbaik,pertama,ekor:terbaik===jml});
+    i=terbaik; pertama=false;
   }
-  if(!rencana.length) return [page];
-  rencana[rencana.length-1].ekor=true;
-  if(rencana.length===1) return [page];
-  return rencana.map(r=>potongLembar(page,r));
+  sarang.remove();
+  if(sesak) toast("Baris tabel lebih tinggi daripada satu lembar");
+  if(lembar.length<=1) return [page];
+  return lembar.map(r=>potongLembar(page,r));
 }
 
 /* Salinan halaman yang hanya memuat baris [mulai,akhir); blok sebelum tabel
@@ -1483,8 +1495,8 @@ function bagiHalaman(page,hpx){
    Kepala tabel terbawa sendirinya karena <thead> tidak pernah dibuang. */
 function potongLembar(page,r){
   const c=page.cloneNode(true);
-  const body=c.querySelector(":scope > .pgbody")||c;
-  const tabel=body.querySelector("table.doc");
+  const badan=c.querySelector(":scope > .pgbody")||c;
+  const tabel=badan.querySelector("table.doc");
   if(!tabel) return c;
   if(!r.pertama) for(let n=tabel.previousElementSibling;n;){ const s=n.previousElementSibling; n.remove(); n=s; }
   if(!r.ekor)    for(let n=tabel.nextElementSibling;n;){ const s=n.nextElementSibling; n.remove(); n=s; }
