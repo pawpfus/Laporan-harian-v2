@@ -204,3 +204,10 @@ dengan nama `cpcl-pm-aas`.
 
 Format dokumen: `C:\Mulung\Sebelumnya\PPLS\Pitu Riawa\CPCL PMAAS OTTING 205 Ha 2026 (BENIH).xlsx`
 dan `(PUPUK).xlsx`.
+
+## Rilis
+
+Tersambung ke Vercel lewat Git: tiap `git push` ke `main` otomatis diterbitkan ke
+<https://cpcls.vercel.app>. Folder ini cuma subfolder dari repo `Laporan-harian-v2`,
+jadi *Root Directory* proyek Vercel-nya disetel ke `cpcl-pm-aas` — karena itu
+`vercel deploy --prod` manual harus dijalankan **dari akar repo**, bukan dari dalam folder ini.
