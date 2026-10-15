@@ -114,3 +114,10 @@ Tiap halaman opsional bisa dimatikan lewat kartu **Gambar & Halaman**.
   pindaian melintang menyusut sampai tak terbaca. Tiga jalur keluaran menanganinya masing-masing:
   cetak lewat `@page` bernama (`page:lbrMelintang`) dan unduhan PDF lewat `MediaBox` per lembar.
 - Daftar anggota bisa ditempel langsung dari Excel (Nama · Jabatan · Luas).
+
+## Rilis
+
+Tersambung ke Vercel lewat Git: tiap `git push` ke `main` otomatis diterbitkan ke
+<https://project-rops.vercel.app>. Folder ini cuma subfolder dari repo `Laporan-harian-v2`,
+jadi *Root Directory* proyek Vercel-nya disetel ke `proposal-alsintan` — karena itu
+`vercel deploy --prod` manual harus dijalankan **dari akar repo**, bukan dari dalam folder ini.
