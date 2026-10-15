@@ -446,7 +446,7 @@
   <div class="card collapsed" id="c6">
     <div class="card-head" onclick="tog('c6')">
       <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 5h18M3 12h18M3 19h18"/></svg></div>
-      <div><h2>Daftar Anggota (CPCL)</h2><p>Nama, jabatan, dan luas lahan garapan</p></div>
+      <div><h2>Daftar Anggota (CPCL)</h2><p>Isi manual atau unggah berkas anggota poktan dari SIMLUHTAN</p></div>
       <div class="step">06</div>
     </div>
     <div class="card-body">
@@ -457,6 +457,7 @@
       <div class="toolbar">
         <button class="btn btn-line btn-sm" onclick="tambahAnggota()">+ Baris</button>
         <button class="btn btn-line btn-sm" onclick="tambahAnggota(5)">+ 5 Baris</button>
+        <button class="btn btn-line btn-sm" onclick="pilihPoktan()">Unggah SIMLUHTAN</button>
         <button class="btn btn-line btn-sm" onclick="togglePaste()">Tempel dari Excel</button>
         <span class="count"><b id="sumJml">0</b> orang · <b id="sumLuas">0</b> Ha</span>
       </div>
@@ -897,6 +898,394 @@ function prosesPaste(tambah){
   anggota=tambah?anggota.concat(rows):rows;
   $("pasteBox").value=""; $("pasteWrap").style.display="none";
   renderAnggota(); autoNarasi(); render(); sim();
+}
+
+/* ══════════════ BERKAS ANGGOTA POKTAN (SIMLUHTAN) ══════════════ */
+/* Unduhan "Anggota Poktan" dari SIMLUHTAN berupa .xls BIFF8 asli, bukan tabel
+   HTML bertopeng, jadi berkasnya dibongkar sendiri di sini: wadah OLE/CFB
+   dibuka untuk mengambil stream "Workbook", lalu rekamannya dibaca menjadi
+   kisi sel. Dengan begitu fitur ini tetap bekerja tanpa internet dan tanpa
+   pustaka luar. .xlsx, .csv, dan tabel HTML dilayani sebagai cadangan bila
+   format unduhannya berubah. */
+const POKTAN_MAKS=20*1024*1024;
+const norma=s=>String(s==null?"":s).toLowerCase().replace(/[^a-z0-9]/g,"");
+const l16=(b,o)=>b[o]|b[o+1]<<8;
+const l32=(b,o)=>(b[o]|b[o+1]<<8|b[o+2]<<16)+b[o+3]*0x1000000;
+const judulKata=s=>String(s||"").toLowerCase().replace(/(^|[\s./-])([a-z])/g,(m,a,b)=>a+b.toUpperCase());
+
+/* ── wadah OLE/CFB: menelusuri FAT untuk mengambil satu stream ── */
+function cfbStream(buf,cocok){
+  const u8=new Uint8Array(buf);
+  if(u8.length<512) return null;
+  const SS=1<<l16(u8,30), MSS=1<<l16(u8,32);
+  if(SS<128||SS>1<<20||MSS<8||MSS>SS) return null;
+  const sektorAda=s=>s<0x80000000&&512+(s+1)*SS<=u8.length;
+  /* nilai khusus 0xFFFFFFFE/FF jauh melebihi panjang FAT, jadi satu syarat
+     c<fat.length sudah sekaligus menghentikan rantai di ujungnya */
+  const rantai=(awal,fat)=>{const o=[];let c=awal;for(let g=0;g<1e6&&c<fat.length;g++){o.push(c);c=fat[c];}return o;};
+  const kumpul=(awal,fat,iris,uk)=>{
+    const bag=rantai(awal,fat).map(iris).filter(Boolean);
+    const tot=bag.reduce((n,b)=>n+b.length,0);
+    const out=new Uint8Array(uk==null?tot:Math.min(uk,tot));
+    let o=0;
+    for(const b of bag){ if(o>=out.length) break; const n=Math.min(b.length,out.length-o); out.set(b.subarray(0,n),o); o+=n; }
+    return out;
+  };
+  const irisBesar=s=>sektorAda(s)?u8.subarray(512+s*SS,512+(s+1)*SS):null;
+  const nFAT=l32(u8,44), dif=[], FAT=[];
+  for(let i=0;i<109&&dif.length<nFAT;i++) dif.push(l32(u8,76+4*i));
+  let d=l32(u8,68);
+  for(let g=0;g<1e5&&dif.length<nFAT&&sektorAda(d);g++){
+    const b=512+d*SS, n=SS/4-1;
+    for(let i=0;i<n&&dif.length<nFAT;i++) dif.push(l32(u8,b+i*4));
+    d=l32(u8,b+n*4);
+  }
+  for(const s of dif){ if(!sektorAda(s)) break; for(let i=0;i<SS/4;i++) FAT.push(l32(u8,512+s*SS+i*4)); }
+  if(!FAT.length) return null;
+  const dir=kumpul(l32(u8,48),FAT,irisBesar,null), entri=[];
+  for(let o=0;o+128<=dir.length;o+=128){
+    const tipe=dir[o+66]; if(!tipe) continue;
+    let nama="";
+    for(let i=0;i<64;i+=2){ const c=dir[o+i]|dir[o+i+1]<<8; if(!c) break; nama+=String.fromCharCode(c); }
+    entri.push({nama,tipe,awal:l32(dir,o+116),uk:l32(dir,o+120)});
+  }
+  const e=entri.find(x=>x.tipe===2&&cocok(x.nama));
+  if(!e) return null;
+  if(e.uk>=4096) return kumpul(e.awal,FAT,irisBesar,e.uk);
+  const MFAT=[], mb=kumpul(l32(u8,60),FAT,irisBesar,null);
+  for(let i=0;i+4<=mb.length;i+=4) MFAT.push(l32(mb,i));
+  const akar=entri.find(x=>x.tipe===5);
+  const mini=akar?kumpul(akar.awal,FAT,irisBesar,akar.uk>0?akar.uk:null):new Uint8Array(0);
+  return kumpul(e.awal,MFAT,s=>mini.subarray(s*MSS,(s+1)*MSS),e.uk);
+}
+
+/* ── tabel teks bersama: satu teks boleh terbelah ke rekaman CONTINUE, dan
+   setiap belahan mengulang satu byte penanda sandi di depannya ── */
+function bacaSST(blok){
+  let bi=0,bo=0;
+  const sisa=()=>bi<blok.length?blok[bi].length-bo:0;
+  const maju=()=>{ while(bi<blok.length&&sisa()<=0){bi++;bo=0;} };
+  const byte=()=>{ maju(); return bi<blok.length?blok[bi][bo++]:0; };
+  const u16=()=>byte()|byte()<<8;
+  const u32=()=>u16()+u16()*65536;
+  const lewat=n=>{ for(let i=0;i<n;i++) byte(); };
+  const teks=(cch,lebar)=>{
+    let s="";
+    for(let i=0;i<cch;i++){
+      if(sisa()<=0){ maju(); if(bi>=blok.length) break; lebar=byte()&1; }
+      s+=String.fromCharCode(lebar?u16():byte());
+    }
+    return s;
+  };
+  u32(); const n=u32(), out=[];
+  for(let i=0;i<n&&bi<blok.length;i++){
+    const cch=u16(), f=byte();
+    const rt=(f&0x08)?u16():0, sz=(f&0x04)?u32():0;
+    out.push(teks(cch,f&1));
+    lewat(rt*4+sz);
+  }
+  return out;
+}
+
+/* ── rekaman BIFF → kisi sel lembar pertama ── */
+function kisiBIFF(wb){
+  const rek=[];
+  for(let p=0;p+4<=wb.length;){
+    const id=l16(wb,p), len=l16(wb,p+2);
+    if(p+4+len>wb.length) break;
+    rek.push({id,d:wb.subarray(p+4,p+4+len)});
+    p+=4+len;
+  }
+  let sst=[];
+  const iSST=rek.findIndex(r=>r.id===0x00FC);
+  if(iSST>=0){
+    const blok=[rek[iSST].d];
+    for(let i=iSST+1;i<rek.length&&rek[i].id===0x003C;i++) blok.push(rek[i].d);
+    sst=bacaSST(blok);
+  }
+  const kisi=[], tulis=(r,c,v)=>{ (kisi[r]=kisi[r]||[])[c]=v; };
+  const angka=x=>isFinite(x)?String(Math.round(x*1e10)/1e10):"";
+  const rk=(b,o)=>{
+    const n=l32(b,o);
+    if(n&2) return ((n|0)>>2)/((n&1)?100:1);
+    const dv=new DataView(new ArrayBuffer(8));
+    dv.setUint32(4,n-(n&3),true);
+    return dv.getFloat64(0,true)/((n&1)?100:1);
+  };
+  const ganda=(b,o)=>{
+    if(o+8>b.length) return "";
+    return angka(new DataView(b.buffer,b.byteOffset+o,8).getFloat64(0,true));
+  };
+  const teksSel=(b,o)=>{
+    if(o+3>b.length) return "";
+    const cch=l16(b,o), f=b[o+2];
+    let p=o+3, s="";
+    if(f&8) p+=2;
+    if(f&4) p+=4;
+    for(let i=0;i<cch&&p<b.length;i++){
+      if(f&1){ s+=String.fromCharCode(l16(b,p)); p+=2; }
+      else { s+=String.fromCharCode(b[p]); p++; }
+    }
+    return s;
+  };
+  let lembar=0, tunda=null;
+  for(const r of rek){
+    if(r.id===0x0809){ if(r.d.length>=4&&l16(r.d,2)===0x0010) lembar++; continue; }
+    if(lembar>1) break;
+    const b=r.d;
+    if(r.id===0x0207){ if(tunda){ tulis(tunda[0],tunda[1],teksSel(b,0)); tunda=null; } continue; }
+    if(b.length<4) continue;
+    const baris=l16(b,0), kol=l16(b,2);
+    switch(r.id){
+      case 0x00FD: if(b.length>=10){ const i=l32(b,6); tulis(baris,kol,sst[i]==null?"":sst[i]); } break;
+      case 0x0204: tulis(baris,kol,teksSel(b,6)); break;
+      case 0x0203: tulis(baris,kol,ganda(b,6)); break;
+      case 0x027E: if(b.length>=10) tulis(baris,kol,angka(rk(b,6))); break;
+      case 0x00BD: for(let i=0;6+i*6+4<=b.length;i++) tulis(baris,kol+i,angka(rk(b,6+i*6))); break;
+      /* FORMULA: nilai tunainya berupa teks bila 8 byte nilai bertanda khusus,
+         dan teksnya menyusul pada rekaman STRING tepat sesudahnya */
+      case 0x0006:
+        if(b.length>=14&&b[6]===0&&b[12]===0xFF&&b[13]===0xFF) tunda=[baris,kol];
+        else tulis(baris,kol,ganda(b,6));
+        break;    }
+  }
+  return kisi;
+}
+
+/* ── .xlsx: zip dibuka sendiri, isinya dikembangkan oleh DecompressionStream ── */
+async function kisiXLSX(buf){
+  const u8=new Uint8Array(buf);
+  let eo=-1;
+  for(let i=u8.length-22;i>=0&&i>u8.length-66000;i--) if(l32(u8,i)===0x06054b50){ eo=i; break; }
+  if(eo<0) throw new Error("zip");
+  const berkas={};
+  let n=l16(u8,eo+10), p=l32(u8,eo+16);
+  for(let i=0;i<n&&p+46<=u8.length;i++){
+    if(l32(u8,p)!==0x02014b50) break;
+    const metode=l16(u8,p+10), komp=l32(u8,p+20),
+          nl=l16(u8,p+28), el=l16(u8,p+30), cl=l16(u8,p+32), lo=l32(u8,p+42);
+    let nama="";
+    for(let j=0;j<nl;j++) nama+=String.fromCharCode(u8[p+46+j]);
+    berkas[nama]={metode,awal:lo+30+l16(u8,lo+26)+l16(u8,lo+28),komp};
+    p+=46+nl+el+cl;
+  }
+  const ambil=async nm=>{
+    const f=berkas[nm]; if(!f) return "";
+    const data=u8.subarray(f.awal,f.awal+f.komp);
+    if(f.metode===0) return new TextDecoder().decode(data);
+    if(typeof DecompressionStream!=="function") throw new Error("zip");
+    return await new Response(new Blob([data]).stream()
+      .pipeThrough(new DecompressionStream("deflate-raw"))).text();
+  };
+  const X=t=>new DOMParser().parseFromString(t,"application/xml");
+  const sx=await ambil("xl/sharedStrings.xml");
+  const sst=sx?[...X(sx).getElementsByTagName("si")]
+    .map(si=>[...si.getElementsByTagName("t")].map(t=>t.textContent).join("")):[];
+  const nama=berkas["xl/worksheets/sheet1.xml"]?"xl/worksheets/sheet1.xml"
+    :Object.keys(berkas).find(k=>/^xl\/worksheets\/[^/]+\.xml$/.test(k));
+  if(!nama) throw new Error("zip");
+  const kisi=[];
+  for(const c of [...X(await ambil(nama)).getElementsByTagName("c")]){
+    const m=/^([A-Z]+)(\d+)$/.exec(c.getAttribute("r")||""); if(!m) continue;
+    let kol=0; for(const ch of m[1]) kol=kol*26+(ch.charCodeAt(0)-64);
+    const t=c.getAttribute("t"), v=c.getElementsByTagName("v")[0];
+    let isi="";
+    if(t==="s"){ const i=v?+v.textContent:-1; isi=sst[i]==null?"":sst[i]; }
+    else if(t==="inlineStr"||t==="str") isi=[...c.getElementsByTagName("t")].map(x=>x.textContent).join("")||(v?v.textContent:"");
+    else isi=v?v.textContent:"";
+    (kisi[+m[2]-1]=kisi[+m[2]-1]||[])[kol-1]=isi;
+  }
+  return kisi;
+}
+
+function kisiHTML(teks){
+  const doc=new DOMParser().parseFromString(teks,"text/html");
+  const tabel=[...doc.querySelectorAll("table")].sort((a,b)=>b.rows.length-a.rows.length)[0];
+  if(!tabel) throw new Error("kosong");
+  return [...tabel.rows].map(tr=>[...tr.cells].map(td=>td.textContent.trim()));
+}
+function belahCSV(l,p){
+  const out=[]; let s="", kutip=false;
+  for(let i=0;i<l.length;i++){
+    const c=l[i];
+    if(kutip){ if(c!=='"') s+=c; else if(l[i+1]==='"'){ s+='"'; i++; } else kutip=false; }
+    else if(c==='"') kutip=true;
+    else if(c===p){ out.push(s.trim()); s=""; }
+    else s+=c;
+  }
+  out.push(s.trim());
+  return out;
+}
+function kisiCSV(teks){
+  const baris=teks.replace(/\r\n?/g,"\n").split("\n");
+  const p=teks.includes("\t")?"\t":(teks.split(";").length>teks.split(",").length?";":",");
+  return baris.map(l=>belahCSV(l,p));
+}
+async function kisiBerkas(f){
+  if(f.size>POKTAN_MAKS) throw new Error("besar");
+  const buf=await f.arrayBuffer(), u8=new Uint8Array(buf);
+  const tanda=[...u8.subarray(0,8)].map(b=>b.toString(16).padStart(2,"0")).join("");
+  if(tanda.startsWith("d0cf11e0a1b11ae1")){
+    const wb=cfbStream(buf,n=>/^(workbook|book)$/i.test(n));
+    if(!wb||!wb.length) throw new Error("xls");
+    return kisiBIFF(wb);
+  }
+  if(tanda.startsWith("504b0304")) return await kisiXLSX(buf);
+  const teks=new TextDecoder("utf-8").decode(u8);
+  if(/<\s*table/i.test(teks)) return kisiHTML(teks);
+  return kisiCSV(teks);
+}
+
+/* ── mencocokkan kolom SIMLUHTAN dengan kolom CPCL proposal. Judul kolom
+   dinormalkan tanpa spasi karena unduhannya menulis "LuasLahan" dan
+   "YangDiuasahakan" tanpa pemisah dan dengan salah ketik ── */
+const KOL_POKTAN={
+  nama:{cari:[/^nama$/,/^nama(anggota|petani|lengkap)$/,/nama/]},
+  jabatan:{cari:[/status.*nggota/,/^jabatan/,/kedudukan/]},
+  luas:{cari:[/luaslahanyangdiu?a?sahakan/,/^volume/,/luas/],tolak:/dimiliki/},
+  komoditas:{cari:[/^komoditasyangdiusahakan1?$/,/komoditasyangdiusahakan/,/^komoditas/],tolak:/lainnya/}
+};
+const IDEN_POKTAN={
+  poktan:/^namakelompok(tani)?$/,desa:/^desa(kelurahan)?$/,
+  kecamatan:/^kecamatan$/,kabupaten:/^kabupaten(kota)?$/,provinsi:/^provinsi$/
+};
+const PANGKAT=["Ketua","Sekretaris","Bendahara"];
+const PESAN_POKTAN={
+  besar:"Berkas terlalu besar",
+  xls:"Isi berkas .xls tidak dikenali",
+  zip:"Isi berkas .xlsx tidak dikenali",
+  kepala:"Baris judul kolom tidak ditemukan — pakai berkas unduhan SIMLUHTAN apa adanya",
+  kosong:"Tidak ada baris anggota yang terbaca"
+};
+function barisKepala(kisi){
+  const batas=Math.min(kisi.length,40);
+  for(let r=0;r<batas;r++){
+    const h=(kisi[r]||[]).map(norma);
+    if(h.includes("nama")&&(h.includes("no")||h.includes("nik"))) return r;
+  }
+  for(let r=0;r<batas;r++) if((kisi[r]||[]).map(norma).some(x=>/^nama/.test(x))) return r;
+  return -1;
+}
+function petaKolom(baris){
+  const h=baris.map(norma), out={};
+  for(const k in KOL_POKTAN){
+    const {cari,tolak}=KOL_POKTAN[k];
+    for(const pola of cari){
+      const i=h.findIndex(x=>x&&pola.test(x)&&!(tolak&&tolak.test(x)));
+      if(i>=0){ out[k]=i; break; }
+    }
+  }
+  return out;
+}
+function identitasPoktan(kisi,sampai){
+  const out={};
+  for(let r=0;r<sampai;r++){
+    const baris=kisi[r]||[];
+    for(let c=0;c<baris.length;c++){
+      const n=norma(baris[c]); if(!n) continue;
+      for(const k in IDEN_POKTAN){
+        if(out[k]||!IDEN_POKTAN[k].test(n)) continue;
+        for(let j=c+1;j<baris.length;j++){
+          const v=String(baris[j]==null?"":baris[j]).trim();
+          if(v){ out[k]=v; break; }
+        }
+      }
+    }
+  }
+  return out;
+}
+function jabatanRapi(s){
+  const n=norma(s);
+  if(/ketua/.test(n)) return "Ketua";
+  if(/sek[er]*taris/.test(n)) return "Sekretaris";
+  if(/bendahara/.test(n)) return "Bendahara";
+  return "Anggota";
+}
+/* SIMLUHTAN memakai titik sebagai pemisah desimal ("0.80"), sedangkan lembar
+   CPCL memakai koma. Satu titik selalu dibaca desimal: kolom ini luas garapan
+   satu orang, jadi "1.234" jauh lebih mungkin 1,23 Ha daripada 1.234 Ha.
+   Titik baru dianggap pemisah ribuan kalau kelompoknya lebih dari satu. */
+function angkaLuas(s){
+  let t=String(s==null?"":s).replace(/\s/g,"");
+  if(!t) return "";
+  if(t.includes(",")) t=t.replace(/\./g,"").replace(",",".");
+  else if(/^\d{1,3}(\.\d{3}){2,}$/.test(t)) t=t.replace(/\./g,"");
+  const x=parseFloat(t);
+  if(!isFinite(x)) return "";
+  return (Math.round(x*100)/100).toString().replace(".",",");
+}
+function isiIdentitasPoktan(id,rows){
+  const isi=[], tulis=(elId,nilai,label)=>{
+    const el=$(elId);
+    if(!nilai||!el||el.value.trim()) return;
+    el.value=nilai; isi.push(label);
+  };
+  tulis("poktan",id.poktan,"nama poktan");
+  tulis("desa",judulKata(id.desa),"desa");
+  tulis("kecamatan",judulKata(id.kecamatan),"kecamatan");
+  tulis("kabupaten",judulKata(id.kabupaten),"kabupaten");
+  tulis("provinsi",judulKata(id.provinsi),"provinsi");
+  const hit={};
+  rows.forEach(r=>{ if(r.komoditas) hit[r.komoditas]=(hit[r.komoditas]||0)+1; });
+  const utama=Object.keys(hit).sort((a,b)=>hit[b]-hit[a])[0];
+  tulis("komoditas",utama?judulKata(utama):"","komoditas");
+  const siapa=j=>(rows.find(r=>r.jabatan===j)||{}).nama||"";
+  tulis("ketua",siapa("Ketua"),"ketua");
+  tulis("sekretaris",siapa("Sekretaris"),"sekretaris");
+  tulis("bendahara",siapa("Bendahara"),"bendahara");
+  return isi;
+}
+function barisPoktan(kisi){
+  const kr=barisKepala(kisi);
+  if(kr<0) throw new Error("kepala");
+  const kol=petaKolom(kisi[kr]||[]);
+  if(kol.nama==null) throw new Error("kepala");
+  const rows=[];
+  for(let r=kr+1;r<kisi.length;r++){
+    const b=kisi[r]||[];
+    const nama=String(b[kol.nama]==null?"":b[kol.nama]).trim();
+    if(!nama||/^(jumlah|total|keterangan|catatan)\b/i.test(nama)) continue;
+    rows.push({
+      nama,
+      jabatan:jabatanRapi(kol.jabatan==null?"":b[kol.jabatan]),
+      luas:angkaLuas(kol.luas==null?"":b[kol.luas]),
+      komoditas:kol.komoditas==null?"":String(b[kol.komoditas]==null?"":b[kol.komoditas]).trim()
+    });
+  }
+  if(!rows.length) throw new Error("kosong");
+  return {rows,kepala:kr};
+}
+function pilihPoktan(){
+  const inp=document.createElement("input");
+  inp.type="file";
+  inp.accept=".xls,.xlsx,.csv,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,text/csv";
+  inp.onchange=async()=>{
+    const f=inp.files&&inp.files[0]; if(!f) return;
+    try{
+      const kisi=await kisiBerkas(f);
+      const {rows,kepala}=barisPoktan(kisi);
+      if(anggota.some(a=>a.nama||a.luas)&&!confirm(
+        "Daftar anggota yang sekarang ("+anggota.length+" baris) akan diganti oleh "
+        +rows.length+" baris dari berkas. Lanjutkan?")) return;
+      /* bila berkas menyebut semua orang "Anggota", pengurus dikenali dari
+         nama yang sudah diisi pada borang supaya urutannya tetap seperti CPCL */
+      if(!rows.some(r=>r.jabatan!=="Anggota")) PANGKAT.forEach(jab=>{
+        const el=$(jab.toLowerCase());
+        const nm=el?norma(el.value):"";
+        const t=nm&&rows.find(r=>norma(r.nama)===nm);
+        if(t) t.jabatan=jab;
+      });
+      const pangkat=j=>{ const i=PANGKAT.indexOf(j); return i<0?PANGKAT.length:i; };
+      rows.sort((a,b)=>pangkat(a.jabatan)-pangkat(b.jabatan));
+      anggota=rows.map(r=>({nama:r.nama,jabatan:r.jabatan,luas:r.luas}));
+      const terisi=isiIdentitasPoktan(identitasPoktan(kisi,kepala),rows);
+      renderAnggota(); autoNarasi(); render(); sim();
+      toast(rows.length+" anggota dimuat"+(terisi.length?" · "+terisi.join(", ")+" ikut terisi":""));
+    }catch(e){
+      toast(PESAN_POKTAN[e&&e.message]||"Berkas tidak terbaca — pastikan ini unduhan anggota poktan dari SIMLUHTAN");
+    }
+  };
+  inp.click();
 }
 
 /* ══════════════ RENDER DOKUMEN ══════════════ */

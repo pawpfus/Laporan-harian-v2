@@ -29,6 +29,7 @@ Tanggal surat punya lima gaya penulisan (18 April 2026 · 18/IV/2026 · 18-04-20
 8. **KTP pengurus** — tiga slot scan
 9. **Pembatas LAMPIRAN**
 10. **Daftar CPCL** — tabel anggota + luas lahan, tanda tangan penyuluh, ketua, koordinator BPP
+    (bisa diisi manual atau diangkat dari berkas anggota poktan unduhan SIMLUHTAN)
 11. **Lampiran SIMLUHTAN** — tangkapan layar data kelompok, satu lembar per halaman (opsional)
 12. **Lampiran SK Bupati** — satu lembar per halaman pindaian, ditaruh paling belakang (opsional)
 
@@ -38,6 +39,28 @@ Tiap halaman opsional bisa dimatikan lewat kartu **Gambar & Halaman**.
 
 ## Catatan teknis
 
+- **Unggah berkas anggota poktan** mengisi tabel CPCL langsung dari unduhan SIMLUHTAN.
+  Unduhannya **.xls BIFF8 asli** (wadah OLE/CFB), bukan tabel HTML bertopeng `.xls`, jadi berkasnya
+  dibongkar sendiri di dalam halaman: FAT ditelusuri untuk mengambil stream `Workbook`, lalu rekaman
+  BIFF dibaca jadi kisi sel (LABELSST, LABEL, NUMBER, RK, MULRK, FORMULA+STRING). Teks bersama yang
+  terbelah ke rekaman `CONTINUE` ikut ditangani — tiap belahan mengulang satu byte penanda sandi di
+  depannya, dan tanpa itu seluruh daftar nama jadi sampah. Tidak ada pustaka luar, jadi tetap jalan
+  tanpa internet. `.xlsx` (zip dibuka sendiri, dikembangkan oleh `DecompressionStream`), `.csv`, dan
+  tabel HTML dilayani sebagai cadangan kalau format unduhannya berubah.
+
+  Kolomnya **dicocokkan lewat judul, bukan nomor urut**, karena judul unduhannya kehilangan spasi dan
+  salah ketik ("Total LuasLahan YangDiuasahakan(Ha)", "StatusKenggotaan"); judul dinormalkan jadi
+  huruf-angka saja sebelum dicocokkan. Kolom luas sengaja mengambil *yang diusahakan*, bukan *yang
+  dimiliki*. Angka dipindahkan ke gaya CPCL (titik desimal jadi koma, nol di belakang dibuang):
+  `0.80` → `0,8`, `2.00` → `2`. Satu titik selalu dibaca desimal — pada kolom luas garapan
+  satu orang, "1.234" jauh lebih mungkin 1,23 Ha daripada 1.234 Ha.
+
+  Urutannya disusun seperti CPCL proposal: **pengurus dulu**, baru anggota. Bila berkasnya menyebut
+  semua orang "Anggota" (seperti unduhan contoh), pengurus dikenali dari nama yang sudah diisi di
+  borang. Identitas kelompok (nama poktan, kecamatan, kabupaten, provinsi, komoditas tersering) dan
+  nama pengurus ikut terisi — **hanya yang masih kosong**, jadi isian yang sudah diketik tidak tertimpa.
+  SIMLUHTAN tidak membawa nama desa, jadi kolom itu tetap diisi sendiri. Daftar yang sudah ada
+  dikonfirmasi dulu sebelum diganti.
 - **Narasi otomatis** menyesuaikan jenis alsin (15 pilihan + isian bebas), dengan 3 gaya penulisan (A/B/C) atau acak.
   Kotak yang disunting manual berubah menjadi *terkunci* dan tidak ditimpa lagi — tekan ↻ untuk membuka kunci.
 - Nama alsin dicetak **miring** di dalam kalimat, mengikuti dokumen aslinya.
