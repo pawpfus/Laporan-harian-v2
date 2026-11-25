@@ -345,11 +345,11 @@
   <div class="card" id="c2">
     <div class="card-head" onclick="tog('c2')">
       <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="7" cy="17" r="3"/><circle cx="17" cy="17" r="3"/><path d="M10 17h4M4 17V7h6l3 5h4l1 5"/></svg></div>
-      <div><h2>Jenis Alsintan</h2><p>Menentukan judul, isi surat, dan seluruh narasi</p></div>
+      <div><h2>Jenis Bantuan</h2><p>Menentukan judul, isi surat, dan seluruh narasi</p></div>
       <div class="step">02</div>
     </div>
     <div class="card-body">
-      <div class="field"><label>Jenis Alsin</label><select id="alsin"></select></div>
+      <div class="field"><label>Jenis Bantuan</label><select id="alsin"></select></div>
       <div id="wrapCustom" style="display:none;margin-top:13px">
         <div class="grid">
           <div class="field"><label>Nama Alsin (isi sendiri)</label><input type="text" id="alsinNama" placeholder="Nama alat mesin pertanian"></div>
@@ -358,9 +358,10 @@
         </div>
       </div>
       <div class="grid three" style="margin-top:13px">
-        <div class="field"><label>Volume</label><input type="number" id="volume" min="1" value="1"></div>
+        <div class="field"><label id="lblVolume">Volume</label><input type="number" id="volume" min="0" step="any" value="1"></div>
         <div class="field"><label>Satuan</label><input type="text" id="satuan" placeholder="unit"></div>
-        <div class="field"><label>Spesifikasi (opsional)</label><input type="text" id="spek" placeholder="diesel 8,5 HP"></div>
+        <div class="field" id="fSpek"><label>Spesifikasi (opsional)</label><input type="text" id="spek" placeholder="diesel 8,5 HP"></div>
+        <div class="field" id="fTarif" style="display:none"><label>Biaya per Ha (opsional)</label><input type="text" id="tarifHa" placeholder="kosongkan bila tanpa angka biaya"></div>
       </div>
       <div class="grid" style="margin-top:13px">
         <div class="field full"><label>Judul Alsin pada Sampul</label><input type="text" id="judulSampul" placeholder="HANDTRAKTOR — kosongkan untuk memakai nama lengkap"></div>
@@ -424,7 +425,7 @@
   <div class="card collapsed" id="c5">
     <div class="card-head" onclick="tog('c5')">
       <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg></div>
-      <div><h2>Narasi Proposal</h2><p>Otomatis menyesuaikan jenis alsin — bisa disunting</p></div>
+      <div><h2>Narasi Proposal</h2><p>Otomatis menyesuaikan jenis bantuan — bisa disunting</p></div>
       <div class="step">05</div>
     </div>
     <div class="card-body">
@@ -631,6 +632,38 @@ const ALSIN = {
     masalah:"kegiatan panen masih mengandalkan tenaga kerja manual sehingga waktu panen panjang dan kehilangan hasil tinggi",
     manfaat:["mempercepat kegiatan panen kelompok","menekan kehilangan hasil di lapangan","menurunkan biaya panen per hektar"],
     kategori:"sarana panen"},
+  /* --- Bukan alsin: biaya pengolahan lahan program Optimasi Lahan (OPLAH).
+     `mode:"oplah"` memindahkan seluruh narasi ke GEN_OPLAH, karena narasi alsin
+     dipaku ke kata "alat" ("Ketersediaan alat ini...") yang tidak masuk akal
+     untuk permohonan biaya. --- */
+  oplahrawa:{
+    nama:"Biaya Olah Lahan Optimasi Lahan Rawa (OPLAH)", singkat:"biaya olah lahan",
+    sampul:"OPTIMASI LAHAN RAWA (OPLAH)", satuan:"Ha", tahap:"pengolahan lahan",
+    mode:"oplah", lahan:"rawa", lahanPanjang:"lahan rawa",
+    ringkas:"pengolahan tanah pada lahan rawa masih menjadi hambatan terbesar bagi anggota kelompok karena biayanya jauh di atas kemampuan petani",
+    cvSub:"PERMOHONAN BIAYA OLAH LAHAN",
+    perihal:"Permohonan Biaya Olah Lahan Optimasi Lahan Rawa (OPLAH)",
+    cpclSub:"BIAYA OLAH LAHAN OPTIMASI LAHAN RAWA (OPLAH)",
+    fungsi:"membiayai pengolahan tanah pada lahan rawa agar siap tanam tepat waktu",
+    masalah:"lahan rawa anggota kelompok umumnya hanya dapat ditanami satu kali dalam setahun karena pengolahan tanahnya berat dan mahal; genangan air yang sulit disurutkan, gulma rawa yang padat, serta tanah bertekstur liat membuat biaya olah lahan jauh di atas kemampuan petani",
+    manfaat:["lahan rawa dapat diolah tepat waktu sehingga tanam dapat dilakukan serentak",
+             "meringankan beban biaya pengolahan tanah yang selama ini ditanggung sendiri oleh petani",
+             "meningkatkan indeks pertanaman (IP) pada lahan rawa yang selama ini hanya satu kali tanam"],
+    kategori:"biaya pengolahan lahan"},
+  oplahnonrawa:{
+    nama:"Biaya Olah Lahan Optimasi Lahan Non-Rawa (OPLAH)", singkat:"biaya olah lahan",
+    sampul:"OPTIMASI LAHAN NON-RAWA (OPLAH)", satuan:"Ha", tahap:"pengolahan lahan",
+    mode:"oplah", lahan:"non-rawa", lahanPanjang:"lahan non-rawa",
+    ringkas:"biaya pengolahan tanah yang tinggi membuat sebagian lahan anggota tidak tergarap tepat waktu",
+    cvSub:"PERMOHONAN BIAYA OLAH LAHAN",
+    perihal:"Permohonan Biaya Olah Lahan Optimasi Lahan Non-Rawa (OPLAH)",
+    cpclSub:"BIAYA OLAH LAHAN OPTIMASI LAHAN NON-RAWA (OPLAH)",
+    fungsi:"membiayai pengolahan tanah pada lahan non-rawa agar siap tanam tepat waktu",
+    masalah:"sebagian lahan anggota belum tergarap secara optimal karena biaya pengolahan tanah yang tinggi; petani harus menyewa alat dari luar kelompok dengan tarif yang memberatkan sehingga jadwal tanam kerap mundur dan sebagian petakan terpaksa dibiarkan tidak ditanami",
+    manfaat:["lahan dapat diolah tepat waktu sehingga percepatan tanam dapat tercapai",
+             "menekan biaya sewa alat pengolahan tanah yang selama ini memberatkan anggota",
+             "meningkatkan indeks pertanaman dan luas tanam kelompok"],
+    kategori:"biaya pengolahan lahan"},
   custom:{nama:"",singkat:"",sampul:"",satuan:"unit",tahap:"usaha tani",fungsi:"",masalah:"",manfaat:[],kategori:"alat mesin pertanian"}
 };
 const ALSIN_LABEL = {
@@ -639,7 +672,9 @@ const ALSIN_LABEL = {
   thresher:"Power Thresher (Perontok Padi)", cornsheller:"Corn Sheller (Pemipil Jagung)",
   drumseeder:"Drum Seeder", cornplanter:"Alat Tanam Jagung (Corn Planter)", sprayer:"Power Sprayer",
   dryer:"Mesin Pengering (Vertical Dryer)", rmu:"Rice Milling Unit (RMU)", excavator:"Excavator Mini",
-  panen:"Alat Panen Multiguna", custom:"— Alsin lainnya (isi sendiri) —"
+  panen:"Alat Panen Multiguna",
+  oplahrawa:"Biaya Olah Lahan — OPLAH Rawa", oplahnonrawa:"Biaya Olah Lahan — OPLAH Non-Rawa",
+  custom:"— Alsin lainnya (isi sendiri) —"
 };
 const SLOT_LABEL = {
   logo:["Logo Kop","Logo instansi"], alsinImg:["Gambar Alsin","Foto di sampul"],
@@ -687,10 +722,19 @@ function terbilang(n){
   if(n<1000) return (terbilang(Math.floor(n/100))+" ratus "+(n%100?terbilang(n%100):"")).trim();
   return String(n);
 }
+/* luas lahan boleh pecahan, jadi terbilangnya perlu bagian di belakang koma */
+function terbilangNum(x){
+  const v=Number(x)||0;
+  if(Number.isInteger(v)) return terbilang(v);
+  const [b,k]=String(v).split(".");
+  return terbilang(b)+" koma "+[...k].map(c=>terbilang(+c)).join(" ");
+}
+const angkaID = x => Number.isInteger(Number(x)) ? String(Number(x)) : String(Number(x)).replace(".",",");
 function lines(t){ return String(t||"").split("\n").filter(x=>x.trim()); }
 /* nama alsin dicetak miring di dalam teks, seperti dokumen aslinya */
 function ital(txt,a){
   let h=esc(txt);
+  if(a.mode==="oplah") return h;   // ini biaya, bukan nama alat
   const kata=[...new Set([a.nama,a.singkat].filter(x=>x&&x.length>3))].sort((x,y)=>y.length-x.length);
   kata.forEach(k=>{ h=h.replace(new RegExp(rxq(esc(k)),"gi"),m=>"@@i@@"+m+"@@/i@@"); });
   return h.split("@@i@@").join("<i>").split("@@/i@@").join("</i>");
@@ -717,6 +761,9 @@ function alsinAktif(){
     a.manfaat=["memperlancar kegiatan "+a.tahap+" anggota kelompok","menekan biaya usaha tani","meningkatkan produksi dan pendapatan petani"];
     a.kategori="alat mesin pertanian";
   }
+  a.mode    = a.mode    || "alsin";
+  a.cvSub   = a.cvSub   || "PERMOHONAN BANTUAN";
+  a.cpclSub = a.cpclSub || "BANTUAN SARANA PERTANIAN";
   const sp=$("spek").value.trim();
   a.namaSpek = sp ? a.nama+" ("+sp+")" : a.nama;
   a.judulSampul = $("judulSampul").value.trim() ? up($("judulSampul").value.trim()) : (a.sampul||up(a.nama));
@@ -743,10 +790,11 @@ function D(){
     kades:$("kades").value.trim(), penyuluh:$("penyuluh").value.trim(), nipPenyuluh:$("nipPenyuluh").value.trim(),
     koordinator:$("koordinator").value.trim(), nipKoordinator:$("nipKoordinator").value.trim(),
     bpp:$("bpp").value.trim()||"BPP", bppTembusan:$("bppTembusan").value.trim(),
-    tujuan:$("tujuan").value, tembusan:$("tembusan").value, variasi:$("variasi").value
+    tujuan:$("tujuan").value, tembusan:$("tembusan").value, variasi:$("variasi").value,
+    tarif:$("tarifHa").value.trim()
   };
   d.alamat=$("alamat").value.trim()||("Desa "+d.desa+", Kecamatan "+d.kec+", Kabupaten "+d.kab);
-  d.volTeks=d.vol+" ("+terbilang(d.vol)+") "+d.satuan;
+  d.volTeks=angkaID(d.vol)+" ("+terbilangNum(d.vol)+") "+d.satuan;
   d.kota=$("kota").value.trim()||d.desa;
   d.kotaTgl=d.kota+", "+(d.tanggal||"...............");
   return d;
@@ -856,9 +904,106 @@ Atas perhatian dan partisipasinya kami ucapkan terima kasih.`,
 Atas perhatian, pertimbangan, dan bantuan yang diberikan, kami ucapkan terima kasih.`,
 `Demikian proposal ini kami ajukan. Besar harapan kami permohonan ini dapat dipertimbangkan dan disetujui. Atas perhatian dan bantuannya kami ucapkan terima kasih.`]); }
 };
-function regen(id){ dirty[id]=false; $(id).value=GEN[id](D()); markLock(); render(); sim(); }
-function susunUlangSemua(){ const d=D(); NKEY.forEach(k=>{dirty[k]=false; $(k).value=GEN[k](d);}); markLock(); render(); sim(); }
-function autoNarasi(){ const d=D(); NKEY.forEach(k=>{ if(!dirty[k]) $(k).value=GEN[k](d); }); markLock(); }
+/* Narasi khusus permohonan BIAYA olah lahan (OPLAH). Hanya bab yang memang
+   berbicara soal "alat" yang ditulis ulang; Penutup dipakai bersama GEN.
+   Kalimat biaya hanya muncul bila kolom tarif per hektar diisi — kalau
+   dikosongkan, dokumennya sama sekali tidak memuat angka rupiah. */
+const rupiah = n => "Rp " + Math.round(n).toLocaleString("id-ID");
+function tarifAngka(s){
+  const t = String(s==null?"":s).replace(/[^\d.,]/g,"").replace(/\./g,"").replace(",",".");
+  const x = parseFloat(t);
+  return isFinite(x) && x > 0 ? x : 0;
+}
+function biayaKalimat(d){
+  const t = tarifAngka(d.tarif);
+  if(!t) return "";
+  return ` Biaya pengolahan lahan yang diusulkan sebesar ${rupiah(t)} per hektar, sehingga untuk ${d.volTeks} keseluruhannya menjadi ${rupiah(t*d.vol)}.`;
+}
+
+const GEN_OPLAH = Object.assign({}, GEN, {
+  nSurat(d){ const a=d.alsin, lh=a.lahanPanjang; return V(d,[
+`Sebagaimana diketahui bahwa Kabupaten ${d.kab} merupakan salah satu daerah penghasil ${d.komoditas} di ${d.prov}, dengan sebagian besar masyarakatnya bermata pencaharian sebagai petani tanaman pangan. Namun demikian, ${a.ringkas||a.masalah}.
+
+Untuk mengatasi keadaan tersebut, Kelompok Tani ${up(d.poktan)} sangat membutuhkan bantuan biaya olah lahan melalui kegiatan Optimasi Lahan (OPLAH) pada ${lh} seluas ${d.volTeks}. Dengan tersedianya biaya pengolahan tanah, lahan anggota dapat digarap tepat waktu sehingga tanam dapat dilaksanakan serentak dan indeks pertanaman meningkat.
+
+Sehubungan dengan hal tersebut, kami mengajukan permohonan bantuan biaya olah lahan seluas ${d.volTeks} untuk dimanfaatkan oleh seluruh anggota kelompok.${biayaKalimat(d)}`,
+`Kelompok Tani ${up(d.poktan)} Desa ${d.desa} Kecamatan ${d.kec} Kabupaten ${d.kab} mengusahakan komoditas ${d.komoditas} pada ${lh}. Dalam menjalankan usaha taninya, ${a.masalah}.
+
+Kegiatan Optimasi Lahan (OPLAH) kami pandang sebagai jalan keluar atas keadaan tersebut, karena pembiayaan pengolahan tanah akan memastikan lahan siap tanam pada waktunya tanpa membebani petani dengan biaya yang tidak terjangkau.
+
+Oleh karena itu, kami mengajukan permohonan biaya olah lahan seluas ${d.volTeks} bagi anggota Kelompok Tani ${up(d.poktan)}.${biayaKalimat(d)}`,
+`Permohonan ini kami sampaikan mengingat ${a.masalah}. Melalui kegiatan Optimasi Lahan (OPLAH) pada ${lh}, biaya pengolahan tanah yang selama ini menjadi penghambat utama dapat teratasi sehingga lahan anggota kembali tergarap secara penuh.
+
+Adapun luas lahan yang kami usulkan untuk dibiayai pengolahannya yaitu ${d.volTeks}.${biayaKalimat(d)}`]); },
+
+  nPengantar(d){ const a=d.alsin; return V(d,[
+`Puji syukur kami panjatkan ke hadirat Tuhan Yang Maha Esa, karena atas rahmat-Nya proposal permohonan biaya olah lahan ini dapat kami susun.
+
+Proposal ini disusun berdasarkan keadaan nyata usaha tani anggota Kelompok Tani ${up(d.poktan)} Desa ${d.desa} Kecamatan ${d.kec} Kabupaten ${d.kab}, dimana ${a.masalah}. Melalui kegiatan Optimasi Lahan (OPLAH), biaya pengolahan tanah pada ${a.lahanPanjang} anggota diharapkan dapat tertangani.
+
+Kami menyadari penyusunan proposal ini masih jauh dari sempurna, karena itu saran dan masukan dari semua pihak sangat kami harapkan.`,
+`Dengan memanjatkan puji syukur kepada Tuhan Yang Maha Esa, proposal permohonan biaya olah lahan pada kegiatan Optimasi Lahan (OPLAH) ini kami susun sebagai bahan pertimbangan bagi instansi terkait.
+
+Pengolahan tanah merupakan tahap yang menentukan keberhasilan satu musim tanam, sementara ${a.masalah}. Bantuan biaya olah lahan seluas ${d.volTeks} sangat kami butuhkan agar kegiatan usaha tani anggota dapat berjalan sebagaimana mestinya.
+
+Atas perhatian dan bantuan dari semua pihak, kami ucapkan terima kasih.`,
+`Proposal permohonan biaya olah lahan ini kami susun untuk menggambarkan keadaan ${a.lahanPanjang} yang diusahakan anggota Kelompok Tani ${up(d.poktan)} serta kebutuhan pembiayaan pengolahannya.
+
+Besar harapan kami proposal ini dapat dikaji dan dipertimbangkan sebagaimana mestinya, sehingga produksi dan pendapatan anggota kelompok dapat meningkat.`]); },
+
+  nLatar(d){ const a=d.alsin, lh=a.lahanPanjang;
+    const luas=d.hamparan?` dengan hamparan lahan seluas ${d.hamparan} hektar`:"";
+    return V(d,[
+`Pengolahan tanah merupakan tahap awal yang menentukan keberhasilan satu musim tanam. Tanah yang diolah sempurna dan tepat waktu akan memberikan pertumbuhan tanaman yang baik serta memungkinkan tanam dilakukan secara serentak dalam satu hamparan.
+
+Kelompok Tani ${up(d.poktan)} Desa ${d.desa} Kecamatan ${d.kec} Kabupaten ${d.kab}${luas} mengusahakan komoditas ${d.komoditas} pada ${lh}. Kenyataan di lapangan menunjukkan bahwa ${a.masalah}.
+
+Keadaan tersebut menyebabkan sebagian lahan tidak tergarap pada waktunya, jadwal tanam menjadi mundur, dan hasil yang diperoleh anggota belum optimal. Karena itu bantuan biaya olah lahan melalui kegiatan Optimasi Lahan (OPLAH) sangat dibutuhkan.`,
+`Berdasarkan keadaan lapangan dan luas lahan Kelompok Tani ${up(d.poktan)}${luas} yang ada, pengolahan tanah pada ${lh} memerlukan biaya yang tidak sedikit. Apabila lahan tersebut dapat diolah dengan sempurna dan tepat waktu, produktivitas lahan akan meningkat.
+
+Permasalahan yang dihadapi yaitu ${a.masalah}. Akibatnya indeks pertanaman kelompok sulit ditingkatkan, padahal potensi lahannya masih terbuka untuk digarap lebih dari satu kali dalam setahun.
+
+Melalui kegiatan Optimasi Lahan (OPLAH), pembiayaan pengolahan tanah diharapkan dapat membuka kembali potensi lahan tersebut.`,
+`Lahan yang diusahakan anggota Kelompok Tani ${up(d.poktan)}${luas} merupakan ${lh} yang masih dapat ditingkatkan pemanfaatannya. Hambatan utamanya bukan pada kemauan petani, melainkan pada biaya: ${a.masalah}.
+
+Kegiatan Optimasi Lahan (OPLAH) yang membiayai pengolahan tanah kami pandang sebagai kebutuhan yang mendesak, karena langsung menyentuh akar persoalan yang selama ini menahan produktivitas lahan anggota kelompok.`]); },
+
+  nTujuan(d){ const a=d.alsin;
+    const m=a.manfaat.length?a.manfaat:["memperlancar kegiatan usaha tani anggota kelompok"];
+    const mList=m.map((x,i)=>(i===m.length-1&&m.length>1?"serta ":"")+x).join("; ");
+    return V(d,[
+`Tujuan dari pengusulan bantuan biaya olah lahan ini adalah agar pengolahan tanah pada ${a.lahanPanjang} anggota Kelompok Tani ${up(d.poktan)} seluas ${d.volTeks} dapat dilaksanakan secara tepat waktu tanpa terbebani biaya yang selama ini tidak terjangkau oleh petani.
+
+Adapun manfaat yang diharapkan antara lain: ${mList}. Secara keseluruhan, bantuan ini diharapkan mampu meningkatkan produksi ${d.komoditas} sekaligus pendapatan dan kesejahteraan anggota kelompok tani.`,
+`Pengusulan bantuan biaya olah lahan bertujuan agar anggota Kelompok Tani ${up(d.poktan)} dapat menggarap lahannya secara penuh pada setiap musim tanam, tidak lagi menyisakan petakan yang terlantar karena biaya pengolahan yang memberatkan.
+
+Manfaatnya bagi petani yaitu ${mList}, sehingga produksi ${d.komoditas} dan pendapatan anggota kelompok dapat meningkat.`,
+`Kegiatan ini bertujuan memastikan ${a.lahanPanjang} seluas ${d.volTeks} milik anggota Kelompok Tani ${up(d.poktan)} siap tanam pada waktunya, sehingga tanam serentak dalam satu hamparan dapat diwujudkan.
+
+Manfaat yang diharapkan: ${mList}.`]); },
+
+  nSasaran(d){ const a=d.alsin;
+    const luas=d.hamparan?`dengan hamparan lahan seluas ${d.hamparan} Hektar`:"yang menjadi kawasan pertanian";
+    const jml=anggota.length?`sebanyak ${anggota.length} (${terbilang(anggota.length)}) orang anggota`:"mempunyai beberapa orang anggota";
+    return V(d,[
+`Sasaran dari bantuan biaya olah lahan yang diusulkan dalam proposal ini yaitu para petani yang tergabung dalam Kelompok Tani ${up(d.poktan)} di Desa ${d.desa} Kecamatan ${d.kec} Kabupaten ${d.kab} ${jml}, yang mengusahakan ${a.lahanPanjang}.
+
+Lokasi kegiatan berada di Desa ${d.desa} Kecamatan ${d.kec} Kabupaten ${d.kab} Provinsi ${d.prov}, ${luas}.${d.koordinat?" Adapun titik koordinat lokasi kelompok yaitu "+d.koordinat+".":""} Daftar nama calon petani dan calon lokasi (CPCL) beserta luas garapan masing-masing anggota terlampir dalam proposal ini.`,
+`Sasaran penerima manfaat kegiatan Optimasi Lahan (OPLAH) ini adalah seluruh petani yang tergabung dalam Kelompok Tani ${up(d.poktan)} ${jml}, yang menggarap ${a.lahanPanjang} untuk komoditas ${d.komoditas}.
+
+Adapun lokasi kegiatan berada di Desa ${d.desa} Kecamatan ${d.kec} Kabupaten ${d.kab}, ${luas}.${d.koordinat?" Titik koordinat lokasi: "+d.koordinat+".":""} Luas lahan yang diusulkan untuk dibiayai pengolahannya yaitu ${d.volTeks}, dengan rincian per anggota sebagaimana daftar CPCL terlampir.`,
+`Sasaran bantuan ini yaitu anggota Kelompok Tani ${up(d.poktan)} ${jml} yang mengusahakan ${a.lahanPanjang} di Desa ${d.desa} Kecamatan ${d.kec} Kabupaten ${d.kab}, ${luas}.${d.koordinat?" Titik koordinat: "+d.koordinat+".":""} Daftar CPCL terlampir.`]); },
+
+  nJenis(d){ const a=d.alsin; return V(d,[
+`Bantuan yang diusulkan dalam proposal ini berupa biaya olah lahan pada kegiatan Optimasi Lahan (OPLAH) ${a.lahan} seluas ${d.volTeks}, yang diperuntukkan bagi pengolahan tanah lahan garapan anggota Kelompok Tani ${up(d.poktan)}.${biayaKalimat(d)}`,
+`Jenis bantuan yang diusulkan yaitu biaya pengolahan lahan untuk kegiatan ${a.tahap} pada ${a.lahanPanjang} anggota Kelompok Tani ${up(d.poktan)}, dengan volume yang diusulkan seluas ${d.volTeks}. Pembagian luas garapan per anggota mengikuti daftar CPCL terlampir.${biayaKalimat(d)}`,
+`Jenis dan volume bantuan yang diusulkan: biaya olah lahan Optimasi Lahan (OPLAH) ${a.lahan} seluas ${d.volTeks}, dimanfaatkan untuk pengolahan tanah lahan anggota Kelompok Tani ${up(d.poktan)}.${biayaKalimat(d)}`]); }
+});
+const genSet = d => (d.alsin && d.alsin.mode==="oplah") ? GEN_OPLAH : GEN;
+
+function regen(id){ const d=D(); dirty[id]=false; $(id).value=genSet(d)[id](d); markLock(); render(); sim(); }
+function susunUlangSemua(){ const d=D(), G=genSet(d); NKEY.forEach(k=>{dirty[k]=false; $(k).value=G[k](d);}); markLock(); render(); sim(); }
+function autoNarasi(){ const d=D(), G=genSet(d); NKEY.forEach(k=>{ if(!dirty[k]) $(k).value=G[k](d); }); markLock(); }
 function markLock(){ NKEY.forEach(k=>{ const b=$("lock-"+k); if(b){ b.textContent=dirty[k]?"terkunci":"otomatis"; b.className="lock"+(dirty[k]?" on":""); } }); }
 
 /* ══════════════ ANGGOTA ══════════════ */
@@ -1309,7 +1454,7 @@ function render(){
   /* ── 1. SAMPUL ── */
   P.push(`<div class="page sampul"><div class="cvframe">
     <div class="cv-t1">PROPOSAL</div>
-    <div class="cv-t2">PERMOHONAN BANTUAN</div>
+    <div class="cv-t2">${esc(a.cvSub)}</div>
     <div class="cv-t3">${esc(a.judulSampul)}</div>
     ${img.alsinImg?`<img class="cv-img" src="${img.alsinImg}" alt="">`:""}
     <div class="cv-gap"></div>
@@ -1338,8 +1483,8 @@ function render(){
       <div class="kiri">
         <div><span>Nomor</span><span>: ${esc(d.nomor||"..............................")}</span></div>
         <div><span>Lampiran</span><span>: ${esc(d.lampiran||"1 (satu) bundel Proposal")}</span></div>
-        <div><span>Perihal</span><span>: Permohonan Bantuan <i>${esc(a.singkat||a.nama)}</i>${
-          a.kurung?`<div style="padding-left:.7cm"><i>(${esc(a.kurung)})</i></div>`:""}</span></div>
+        <div><span>Perihal</span><span>: ${a.perihal ? esc(a.perihal)
+          : `Permohonan Bantuan <i>${esc(a.singkat||a.nama)}</i>${a.kurung?`<div style="padding-left:.7cm"><i>(${esc(a.kurung)})</i></div>`:""}`}</span></div>
       </div>
       <div class="kanan">${tuju}</div>
     </div>
@@ -1452,7 +1597,7 @@ function render(){
   if($("pgCpcl").checked){
     const total=anggota.reduce((s,x)=>s+(parseFloat(String(x.luas).replace(",","."))||0),0);
     P.push(`<div class="page" data-fit="soft">
-      <div class="doc-title" style="line-height:1.95;margin-top:6pt">CALON PETANI CALON LOKASI<br>BANTUAN SARANA PERTANIAN<br>
+      <div class="doc-title" style="line-height:1.95;margin-top:6pt">CALON PETANI CALON LOKASI<br>${esc(a.cpclSub)}<br>
         KELOMPOK TANI &ldquo;${esc(up(d.poktan))}&rdquo;<br>DESA ${esc(up(d.desa))} KECAMATAN ${esc(up(d.kec))}<br>KABUPATEN ${esc(up(d.kab))}</div>
       <div class="identitas">
         <div><span>Nama kelompok tani</span><span>:</span><span>${esc(d.poktan)}</span></div>
@@ -1701,7 +1846,7 @@ function pilihImg(k){
 
 /* ══════════════ SIMPAN / MUAT ══════════════ */
 const FIELDS=["poktan","desa","kecamatan","kabupaten","provinsi","komoditas","hamparan","tahun","koordinat","alamat",
-  "alsin","alsinNama","alsinTahap","alsinFungsi","volume","satuan","spek","judulSampul","nomor","lampiran","tanggal","kota",
+  "alsin","alsinNama","alsinTahap","alsinFungsi","volume","satuan","spek","tarifHa","judulSampul","nomor","lampiran","tanggal","kota",
   "tglGaya","tglManual",
   "tujuan","tembusan","ketua","sekretaris","bendahara","kades","penyuluh","nipPenyuluh","koordinator","nipKoordinator",
   "bpp","bppTembusan","variasi",...NKEY];
@@ -1976,7 +2121,14 @@ function updateThemeIcons(){
   const dk=document.body.classList.contains("dark");
   $("sun").style.display=dk?"block":"none"; $("moon").style.display=dk?"none":"block";
 }
-function toggleCustom(){ $("wrapCustom").style.display=$("alsin").value==="custom"?"block":"none"; }
+function toggleCustom(){
+  const k=$("alsin").value, oplah=(ALSIN[k]||{}).mode==="oplah";
+  $("wrapCustom").style.display = k==="custom" ? "block" : "none";
+  $("fSpek").style.display  = oplah ? "none" : "";
+  $("fTarif").style.display = oplah ? "" : "none";
+  $("lblVolume").textContent = oplah ? "Luas Lahan" : "Volume";
+  $("satuan").placeholder = (ALSIN[k]||{}).satuan || "unit";
+}
 function isiDefaultTeks(){
   $("tujuan").value="Kepada\n*Yth. Menteri Pertanian RI\n*Cq. Dirjen Prasarana dan Sarana Pertanian\nDi-\n>Jakarta";
   $("tembusan").value="Koordinator BPP setempat\nPertinggal";

@@ -1,6 +1,8 @@
 # PROJECT ROPS
 
-Generator proposal permohonan bantuan alsintan kelompok tani — satu berkas HTML, tanpa server.
+Generator proposal permohonan bantuan kelompok tani — satu berkas HTML, tanpa server.
+Dua macam permohonan: **bantuan alsintan** (15 jenis alat + isian bebas) dan **biaya olah
+lahan** program Optimasi Lahan (OPLAH), masing-masing untuk lahan **rawa** dan **non-rawa**.
 Tema mengikuti COCKPIT (sama seperti Eviden LCS): terang/gelap, aksen lime, tersimpan otomatis.
 
 Buka `index.html` di browser, isi form di panel kiri, lalu unduh hasilnya:
@@ -39,6 +41,20 @@ Tiap halaman opsional bisa dimatikan lewat kartu **Gambar & Halaman**.
 
 ## Catatan teknis
 
+- **Proposal biaya olah lahan (OPLAH)** bukan sekadar entri baru di katalog alat. Narasi alsin
+  dipaku ke kata "alat" — "Ketersediaan alat ini...", "Alat tersebut akan dikelola..." — yang
+  mustahil dipakai untuk permohonan biaya. Karena itu jenis ber-`mode:"oplah"` memindahkan
+  seluruh narasi ke `GEN_OPLAH`; hanya bab Penutup yang dipakai bersama karena memang netral.
+  Yang ikut menyesuaikan: baris kedua sampul (`cvSub`), perihal surat (`perihal`), judul lembar
+  CPCL (`cpclSub`), satuan bawaan (Ha), label kolom volume, dan pemiringan nama alat yang
+  dimatikan — "Biaya Olah Lahan" bukan nama alat, jadi tidak dicetak miring.
+
+  Luas lahan boleh pecahan, dan terbilangnya ikut: `25,5` menjadi
+  "25,5 (dua puluh lima koma lima) Ha". Kolom volume dibuat `step="any"`.
+
+  **Dokumennya tidak memuat angka rupiah sama sekali** kecuali kolom *Biaya per Ha* diisi.
+  Kolom itu sengaja dibiarkan kosong — tarif resmi tidak ditebak oleh program. Bila diisi,
+  kalimat biaya muncul di surat dan di bab D lengkap dengan totalnya (tarif × luas).
 - **Unggah berkas anggota poktan** mengisi tabel CPCL langsung dari unduhan SIMLUHTAN.
   Unduhannya **.xls BIFF8 asli** (wadah OLE/CFB), bukan tabel HTML bertopeng `.xls`, jadi berkasnya
   dibongkar sendiri di dalam halaman: FAT ditelusuri untuk mengambil stream `Workbook`, lalu rekaman
