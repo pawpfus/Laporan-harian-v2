@@ -45,9 +45,13 @@ Tiap halaman opsional bisa dimatikan lewat kartu **Gambar & Halaman**.
   dipaku ke kata "alat" — "Ketersediaan alat ini...", "Alat tersebut akan dikelola..." — yang
   mustahil dipakai untuk permohonan biaya. Karena itu jenis ber-`mode:"oplah"` memindahkan
   seluruh narasi ke `GEN_OPLAH`; hanya bab Penutup yang dipakai bersama karena memang netral.
-  Yang ikut menyesuaikan: baris kedua sampul (`cvSub`), perihal surat (`perihal`), judul lembar
-  CPCL (`cpclSub`), satuan bawaan (Ha), label kolom volume, dan pemiringan nama alat yang
-  dimatikan — "Biaya Olah Lahan" bukan nama alat, jadi tidak dicetak miring.
+  Yang ikut menyesuaikan: baris kedua sampul (`cvSub`), perihal surat (`perihal`), satuan
+  bawaan (Ha), label kolom volume, dan pemiringan nama alat yang dimatikan — "Biaya Olah
+  Lahan" bukan nama alat, jadi tidak dicetak miring.
+
+  Lembar CPCL sengaja tetap memakai judul baku "BANTUAN SARANA PERTANIAN" untuk semua jenis,
+  menunggu bentuk CPCL OPLAH yang baku. Kaitnya sudah tersedia: cukup tambahkan `cpclSub`
+  pada entri katalognya kalau nanti judulnya perlu berbeda.
 
   Luas lahan boleh pecahan, dan terbilangnya ikut: `25,5` menjadi
   "25,5 (dua puluh lima koma lima) Ha". Kolom volume dibuat `step="any"`.
